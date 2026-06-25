@@ -1,0 +1,76 @@
+Tiyi
+Copyright (c) 2026 The Tiyi Authors. All rights reserved.
+
+This product is proprietary software distributed under the End User License
+Agreement in EULA.md. It is NOT open source. The accompanying binary is a
+single statically linked executable that embeds the third-party open-source
+components listed below.
+
+This NOTICE file is provided for attribution and license-compliance purposes.
+It does not grant any rights to Tiyi itself beyond those in EULA.md.
+
+================================================================================
+Third-party components embedded in the tiyi binary
+================================================================================
+
+The tiyi binary statically links and/or embeds the following open-source
+software. Each component remains under its own license; nothing in EULA.md
+restricts your rights under those licenses with respect to those components.
+
+Reverse proxy / data plane
+  - Caddy (github.com/caddyserver/caddy/v2) ............... Apache License 2.0
+  - CertMagic / ACME libraries (caddyserver) ............. Apache License 2.0
+
+Web Application Firewall
+  - OWASP Coraza (github.com/corazawaf/coraza/v3) ........ Apache License 2.0
+  - coraza-caddy (github.com/corazawaf/coraza-caddy/v2) .. Apache License 2.0
+  - OWASP CRS — Core Rule Set (coreruleset) .............. Apache License 2.0
+
+Storage / runtime
+  - modernc.org/sqlite (pure-Go SQLite) ................. BSD-3-Clause
+  - go.etcd.io/bbolt .................................... MIT License
+  - golang.org/x/* (crypto, mod, net, sync, …) .......... BSD-3-Clause
+
+API / CLI / config
+  - connectrpc.com/connect .............................. Apache License 2.0
+  - google.golang.org/protobuf .......................... BSD-3-Clause
+  - github.com/spf13/cobra .............................. Apache License 2.0
+  - github.com/knadh/koanf .............................. MIT License
+  - github.com/golang-jwt/jwt ........................... MIT License
+  - github.com/google/uuid ............................. BSD-3-Clause
+
+Telemetry / observability
+  - go.opentelemetry.io/otel and exporters .............. Apache License 2.0
+  - github.com/prometheus/client_golang ................. Apache License 2.0
+
+Geolocation
+  - github.com/oschwald/maxminddb-golang ................ ISC License
+  - github.com/maxmind/mmdbwriter ....................... Apache License 2.0
+
+Management UI (embedded web assets)
+  - Vue Vben Admin (vbenjs/vue-vben-admin) .............. MIT License
+  - bundled Vue, Ant Design Vue, and related front-end
+    dependencies ....................................... see web UI licenses
+
+The authoritative and complete dependency lists, with exact versions, are the
+Go module files (go.mod / go.sum) and the web UI manifest
+(vue-vben-admin/apps/web-antd/package.json). Full license texts for the
+vendored upstreams are retained in their source trees under reference/.
+
+================================================================================
+Geolocation data
+================================================================================
+
+When geolocation is enabled, Tiyi can use IP geolocation databases (for example
+the DB-IP Lite databases) that you install. Such databases are provided by their
+respective publishers under their own license terms (the DB-IP Lite databases
+are distributed under the Creative Commons Attribution 4.0 International license
+and require attribution to DB-IP — https://db-ip.com). You are responsible for
+complying with the license of any geolocation database you install.
+
+================================================================================
+Trademarks
+================================================================================
+
+"Tiyi" and the Tiyi logo are trademarks of the Tiyi Authors. All other
+trademarks are the property of their respective owners.

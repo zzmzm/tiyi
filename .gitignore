@@ -1,0 +1,14 @@
+# Release artifacts live as GitHub Release assets, never committed here.
+# These patterns keep locally-downloaded copies (e.g. for manual verification)
+# out of the repo.
+*.tar.gz
+/SHA256SUMS
+/SHA256SUMS.sig
+/release-manifest.json
+/release-key.pem
+/tiyi
+/dist/
+
+# OS / editor noise
+.DS_Store
+*.swp
