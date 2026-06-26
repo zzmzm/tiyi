@@ -54,7 +54,17 @@ tmp=$(mktemp -d)
 trap 'rm -rf "$tmp"' EXIT
 
 echo "Installing tiyi $tag ($os/$arch) from $REPO …"
-curl -fsSL -o "$tmp/$tarball" "$base/$tarball" || err "download $tarball failed"
+
+# The release tarball is the large, slow download. Show a live progress bar on
+# an interactive terminal so it never looks frozen; stay quiet (silent, but
+# still surface errors) in pipelines / CI logs where a redrawing bar is noise.
+dl_opts=(-fsSL)
+if [ -t 2 ]; then
+	dl_opts=(-fL --progress-bar)
+fi
+
+echo "  Downloading $tarball …"
+curl "${dl_opts[@]}" -o "$tmp/$tarball" "$base/$tarball" || err "download $tarball failed"
 curl -fsSL -o "$tmp/SHA256SUMS" "$base/SHA256SUMS" || err "download SHA256SUMS failed"
 curl -fsSL -o "$tmp/SHA256SUMS.sig" "$base/SHA256SUMS.sig" 2>/dev/null || true
 
