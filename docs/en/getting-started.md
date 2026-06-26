@@ -17,7 +17,7 @@ script is mirrored at
 Pin a version or change the install prefix:
 
 ```sh
-TIYI_VERSION=v3.0.0-rc.1 TIYI_PREFIX="$HOME/.local/bin" \
+TIYI_VERSION=v3.0.0 TIYI_PREFIX="$HOME/.local/bin" \
   bash -c "$(curl -fsSL https://www.tiyisec.com/install.sh)"
 ```
 
