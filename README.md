@@ -30,39 +30,47 @@ signed release, verifies its SHA-256 (required) and — when OpenSSL 3.x is
 available — its Ed25519 release signature, then installs `tiyi` to
 `/usr/local/bin`. Override with `TIYI_VERSION`, `TIYI_PREFIX`, or `TIYI_REPO`.
 
-Then bring up a single-host install — server, agent, and dashboard in one
-process:
+Then start a single-host install — server, agent, and dashboard in one process.
+Pick the option that matches your privileges:
 
 ```sh
-tiyi standalone
+# Root / sudo — uses the default state dir (/var/lib/tiyi) and ports 80/443
+sudo tiyi standalone
+
+# Normal user (no sudo) — writable paths and high ports
+mkdir -p /tmp/waf
+tiyi standalone \
+  --state-db /tmp/waf/state.db \
+  --caddy-admin-socket /tmp/waf/caddy.sock \
+  --admin-socket /tmp/waf/admin.sock \
+  --proxy-http-addr 0.0.0.0:8180 \
+  --proxy-https-addr 0.0.0.0:18443
 ```
 
-It prints a one-time admin password on first boot. Open the dashboard, sign in,
-and add your first site. Full walkthrough:
+Tiyi prints a one-time `admin` password on first boot. Open the dashboard, sign
+in, and add your first site. Full walkthrough:
 [`docs/en/getting-started.md`](docs/en/getting-started.md) ·
 [中文](docs/zh/getting-started.md).
 
-### Advanced: pick your own admin password
+### Advanced: choose your own admin password
 
-Skip the generated password and bring Tiyi up non-interactively — set the admin
-password and the listen/socket paths in one command (ideal for automation,
-images, and CI):
+Set `TIYI_BOOTSTRAP_ADMIN_PASSWORD` before the first boot to skip the generated
+password (ideal for automation, images, and CI) — combine it with either run
+option above. Tiyi uses it verbatim and prints no banner:
 
 ```sh
 mkdir -p /tmp/waf
 TIYI_BOOTSTRAP_ADMIN_PASSWORD='admin123@xxxxxxm' \
   tiyi standalone \
-  --addr 0.0.0.0:8080 \
   --state-db /tmp/waf/state.db \
   --caddy-admin-socket /tmp/waf/caddy.sock \
+  --admin-socket /tmp/waf/admin.sock \
   --proxy-http-addr 0.0.0.0:8180 \
-  --proxy-https-addr 0.0.0.0:18443 \
-  --admin-socket /tmp/waf/admin.sock
+  --proxy-https-addr 0.0.0.0:18443
 ```
 
-Tiyi uses the supplied credentials verbatim and prints no banner. The username
-defaults to `admin`. Auto-generation only fires when no users exist, so restarts
-are no-ops.
+The username defaults to `admin`. Auto-generation only fires when no users
+exist, so restarts are no-ops.
 
 ## Free and full-featured on a single node
 

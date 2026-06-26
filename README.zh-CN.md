@@ -28,35 +28,45 @@ curl -fsSL https://www.tiyisec.com/install.sh | bash
 SHA-256（必需）并在有 OpenSSL 3.x 时校验其 Ed25519 发布签名，然后把 `tiyi`
 安装到 `/usr/local/bin`。可用 `TIYI_VERSION`、`TIYI_PREFIX`、`TIYI_REPO` 覆盖。
 
-然后拉起单机安装 —— 在一个进程里同时运行 server、agent 与 dashboard：
+然后拉起单机安装 —— 在一个进程里同时运行 server、agent 与 dashboard。按你的
+权限选择一种方式：
 
 ```sh
-tiyi standalone
+# root / sudo —— 使用默认状态目录（/var/lib/tiyi）与 80/443 端口
+sudo tiyi standalone
+
+# 普通用户（不用 sudo）—— 可写路径 + 高端口
+mkdir -p /tmp/waf
+tiyi standalone \
+  --state-db /tmp/waf/state.db \
+  --caddy-admin-socket /tmp/waf/caddy.sock \
+  --admin-socket /tmp/waf/admin.sock \
+  --proxy-http-addr 0.0.0.0:8180 \
+  --proxy-https-addr 0.0.0.0:18443
 ```
 
-首次启动时会打印一次性的管理员密码。打开仪表盘登录，并添加第一个站点。完整
+首次启动时会打印一次性的 `admin` 密码。打开仪表盘登录，并添加第一个站点。完整
 教程：[`docs/zh/getting-started.md`](docs/zh/getting-started.md) ·
 [English](docs/en/getting-started.md)。
 
 ### 进阶：自定义管理员密码
 
-跳过自动生成的密码，非交互式拉起 Tiyi —— 用一条命令设定管理员密码与监听/套接字
-路径（非常适合自动化、镜像与 CI）：
+在首次启动前设置 `TIYI_BOOTSTRAP_ADMIN_PASSWORD`，即可跳过自动生成的密码（非常
+适合自动化、镜像与 CI）—— 可与上面任一种运行方式组合。Tiyi 会原样采用且不打印
+任何 banner：
 
 ```sh
 mkdir -p /tmp/waf
 TIYI_BOOTSTRAP_ADMIN_PASSWORD='admin123@xxxxxxm' \
   tiyi standalone \
-  --addr 0.0.0.0:8080 \
   --state-db /tmp/waf/state.db \
   --caddy-admin-socket /tmp/waf/caddy.sock \
+  --admin-socket /tmp/waf/admin.sock \
   --proxy-http-addr 0.0.0.0:8180 \
-  --proxy-https-addr 0.0.0.0:18443 \
-  --admin-socket /tmp/waf/admin.sock
+  --proxy-https-addr 0.0.0.0:18443
 ```
 
-Tiyi 会原样采用所给凭据且不打印任何 banner。用户名默认 `admin`。仅当不存在任何
-用户时才会自动生成密码，因此重启都是空操作。
+用户名默认 `admin`。仅当不存在任何用户时才会自动生成密码，因此重启都是空操作。
 
 ## 单节点免费且功能完整
 
