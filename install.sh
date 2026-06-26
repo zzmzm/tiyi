@@ -116,6 +116,25 @@ fi
 
 echo "Installed tiyi $tag to $PREFIX/tiyi"
 "$PREFIX/tiyi" --version 2>/dev/null || true
-echo
-echo "Next: run 'tiyi standalone' for a single-host install, or see the docs:"
-echo "  https://github.com/$REPO/tree/main/docs"
+
+cat <<'EOF'
+
+Next — start a single-host install.
+
+  The default stores state under /var/lib/tiyi and binds ports 80/443, so it
+  needs root:
+
+      sudo tiyi standalone
+
+  To run as a normal user (no sudo), point it at writable paths and high ports:
+
+      mkdir -p /tmp/waf
+      tiyi standalone \
+        --state-db /tmp/waf/state.db \
+        --caddy-admin-socket /tmp/waf/caddy.sock \
+        --admin-socket /tmp/waf/admin.sock \
+        --proxy-http-addr 0.0.0.0:8180 \
+        --proxy-https-addr 0.0.0.0:18443
+
+EOF
+echo "Docs: https://github.com/$REPO/tree/main/docs"

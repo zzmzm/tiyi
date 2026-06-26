@@ -49,10 +49,12 @@ base64.
 
 ## 3. Run
 
-A single-host install runs the server, agent, and dashboard in one process:
+A single-host install runs the server, agent, and dashboard in one process. By
+default Tiyi stores its state under `/var/lib/tiyi` and binds ports 80/443, so
+the default invocation needs root:
 
 ```sh
-tiyi standalone
+sudo tiyi standalone
 ```
 
 On first boot Tiyi auto-creates an `admin` account and prints a one-time random
@@ -61,11 +63,15 @@ hash). Open `http://127.0.0.1:8080`, sign in as `admin`, and add your first
 site. For the full operator flow (config file, admin socket, sites, upstreams,
 certificates, WAF policies), see <https://www.tiyisec.com/docs/>.
 
-### Advanced: pick your own admin password
+To run as a normal user without `sudo`, point Tiyi at writable paths and high
+ports — the advanced command below does exactly that.
 
-For automation, container images, or CI, skip the generated password and bring
-Tiyi up non-interactively — set the admin password and the listen/socket paths
-in one command:
+### Advanced: run as a normal user / pick your own admin password
+
+For automation, container images, CI, or simply running without `sudo`, point
+Tiyi at writable paths and high ports (and, optionally, set the admin password)
+— all in one command. Nothing here touches `/var/lib/tiyi` or ports 80/443, so
+no root is needed:
 
 ```sh
 mkdir -p /tmp/waf

@@ -46,10 +46,11 @@ openssl pkeyutl -verify -pubin -inkey release-key.pem -rawin \
 
 ## 3. 运行
 
-单机安装会在一个进程中同时运行服务端、agent 和仪表盘：
+单机安装会在一个进程中同时运行服务端、agent 和仪表盘。默认情况下 Tiyi 把状态
+存放在 `/var/lib/tiyi` 并监听 80/443 端口，因此默认方式需要 root：
 
 ```sh
-tiyi standalone
+sudo tiyi standalone
 ```
 
 首次启动时，Tiyi 会自动创建 `admin` 账户，并向控制台打印一次性随机密码 —— 请在
@@ -57,10 +58,14 @@ tiyi standalone
 `admin` 登录，并添加第一个站点。完整的运维流程（配置文件、管理套接字、站点、
 上游、证书、WAF 策略）见 <https://www.tiyisec.com/zh/docs/>。
 
-### 进阶：自定义管理员密码
+若要以普通用户身份（不用 `sudo`）运行，把 Tiyi 指向可写路径并使用高端口 ——
+下面的进阶命令正是这么做的。
 
-用于自动化、容器镜像或 CI 时，跳过自动生成的密码，非交互式拉起 Tiyi —— 用一条
-命令设定管理员密码与监听/套接字路径：
+### 进阶：以普通用户运行 / 自定义管理员密码
+
+用于自动化、容器镜像、CI，或只是想不用 `sudo` 运行时，把 Tiyi 指向可写路径并
+使用高端口（并可选地设定管理员密码）—— 一条命令搞定。这里不涉及
+`/var/lib/tiyi`，也不绑定 80/443 端口，因此无需 root：
 
 ```sh
 mkdir -p /tmp/waf
