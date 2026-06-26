@@ -7,8 +7,7 @@ privately. **Do not open a public issue for security reports.**
 
 - Preferred: open a private advisory via GitHub Security Advisories on the
   distribution repository (Security → "Report a vulnerability").
-- Or email: **[security@your-domain.example]** (replace with your real security
-  contact before publishing).
+- Or email: **support@tiyisec.com**.
 
 Please include: affected version (`tiyi --version`), a description of the issue,
 reproduction steps or a proof of concept, and the impact you observed. If you

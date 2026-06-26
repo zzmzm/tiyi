@@ -6,17 +6,19 @@ integrated management plane.
 ## 1. Install
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/zzmzm/tiyi/main/install.sh | bash
+curl -fsSL https://www.tiyisec.com/install.sh | bash
 ```
 
 The installer detects your platform (Linux amd64/arm64), resolves the latest
-signed release, verifies it, and installs `tiyi` to `/usr/local/bin`.
+signed release, verifies it, and installs `tiyi` to `/usr/local/bin`. The same
+script is mirrored at
+`https://raw.githubusercontent.com/zzmzm/tiyi/main/install.sh`.
 
 Pin a version or change the install prefix:
 
 ```sh
 TIYI_VERSION=v3.0.0 TIYI_PREFIX="$HOME/.local/bin" \
-  bash -c "$(curl -fsSL https://raw.githubusercontent.com/zzmzm/tiyi/main/install.sh)"
+  bash -c "$(curl -fsSL https://www.tiyisec.com/install.sh)"
 ```
 
 ## 2. Verify a download manually (optional)
@@ -53,9 +55,39 @@ A single-host install runs the server, agent, and dashboard in one process:
 tiyi standalone
 ```
 
-Open the dashboard, complete first-run admin setup, and add your first site.
-For the full operator flow (config file, admin socket, sites, upstreams,
-certificates, WAF policies), see the in-product documentation.
+On first boot Tiyi auto-creates an `admin` account and prints a one-time random
+password to the console — copy it before it scrolls away (it is stored only as a
+hash). Open `http://127.0.0.1:8080`, sign in as `admin`, and add your first
+site. For the full operator flow (config file, admin socket, sites, upstreams,
+certificates, WAF policies), see <https://www.tiyisec.com/docs/>.
+
+### Advanced: pick your own admin password
+
+For automation, container images, or CI, skip the generated password and bring
+Tiyi up non-interactively — set the admin password and the listen/socket paths
+in one command:
+
+```sh
+mkdir -p /tmp/waf
+TIYI_BOOTSTRAP_ADMIN_PASSWORD='admin123@xxxxxxm' \
+  tiyi standalone \
+  --addr 0.0.0.0:8080 \
+  --state-db /tmp/waf/state.db \
+  --caddy-admin-socket /tmp/waf/caddy.sock \
+  --proxy-http-addr 0.0.0.0:8180 \
+  --proxy-https-addr 0.0.0.0:18443 \
+  --admin-socket /tmp/waf/admin.sock
+```
+
+Tiyi uses the supplied credentials verbatim and prints no banner. The username
+defaults to `admin`. Auto-generation only fires when no users exist yet, so
+restarts are no-ops. Lost the password? Reset it on the same host over the local
+admin socket — no login required:
+
+```sh
+tiyi user list
+tiyi user reset-password <user-id> --password <new-password>
+```
 
 ## 4. Keep it updated
 
@@ -70,8 +102,9 @@ after updating. Track pre-release builds with `--channel prerelease`.
 
 ## 5. Licensing
 
-Tiyi runs free in single-node Community mode. Multi-node (remote agent) fleets
-require a license. See [EULA.md](../../EULA.md).
+Tiyi is free and full-featured on a single node. Growing to multiple nodes
+(remote agents) uses a signed license — the single-node experience is
+unchanged. See [EULA.md](../../EULA.md).
 
 ## Support
 

@@ -99,4 +99,4 @@ of-laws rules. If any provision is held unenforceable, the remainder remains in
 effect. This Agreement is the entire agreement between the parties regarding the
 Software and supersedes prior understandings.
 
-Contact: [LEGAL/CONTACT EMAIL]
+Contact: support@tiyisec.com
