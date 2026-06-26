@@ -122,6 +122,22 @@ tiyi self-update --yes       # 下载、校验并安装
 - English：[`docs/en/getting-started.md`](docs/en/getting-started.md)
 - 官网与完整文档：<https://www.tiyisec.com>
 
+## Codex skill
+
+使用 Codex 的运维人员可以安装 Tiyi operator skill，用于安装、standalone、Web UI、
+CLI、发布、授权与排障流程：
+
+```sh
+SKILL_DIR="${CODEX_HOME:-$HOME/.codex}/skills/tiyi-operator"
+mkdir -p "$SKILL_DIR/agents"
+curl -fsSL https://raw.githubusercontent.com/zzmzm/tiyi/main/skills/tiyi-operator/SKILL.md \
+  -o "$SKILL_DIR/SKILL.md"
+curl -fsSL https://raw.githubusercontent.com/zzmzm/tiyi/main/skills/tiyi-operator/agents/openai.yaml \
+  -o "$SKILL_DIR/agents/openai.yaml"
+```
+
+发布源码位于 [`skills/tiyi-operator/`](skills/tiyi-operator/)。
+
 ## 法律
 
 - 授权许可：[EULA.md](EULA.md)。

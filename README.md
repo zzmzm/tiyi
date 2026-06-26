@@ -137,6 +137,22 @@ Track pre-release builds with `--channel prerelease`.
 - 中文: [`docs/zh/getting-started.md`](docs/zh/getting-started.md)
 - Website & full docs: <https://www.tiyisec.com>
 
+## Codex skill
+
+Operators using Codex can install the Tiyi operator skill for guided install,
+standalone, Web UI, CLI, release, license, and troubleshooting workflows:
+
+```sh
+SKILL_DIR="${CODEX_HOME:-$HOME/.codex}/skills/tiyi-operator"
+mkdir -p "$SKILL_DIR/agents"
+curl -fsSL https://raw.githubusercontent.com/zzmzm/tiyi/main/skills/tiyi-operator/SKILL.md \
+  -o "$SKILL_DIR/SKILL.md"
+curl -fsSL https://raw.githubusercontent.com/zzmzm/tiyi/main/skills/tiyi-operator/agents/openai.yaml \
+  -o "$SKILL_DIR/agents/openai.yaml"
+```
+
+The published source lives in [`skills/tiyi-operator/`](skills/tiyi-operator/).
+
 ## Legal
 
 - License: [EULA.md](EULA.md).
