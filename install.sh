@@ -25,6 +25,15 @@ RELEASE_PUBKEY_B64="RIH4Xm2V8NjU4byn/xq+36xQG38dWQ9eQB39Bk+Aze4="
 
 err() { echo "error: $*" >&2; exit 1; }
 
+# Run a command as root: directly when already root, otherwise via sudo.
+as_root() {
+	if [ "$(id -u)" -eq 0 ]; then
+		"$@"
+	else
+		sudo "$@"
+	fi
+}
+
 # --- platform detection ----------------------------------------------------
 os=$(uname -s | tr '[:upper:]' '[:lower:]')
 [ "$os" = "linux" ] || err "unsupported OS '$os' (linux only)"
@@ -37,6 +46,35 @@ esac
 command -v curl >/dev/null || err "curl is required"
 command -v sha256sum >/dev/null || err "sha256sum is required"
 command -v tar >/dev/null || err "tar is required"
+
+# --- already installed? update in place, then install + start the service --
+# Re-running the installer on a host that already has tiyi stays cheap: use the
+# signed in-place self-update (which downloads only when a newer release exists)
+# instead of pulling the full tarball again, then (re)install the systemd unit
+# and start it on the new binary. Falls back to a fresh download when the
+# in-place update can't run (e.g. a build with no embedded release key).
+existing=""
+if command -v tiyi >/dev/null 2>&1; then
+	existing=$(command -v tiyi)
+elif [ -x "$PREFIX/tiyi" ]; then
+	existing="$PREFIX/tiyi"
+fi
+if [ -n "$existing" ]; then
+	echo "tiyi already installed: $("$existing" --version 2>/dev/null | head -1 || echo unknown)"
+	echo "  Updating in place via signed self-update …"
+	if as_root "$existing" self-update --yes; then
+		# Stop any running instance so the updated binary re-opens the state DB
+		# exclusively during install; install --now then enables + starts it.
+		as_root systemctl stop tiyi.service >/dev/null 2>&1 || true
+		echo "  Installing/refreshing the systemd service and starting it …"
+		as_root "$existing" install --now
+		echo
+		echo "tiyi is up to date and running. Check it with: systemctl status tiyi"
+		exit 0
+	fi
+	echo "  in-place self-update unavailable; falling back to a fresh download." >&2
+	echo
+fi
 
 # --- resolve the release tag ----------------------------------------------
 tag="${TIYI_VERSION:-}"
@@ -119,22 +157,19 @@ echo "Installed tiyi $tag to $PREFIX/tiyi"
 
 cat <<'EOF'
 
-Next — start a single-host install.
-
-  Recommended (systemd): install a hardened service that runs unprivileged,
-  binds 80/443 via CAP_NET_BIND_SERVICE, and starts on boot:
+Next — start Tiyi as a hardened systemd service (the recommended default):
 
       sudo tiyi install --now
 
-  The one-time admin password is printed once to the journal:
-
-      journalctl -u tiyi -b | grep -i password
+  This creates the tiyi service user, installs a unit that runs unprivileged
+  and binds 80/443 via CAP_NET_BIND_SERVICE, enables it on boot, and prints the
+  one-time admin login (URL + username + password) once the service is up.
 
   (Preview the unit first with `tiyi install --print`; remove it later with
   `sudo tiyi uninstall`.)
 
-  Or run it in the foreground. The default stores state under /var/lib/tiyi
-  and binds ports 80/443, so it needs root:
+  Prefer the foreground? It stores state under /var/lib/tiyi and binds ports
+  80/443, so it needs root, and prints the admin password to the console:
 
       sudo tiyi standalone
 

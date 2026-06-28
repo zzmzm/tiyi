@@ -15,7 +15,7 @@ curl -fsSL https://www.tiyisec.com/install.sh | bash
 指定版本或更改安装目录：
 
 ```sh
-TIYI_VERSION=v3.0.1 TIYI_PREFIX="$HOME/.local/bin" \
+TIYI_VERSION=v3.0.2 TIYI_PREFIX="$HOME/.local/bin" \
   bash -c "$(curl -fsSL https://www.tiyisec.com/install.sh)"
 ```
 
