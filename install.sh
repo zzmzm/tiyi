@@ -12,7 +12,7 @@
 #
 # Environment overrides:
 #   TIYI_REPO     GitHub owner/name        (default: zzmzm/tiyi)
-#   TIYI_VERSION  pin a tag, e.g. v3.0.0   (default: latest stable)
+#   TIYI_VERSION  pin a tag, e.g. v3.0.1   (default: latest stable)
 #   TIYI_PREFIX   install directory        (default: /usr/local/bin)
 set -euo pipefail
 
@@ -121,8 +121,20 @@ cat <<'EOF'
 
 Next — start a single-host install.
 
-  The default stores state under /var/lib/tiyi and binds ports 80/443, so it
-  needs root:
+  Recommended (systemd): install a hardened service that runs unprivileged,
+  binds 80/443 via CAP_NET_BIND_SERVICE, and starts on boot:
+
+      sudo tiyi install --now
+
+  The one-time admin password is printed once to the journal:
+
+      journalctl -u tiyi -b | grep -i password
+
+  (Preview the unit first with `tiyi install --print`; remove it later with
+  `sudo tiyi uninstall`.)
+
+  Or run it in the foreground. The default stores state under /var/lib/tiyi
+  and binds ports 80/443, so it needs root:
 
       sudo tiyi standalone
 
