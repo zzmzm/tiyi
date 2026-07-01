@@ -45,6 +45,143 @@ as_root() {
 	fi
 }
 
+color_enabled() {
+	[ -t 1 ] && [ -z "${NO_COLOR:-}" ] && [ "${TERM:-}" != "dumb" ]
+}
+
+if color_enabled; then
+	C_RESET="$(printf '\033[0m')"
+	C_OK="$(printf '\033[32m')"
+	C_WARN="$(printf '\033[33m')"
+	C_INFO="$(printf '\033[36m')"
+	C_BOLD="$(printf '\033[1m')"
+else
+	C_RESET=""
+	C_OK=""
+	C_WARN=""
+	C_INFO=""
+	C_BOLD=""
+fi
+
+doctor_line() {
+	local color="$1" status="$2" label="$3" message="$4"
+	printf '  %s%-5s%s %-13s %s\n' "$color" "$status" "$C_RESET" "$label:" "$message"
+}
+
+doctor_detail() {
+	printf '        %s\n' "$*"
+}
+
+path_has_dir() {
+	local list="$1" dir="$2" old_ifs part
+	old_ifs=$IFS
+	IFS=:
+	for part in $list; do
+		if [ "$part" = "$dir" ]; then
+			IFS=$old_ifs
+			return 0
+		fi
+	done
+	IFS=$old_ifs
+	return 1
+}
+
+sudo_secure_path() {
+	sudo -V 2>/dev/null | awk '
+		/Secure Path:/ { sub(/^.*Secure Path:[[:space:]]*/, ""); print; exit }
+		/secure_path=/ { sub(/^.*secure_path=/, ""); print; exit }
+		/Value to override user.*PATH with:/ { sub(/^.*PATH with:[[:space:]]*/, ""); print; exit }
+	'
+}
+
+install_check_sudo_path() {
+	local installed_bin="$1" bin_dir secure
+	bin_dir=$(dirname "$installed_bin")
+	if command -v tiyi >/dev/null 2>&1; then
+		doctor_line "$C_OK" "OK" "shell PATH" "tiyi resolves to $(command -v tiyi)"
+	else
+		doctor_line "$C_WARN" "WARN" "shell PATH" "tiyi is not visible in this shell PATH"
+		doctor_detail "Add $bin_dir to PATH, or run $installed_bin explicitly."
+	fi
+
+	if ! command -v sudo >/dev/null 2>&1; then
+		if [ "$(id -u)" -eq 0 ]; then
+			doctor_line "$C_INFO" "INFO" "sudo PATH" "sudo is unavailable, but you are root; run $installed_bin install --now directly."
+		else
+			doctor_line "$C_WARN" "WARN" "sudo PATH" "sudo is unavailable; sudo tiyi install --now cannot run."
+		fi
+		return
+	fi
+	if sudo -n sh -c 'command -v tiyi >/dev/null' >/dev/null 2>&1; then
+		doctor_line "$C_OK" "OK" "sudo PATH" "sudo can resolve tiyi"
+		return
+	fi
+	secure=$(sudo_secure_path || true)
+	if [ -n "$secure" ] && ! path_has_dir "$secure" "$bin_dir"; then
+		doctor_line "$C_WARN" "WARN" "sudo PATH" "sudo secure_path does not include $bin_dir"
+		doctor_detail "If sudo tiyi install --now says command not found, run: sudo \"$installed_bin\" install --now"
+		doctor_detail "Permanent fix: add $bin_dir to secure_path with sudo visudo."
+	else
+		doctor_line "$C_INFO" "INFO" "sudo PATH" "could not confirm sudo PATH without prompting"
+		doctor_detail "If sudo cannot find tiyi, run: sudo \"$installed_bin\" install --now"
+	fi
+}
+
+listener_for_port() {
+	local port="$1"
+	if command -v ss >/dev/null 2>&1; then
+		ss -H -ltnp 2>/dev/null | awk -v p=":$port" '$4 ~ p "$" {print; exit}'
+		return
+	fi
+	if command -v lsof >/dev/null 2>&1; then
+		lsof -nP "-iTCP:$port" -sTCP:LISTEN 2>/dev/null | awk 'NR == 2 {print $1 " pid=" $2 " user=" $3; exit}'
+		return
+	fi
+	return 0
+}
+
+process_name_from_listener() {
+	printf '%s' "$1" | sed -n 's/.*users:((\"\([^\"]*\)\".*/\1/p'
+}
+
+install_check_port() {
+	local label="$1" port="$2" key="$3" fallback="$4" line proc
+	line=$(listener_for_port "$port" || true)
+	if [ -z "$line" ]; then
+		doctor_line "$C_OK" "OK" "$label" "port $port has no active TCP listener"
+		return
+	fi
+	if printf '%s' "$line" | grep -qi '\"tiyi\"\|tiyi'; then
+		doctor_line "$C_OK" "OK" "$label" "port $port is already held by tiyi"
+		return
+	fi
+	doctor_line "$C_WARN" "WARN" "$label" "port $port is already in use"
+	doctor_detail "$line"
+	doctor_detail "Release it for Tiyi: stop or disable the service that owns the port."
+	if ! printf '%s' "$line" | grep -q 'users:(('; then
+		doctor_detail "Rerun sudo tiyi doctor for process details when available."
+	fi
+	proc=$(process_name_from_listener "$line")
+	if [ -n "$proc" ]; then
+		doctor_detail "Example when appropriate: sudo systemctl stop $proc"
+	fi
+	doctor_detail "Or move Tiyi: set $key to \"$fallback\" in /etc/tiyi/server.yaml."
+}
+
+run_install_environment_check() {
+	local installed_bin="$1"
+	echo
+	printf '%sInstallation environment check%s\n' "$C_BOLD" "$C_RESET"
+	if "$installed_bin" doctor --help >/dev/null 2>&1; then
+		"$installed_bin" doctor --mode standalone || true
+		return
+	fi
+	install_check_sudo_path "$installed_bin"
+	install_check_port "API/dashboard" 8080 "server.addr" "0.0.0.0:8081"
+	install_check_port "HTTP proxy" 80 "proxy.http_addr" ":8180"
+	install_check_port "HTTPS proxy" 443 "proxy.https_addr" ":18443"
+}
+
 # --- platform detection ----------------------------------------------------
 os=$(uname -s | tr '[:upper:]' '[:lower:]')
 [ "$os" = "linux" ] || err "unsupported OS '$os' (linux only)"
@@ -77,6 +214,7 @@ if [ -n "$existing" ]; then
 		# Stop any running instance so the updated binary re-opens the state DB
 		# exclusively during install; install --now then enables + starts it.
 		as_root systemctl stop tiyi.service >/dev/null 2>&1 || true
+		run_install_environment_check "$existing"
 		echo "  Installing/refreshing the systemd service and starting it …"
 		as_root "$existing" install --now
 		echo
@@ -224,25 +362,33 @@ fi
 installed_bin="$PREFIX/tiyi"
 echo "Installed tiyi $tag to $installed_bin"
 "$installed_bin" --version 2>/dev/null || true
+run_install_environment_check "$installed_bin"
 
 cat <<EOF
 
 Next — start Tiyi as a hardened systemd service (the recommended default):
 
-      sudo tiyi install --now || sudo "$installed_bin" install --now
+      sudo tiyi install --now
 
   This creates the tiyi service user, installs a unit that runs unprivileged
   and binds 80/443 via CAP_NET_BIND_SERVICE, enables it on boot, and prints the
   one-time admin login (URL + username + password) once the service is up.
 
-  The fallback handles CentOS/RHEL sudo secure_path when sudo cannot find
-  $installed_bin. Preview the unit first with tiyi install --print; remove
-  it later with sudo tiyi uninstall.
+  If the environment check warned that sudo cannot find tiyi, run:
+
+      sudo "$installed_bin" install --now
+
+  Preview the unit first with tiyi install --print; remove it later with
+  sudo tiyi uninstall.
 
   Prefer the foreground? It stores state under /var/lib/tiyi and binds ports
   80/443, so it needs root, and prints the admin password to the console:
 
-      sudo tiyi standalone || sudo "$installed_bin" standalone
+      sudo tiyi standalone
+
+  If sudo cannot find tiyi, run:
+
+      sudo "$installed_bin" standalone
 
   To run as a normal user (no sudo), point it at writable paths and high ports:
 

@@ -19,20 +19,22 @@ SQLite + 管理 UI，编译进一个可自托管的 Go 可执行文件。无需 
 ## 安装
 
 ```sh
-curl -fsSL https://www.tiyisec.com/install.sh | bash && (sudo tiyi install --now || sudo /usr/local/bin/tiyi install --now)
+curl -fsSL https://www.tiyisec.com/install.sh | bash && sudo tiyi install --now
 ```
 
-<sub>GitHub 镜像（同一脚本）：`curl -fsSL https://raw.githubusercontent.com/zzmzm/tiyi/main/install.sh | bash && (sudo tiyi install --now || sudo /usr/local/bin/tiyi install --now)`</sub>
+<sub>GitHub 镜像（同一脚本）：`curl -fsSL https://raw.githubusercontent.com/zzmzm/tiyi/main/install.sh | bash && sudo tiyi install --now`</sub>
 <br>
-<sub>中国大陆镜像：`curl -fsSL https://gitee.com/tiyisec/tiyi/raw/main/install.sh | TIYI_MIRROR=gitee bash && (sudo tiyi install --now || sudo /usr/local/bin/tiyi install --now)`</sub>
+<sub>中国大陆镜像：`curl -fsSL https://gitee.com/tiyisec/tiyi/raw/main/install.sh | TIYI_MIRROR=gitee bash && sudo tiyi install --now`</sub>
 
 安装脚本会识别平台（Linux amd64/arm64）、下载最新的已签名发行版、校验其
 SHA-256（必需）并在本机 OpenSSL 支持 `pkeyutl -rawin` 时校验其 Ed25519 发布签名，然后把 `tiyi`
 安装到 `/usr/local/bin`。默认先尝试 GitHub，失败或过慢时回退到 Gitee
 Release 镜像；可用 `TIYI_MIRROR=github|gitee`、`TIYI_VERSION`、
-`TIYI_PREFIX`、`TIYI_REPO` 或 `TIYI_GITEE_REPO` 覆盖。启动服务的命令默认先试
-`sudo tiyi`；在 CentOS/RHEL 上，如果 sudo 找不到 `/usr/local/bin`，回退命令会
-直接运行 `/usr/local/bin/tiyi`。安装脚本不会创建 symlink。
+`TIYI_PREFIX`、`TIYI_REPO` 或 `TIYI_GITEE_REPO` 覆盖。安装二进制后,脚本会用
+彩色提示检查 sudo PATH 以及 80/443/8080 端口监听者。如果提示 sudo
+`secure_path`,使用输出里的完整路径命令,或用 `visudo` 加入 `/usr/local/bin`。
+如果提示端口冲突,停止占用端口的服务,或通过 `server.addr`、`proxy.http_addr`、
+`proxy.https_addr` 调整太一端口。
 
 安装器环境变量：
 
@@ -49,7 +51,7 @@ Release 镜像；可用 `TIYI_MIRROR=github|gitee`、`TIYI_VERSION`、
 
 ```sh
 # root / sudo —— 使用默认状态目录（/var/lib/tiyi）与 80/443 端口
-sudo tiyi standalone || sudo /usr/local/bin/tiyi standalone
+sudo tiyi standalone
 
 # 普通用户（不用 sudo）—— 可写路径 + 高端口
 mkdir -p /tmp/waf

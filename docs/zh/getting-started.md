@@ -12,6 +12,8 @@ curl -fsSL https://www.tiyisec.com/install.sh | bash
 将 `tiyi` 安装到 `/usr/local/bin`。同一脚本也镜像在
 `https://raw.githubusercontent.com/zzmzm/tiyi/main/install.sh`，中国大陆镜像在
 `https://gitee.com/tiyisec/tiyi/raw/main/install.sh`。
+安装二进制后,脚本会用彩色提示检查 sudo PATH 以及 80/443/8080 端口监听者。
+后续版本也会把同样的检查暴露为 `tiyi doctor`。
 
 默认安装器先尝试 GitHub，失败或过慢时回退到 Gitee Release 镜像。必要时可强制
 使用 Gitee：
@@ -68,7 +70,7 @@ openssl pkeyutl -verify -pubin -inkey release-key.pem -rawin \
 存放在 `/var/lib/tiyi` 并监听 80/443 端口，因此默认方式需要 root：
 
 ```sh
-sudo tiyi standalone || sudo /usr/local/bin/tiyi standalone
+sudo tiyi standalone
 ```
 
 首次启动时，太一会自动创建 `admin` 账户，并向控制台打印一次性随机密码 —— 请在

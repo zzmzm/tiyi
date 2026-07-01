@@ -14,6 +14,9 @@ signed release, verifies it, and installs `tiyi` to `/usr/local/bin`. The same
 script is mirrored at
 `https://raw.githubusercontent.com/zzmzm/tiyi/main/install.sh`, with a China
 mirror at `https://gitee.com/tiyisec/tiyi/raw/main/install.sh`.
+After installing the binary, the script runs a colored environment check for
+sudo PATH and listeners on ports 80/443/8080. Later releases also expose the
+same checks as `tiyi doctor`.
 
 By default the installer tries GitHub first and falls back to the Gitee release
 mirror. Force Gitee when needed:
@@ -73,7 +76,7 @@ default Tiyi stores its state under `/var/lib/tiyi` and binds ports 80/443, so
 the default invocation needs root:
 
 ```sh
-sudo tiyi standalone || sudo /usr/local/bin/tiyi standalone
+sudo tiyi standalone
 ```
 
 On first boot Tiyi auto-creates an `admin` account and prints a one-time random
