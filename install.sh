@@ -221,35 +221,36 @@ else
 	sudo install -m 0755 "$tmp/tiyi" "$PREFIX/tiyi"
 fi
 
-echo "Installed tiyi $tag to $PREFIX/tiyi"
-"$PREFIX/tiyi" --version 2>/dev/null || true
+installed_bin="$PREFIX/tiyi"
+echo "Installed tiyi $tag to $installed_bin"
+"$installed_bin" --version 2>/dev/null || true
 
-cat <<'EOF'
+cat <<EOF
 
 Next — start Tiyi as a hardened systemd service (the recommended default):
 
-      sudo tiyi install --now
+      sudo "$installed_bin" install --now
 
   This creates the tiyi service user, installs a unit that runs unprivileged
   and binds 80/443 via CAP_NET_BIND_SERVICE, enables it on boot, and prints the
   one-time admin login (URL + username + password) once the service is up.
 
-  (Preview the unit first with `tiyi install --print`; remove it later with
-  `sudo tiyi uninstall`.)
+  (Preview the unit first with "$installed_bin" install --print; remove it
+  later with sudo "$installed_bin" uninstall.)
 
   Prefer the foreground? It stores state under /var/lib/tiyi and binds ports
   80/443, so it needs root, and prints the admin password to the console:
 
-      sudo tiyi standalone
+      sudo "$installed_bin" standalone
 
   To run as a normal user (no sudo), point it at writable paths and high ports:
 
       mkdir -p /tmp/waf
-      tiyi standalone \
-        --state-db /tmp/waf/state.db \
-        --caddy-admin-socket /tmp/waf/caddy.sock \
-        --admin-socket /tmp/waf/admin.sock \
-        --proxy-http-addr 0.0.0.0:8180 \
+      "$installed_bin" standalone \\
+        --state-db /tmp/waf/state.db \\
+        --caddy-admin-socket /tmp/waf/caddy.sock \\
+        --admin-socket /tmp/waf/admin.sock \\
+        --proxy-http-addr 0.0.0.0:8180 \\
         --proxy-https-addr 0.0.0.0:18443
 
 EOF

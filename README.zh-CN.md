@@ -19,12 +19,12 @@ SQLite + 管理 UI，编译进一个可自托管的 Go 可执行文件。无需 
 ## 安装
 
 ```sh
-curl -fsSL https://www.tiyisec.com/install.sh | bash && sudo tiyi install --now
+curl -fsSL https://www.tiyisec.com/install.sh | bash && sudo /usr/local/bin/tiyi install --now
 ```
 
-<sub>GitHub 镜像（同一脚本）：`curl -fsSL https://raw.githubusercontent.com/zzmzm/tiyi/main/install.sh | bash && sudo tiyi install --now`</sub>
+<sub>GitHub 镜像（同一脚本）：`curl -fsSL https://raw.githubusercontent.com/zzmzm/tiyi/main/install.sh | bash && sudo /usr/local/bin/tiyi install --now`</sub>
 <br>
-<sub>中国大陆镜像：`curl -fsSL https://gitee.com/tiyisec/tiyi/raw/main/install.sh | TIYI_MIRROR=gitee bash && sudo tiyi install --now`</sub>
+<sub>中国大陆镜像：`curl -fsSL https://gitee.com/tiyisec/tiyi/raw/main/install.sh | TIYI_MIRROR=gitee bash && sudo /usr/local/bin/tiyi install --now`</sub>
 
 安装脚本会识别平台（Linux amd64/arm64）、下载最新的已签名发行版、校验其
 SHA-256（必需）并在本机 OpenSSL 支持 `pkeyutl -rawin` 时校验其 Ed25519 发布签名，然后把 `tiyi`
@@ -47,11 +47,11 @@ Release 镜像；可用 `TIYI_MIRROR=github|gitee`、`TIYI_VERSION`、
 
 ```sh
 # root / sudo —— 使用默认状态目录（/var/lib/tiyi）与 80/443 端口
-sudo tiyi standalone
+sudo /usr/local/bin/tiyi standalone
 
 # 普通用户（不用 sudo）—— 可写路径 + 高端口
 mkdir -p /tmp/waf
-tiyi standalone \
+/usr/local/bin/tiyi standalone \
   --state-db /tmp/waf/state.db \
   --caddy-admin-socket /tmp/waf/caddy.sock \
   --admin-socket /tmp/waf/admin.sock \
@@ -72,7 +72,7 @@ tiyi standalone \
 ```sh
 mkdir -p /tmp/waf
 TIYI_AUTH_BOOTSTRAP_ADMIN_PASSWORD='admin123@xxxxxxm' \
-  tiyi standalone \
+  /usr/local/bin/tiyi standalone \
   --state-db /tmp/waf/state.db \
   --caddy-admin-socket /tmp/waf/caddy.sock \
   --admin-socket /tmp/waf/admin.sock \
