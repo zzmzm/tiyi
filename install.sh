@@ -3,6 +3,7 @@
 # Tiyi installer.
 #
 #   curl -fsSL https://raw.githubusercontent.com/zzmzm/tiyi/main/install.sh | bash
+#   curl -fsSL https://gitee.com/tiyisec/tiyi/raw/main/install.sh | TIYI_MIRROR=gitee bash
 #   # or, from a clone:
 #   ./install.sh
 #
@@ -11,12 +12,16 @@
 # needs OpenSSL 3.x + xxd), and installs the tiyi binary.
 #
 # Environment overrides:
-#   TIYI_REPO     GitHub owner/name        (default: zzmzm/tiyi)
-#   TIYI_VERSION  pin a tag, e.g. v3.0.1   (default: latest stable)
-#   TIYI_PREFIX   install directory        (default: /usr/local/bin)
+#   TIYI_MIRROR      auto | github | gitee     (default: auto)
+#   TIYI_REPO        GitHub owner/name         (default: zzmzm/tiyi)
+#   TIYI_GITEE_REPO  Gitee owner/name          (default: tiyisec/tiyi)
+#   TIYI_VERSION     pin a tag, e.g. v3.0.3    (default: latest stable)
+#   TIYI_PREFIX      install directory         (default: /usr/local/bin)
 set -euo pipefail
 
-REPO="${TIYI_REPO:-zzmzm/tiyi}"
+MIRROR="${TIYI_MIRROR:-auto}"
+GITHUB_REPO="${TIYI_REPO:-zzmzm/tiyi}"
+GITEE_REPO="${TIYI_GITEE_REPO:-tiyisec/tiyi}"
 PREFIX="${TIYI_PREFIX:-/usr/local/bin}"
 
 # The Ed25519 release public key (base64, std). Matches release-key.pub and the
@@ -24,6 +29,11 @@ PREFIX="${TIYI_PREFIX:-/usr/local/bin}"
 RELEASE_PUBKEY_B64="RIH4Xm2V8NjU4byn/xq+36xQG38dWQ9eQB39Bk+Aze4="
 
 err() { echo "error: $*" >&2; exit 1; }
+
+case "$MIRROR" in
+	auto | github | gitee) ;;
+	*) err "TIYI_MIRROR must be auto, github, or gitee (got '$MIRROR')" ;;
+esac
 
 # Run a command as root: directly when already root, otherwise via sudo.
 as_root() {
@@ -49,7 +59,7 @@ command -v tar >/dev/null || err "tar is required"
 
 # --- already installed? update in place, then install + start the service --
 # Re-running the installer on a host that already has tiyi stays cheap: use the
-# signed in-place self-update (which downloads only when a newer release exists)
+# signed in-place update (which downloads only when a newer release exists)
 # instead of pulling the full tarball again, then (re)install the systemd unit
 # and start it on the new binary. Falls back to a fresh download when the
 # in-place update can't run (e.g. a build with no embedded release key).
@@ -61,8 +71,8 @@ elif [ -x "$PREFIX/tiyi" ]; then
 fi
 if [ -n "$existing" ]; then
 	echo "tiyi already installed: $("$existing" --version 2>/dev/null | head -1 || echo unknown)"
-	echo "  Updating in place via signed self-update …"
-	if as_root "$existing" self-update --yes; then
+	echo "  Updating in place via signed update …"
+	if as_root "$existing" update --yes --mirror "$MIRROR" --repo "$GITHUB_REPO"; then
 		# Stop any running instance so the updated binary re-opens the state DB
 		# exclusively during install; install --now then enables + starts it.
 		as_root systemctl stop tiyi.service >/dev/null 2>&1 || true
@@ -72,39 +82,93 @@ if [ -n "$existing" ]; then
 		echo "tiyi is up to date and running. Check it with: systemctl status tiyi"
 		exit 0
 	fi
-	echo "  in-place self-update unavailable; falling back to a fresh download." >&2
+	echo "  in-place update unavailable; falling back to a fresh download." >&2
 	echo
 fi
 
+resolve_github_latest() {
+	curl -fsSLI --connect-timeout 5 --max-time 10 -o /dev/null -w '%{url_effective}' "https://github.com/$GITHUB_REPO/releases/latest" |
+		sed -n 's#.*/releases/tag/##p'
+}
+
+resolve_gitee_latest() {
+	curl -fsSL --connect-timeout 5 --max-time 10 "https://gitee.com/api/v5/repos/$GITEE_REPO/releases/latest" |
+		sed -n 's/.*"tag_name"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p'
+}
+
+asset_base_for() {
+	case "$1" in
+		github) printf 'https://github.com/%s/releases/download/%s\n' "$GITHUB_REPO" "$tag" ;;
+		gitee) printf 'https://gitee.com/%s/releases/download/%s\n' "$GITEE_REPO" "$tag" ;;
+		*) return 1 ;;
+	esac
+}
+
 # --- resolve the release tag ----------------------------------------------
 tag="${TIYI_VERSION:-}"
+selected_mirror="$MIRROR"
 if [ -z "$tag" ]; then
-	# Follow the /releases/latest redirect to the tag URL — no API rate limit.
-	tag=$(curl -fsSLI -o /dev/null -w '%{url_effective}' "https://github.com/$REPO/releases/latest" |
-		sed -n 's#.*/releases/tag/##p')
+	case "$MIRROR" in
+		github)
+			tag=$(resolve_github_latest)
+			selected_mirror=github
+			;;
+		gitee)
+			tag=$(resolve_gitee_latest)
+			selected_mirror=gitee
+			;;
+		auto)
+			if tag=$(resolve_github_latest) && [ -n "$tag" ]; then
+				selected_mirror=github
+			else
+				echo "  GitHub latest lookup failed or timed out; trying Gitee mirror …" >&2
+				tag=$(resolve_gitee_latest)
+				selected_mirror=gitee
+			fi
+			;;
+	esac
+elif [ "$selected_mirror" = "auto" ]; then
+	selected_mirror=github
 fi
-[ -n "$tag" ] || err "could not resolve the latest release tag for $REPO"
+[ -n "$tag" ] || err "could not resolve the latest release tag"
 ver="${tag#v}"
 tarball="tiyi_${ver}_${os}_${arch}.tar.gz"
-base="https://github.com/$REPO/releases/download/$tag"
 
 tmp=$(mktemp -d)
 trap 'rm -rf "$tmp"' EXIT
 
-echo "Installing tiyi $tag ($os/$arch) from $REPO …"
+echo "Installing tiyi $tag ($os/$arch) …"
 
 # The release tarball is the large, slow download. Show a live progress bar on
 # an interactive terminal so it never looks frozen; stay quiet (silent, but
 # still surface errors) in pipelines / CI logs where a redrawing bar is noise.
-dl_opts=(-fsSL)
+dl_opts=(-fsSL --connect-timeout 10 --speed-limit 20480 --speed-time 30)
 if [ -t 2 ]; then
-	dl_opts=(-fL --progress-bar)
+	dl_opts=(-fL --progress-bar --connect-timeout 10 --speed-limit 20480 --speed-time 30)
 fi
+meta_opts=(-fsSL --connect-timeout 10 --max-time 60)
 
-echo "  Downloading $tarball …"
-curl "${dl_opts[@]}" -o "$tmp/$tarball" "$base/$tarball" || err "download $tarball failed"
-curl -fsSL -o "$tmp/SHA256SUMS" "$base/SHA256SUMS" || err "download SHA256SUMS failed"
-curl -fsSL -o "$tmp/SHA256SUMS.sig" "$base/SHA256SUMS.sig" 2>/dev/null || true
+download_release_assets() {
+	local source="$1" base="$2"
+	rm -f "$tmp/$tarball" "$tmp/SHA256SUMS" "$tmp/SHA256SUMS.sig"
+	echo "  Download source: $source"
+	echo "  Downloading $tarball …"
+	curl "${dl_opts[@]}" -o "$tmp/$tarball" "$base/$tarball" || return 1
+	curl "${meta_opts[@]}" -o "$tmp/SHA256SUMS" "$base/SHA256SUMS" || return 1
+	curl "${meta_opts[@]}" -o "$tmp/SHA256SUMS.sig" "$base/SHA256SUMS.sig" 2>/dev/null || true
+}
+
+base=$(asset_base_for "$selected_mirror") || err "invalid selected mirror '$selected_mirror'"
+if ! download_release_assets "$selected_mirror" "$base"; then
+	if [ "$MIRROR" = "auto" ] && [ "$selected_mirror" = "github" ]; then
+		echo "  GitHub download failed or was too slow; trying Gitee mirror …" >&2
+		selected_mirror=gitee
+		base=$(asset_base_for "$selected_mirror") || err "invalid selected mirror '$selected_mirror'"
+		download_release_assets "$selected_mirror" "$base" || err "download release assets failed from GitHub and Gitee"
+	else
+		err "download release assets failed from $selected_mirror"
+	fi
+fi
 
 # --- 1. SHA-256 (required) -------------------------------------------------
 ( cd "$tmp" && grep " ${tarball}\$" SHA256SUMS | sha256sum -c - >/dev/null ) ||
@@ -140,7 +204,7 @@ else
 		err "Ed25519 signature verification FAILED — refusing to install"
 	fi
 	echo "  ! skipping Ed25519 verification (needs OpenSSL 3.x + xxd and SHA256SUMS.sig);"
-	echo "    SHA-256 over HTTPS still applied. 'tiyi self-update' fully verifies signatures."
+	echo "    SHA-256 over HTTPS still applied. 'tiyi update' fully verifies signatures."
 fi
 
 # --- install ---------------------------------------------------------------
@@ -184,4 +248,8 @@ Next — start Tiyi as a hardened systemd service (the recommended default):
         --proxy-https-addr 0.0.0.0:18443
 
 EOF
-echo "Docs: https://github.com/$REPO/tree/main/docs"
+if [ "$selected_mirror" = "gitee" ]; then
+	echo "Docs: https://gitee.com/$GITEE_REPO/tree/main/docs"
+else
+	echo "Docs: https://github.com/$GITHUB_REPO/tree/main/docs"
+fi

@@ -1,6 +1,6 @@
 ---
 name: tiyi-operator
-description: Operate Tiyi, the single-binary WAF platform. Use when Codex needs to install, build, run, configure, document, or troubleshoot Tiyi workflows including standalone/server/secondary/agent/dashboard modes, first-run admin bootstrap, local admin socket CLI, Web UI access, site/upstream/policy operations, signed releases, self-update, license import, and production operator guidance.
+description: Operate Tiyi, the single-binary WAF platform. Use when Codex needs to install, build, run, configure, document, or troubleshoot Tiyi workflows including standalone/server/secondary/agent/dashboard modes, first-run admin bootstrap, local admin socket CLI, Web UI access, site/upstream/policy operations, signed releases, binary update, license import, and production operator guidance.
 ---
 
 # Tiyi Operator
@@ -33,7 +33,7 @@ Use explicit first-run admin credentials for automation:
 
 ```sh
 mkdir -p /tmp/waf
-TIYI_BOOTSTRAP_ADMIN_PASSWORD='choose-a-strong-password' \
+TIYI_AUTH_BOOTSTRAP_ADMIN_PASSWORD='choose-a-strong-password' \
   ./bin/tiyi standalone \
   --addr 0.0.0.0:8080 \
   --state-db /tmp/waf/state.db \
@@ -46,7 +46,7 @@ TIYI_BOOTSTRAP_ADMIN_PASSWORD='choose-a-strong-password' \
 First-run rules:
 
 - `standalone` auto-creates `admin` with a random one-time password only when no users exist and no explicit credentials were supplied.
-- `TIYI_BOOTSTRAP_ADMIN_PASSWORD` creates the configured admin in any login-serving mode and suppresses the random password banner.
+- `TIYI_AUTH_BOOTSTRAP_ADMIN_PASSWORD` creates the configured admin in any login-serving mode and suppresses the random password banner.
 - Later restarts do not regenerate users. Reset a lost password locally with `tiyi user list` and `tiyi user reset-password <user-id> --password <new-password>`.
 
 ## CLI And UI
@@ -84,17 +84,17 @@ tiyi agent --api http://primary:8080 --enrollment-token "$TOKEN" --state-dir /va
 
 - `make release` requires a clean worktree, verifies embedded vendor/release public keys through focused tests, rebuilds proto/web/binary outputs, then packages signed Linux artifacts.
 - Release tarballs use `tiyi_<ver>_linux_<arch>.tar.gz` and include `tiyi`, `tiyi.sig`, `tiyi-release.json`, `VERSION`, `CHANGELOG.md`, `EULA.md`, and `NOTICE`.
-- `tiyi self-update --check` reports availability; `tiyi self-update --yes` downloads, verifies SHA-256 plus Ed25519 signatures, and swaps the on-disk binary. Restart the service afterward.
+- `tiyi update --check` reports availability; `tiyi update --yes` downloads, verifies SHA-256 plus Ed25519 signatures, and swaps the on-disk binary. Restart the service afterward. Use `--mirror gitee` to force the Gitee release mirror.
 - Tiyi gates scale, not features. Community is full-featured on the local node with zero remote agents. A vendor-signed license raises the remote-agent budget.
-- Import licenses from System -> About or use `license.key_path` / `TIYI_LICENSE_FILE` for headless deployments. Invalid or expired licenses degrade to Community without stopping the data plane or known agents.
+- Import licenses from System -> About or use `license.key_path` / `TIYI_LICENSE_KEY_PATH` for headless deployments. Invalid or expired licenses degrade to Community without stopping the data plane or known agents.
 
 ## Troubleshooting
 
-- No dashboard login: check whether users exist. For `standalone`, inspect the first-run password banner or reset over the local admin socket. For `server`, intentionally create credentials with `TIYI_BOOTSTRAP_ADMIN_PASSWORD` or `tiyi admin init`.
+- No dashboard login: check whether users exist. For `standalone`, inspect the first-run password banner or reset over the local admin socket. For `server`, intentionally create credentials with `TIYI_AUTH_BOOTSTRAP_ADMIN_PASSWORD` or `tiyi admin init`.
 - CLI cannot connect locally: verify the admin socket path, mode, group, and that the command is run as a user with access to the socket.
 - Proxy ports fail to bind: use unprivileged `--proxy-http-addr` / `--proxy-https-addr` for local QA, or grant `CAP_NET_BIND_SERVICE` under systemd for ports 80/443.
 - WAF blocks produce empty replies: inspect `/debug/logsink/stats` on the local admin socket. A nonzero `panicked` counter means an observability boundary recovered from a panic and needs investigation.
-- Release import or self-update fails: verify `SHA256SUMS`, `SHA256SUMS.sig`, `tiyi.sig`, and that the artifact was signed by the embedded release key.
+- Release import or update fails: verify `SHA256SUMS`, `SHA256SUMS.sig`, `tiyi.sig`, and that the artifact was signed by the embedded release key.
 
 ## Verification
 

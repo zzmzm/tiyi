@@ -12,14 +12,32 @@ curl -fsSL https://www.tiyisec.com/install.sh | bash
 The installer detects your platform (Linux amd64/arm64), resolves the latest
 signed release, verifies it, and installs `tiyi` to `/usr/local/bin`. The same
 script is mirrored at
-`https://raw.githubusercontent.com/zzmzm/tiyi/main/install.sh`.
+`https://raw.githubusercontent.com/zzmzm/tiyi/main/install.sh`, with a China
+mirror at `https://gitee.com/tiyisec/tiyi/raw/main/install.sh`.
+
+By default the installer tries GitHub first and falls back to the Gitee release
+mirror. Force Gitee when needed:
+
+```sh
+curl -fsSL https://gitee.com/tiyisec/tiyi/raw/main/install.sh | TIYI_MIRROR=gitee bash
+```
 
 Pin a version or change the install prefix:
 
 ```sh
-TIYI_VERSION=v3.0.2 TIYI_PREFIX="$HOME/.local/bin" \
+TIYI_VERSION=v3.0.3 TIYI_PREFIX="$HOME/.local/bin" \
   bash -c "$(curl -fsSL https://www.tiyisec.com/install.sh)"
 ```
+
+Installer environment variables:
+
+| Variable | Default | Meaning |
+|---|---|---|
+| `TIYI_MIRROR` | `auto` | Download source: `auto` (GitHub primary, Gitee fallback), `github`, or `gitee`. |
+| `TIYI_REPO` | `zzmzm/tiyi` | GitHub `owner/name` used by the installer. |
+| `TIYI_GITEE_REPO` | `tiyisec/tiyi` | Gitee `owner/name` used by the installer. |
+| `TIYI_VERSION` | latest stable | Pin a release tag, for example `v3.0.3`. |
+| `TIYI_PREFIX` | `/usr/local/bin` | Install directory for the `tiyi` binary. |
 
 ## 2. Verify a download manually (optional)
 
@@ -75,7 +93,7 @@ no root is needed:
 
 ```sh
 mkdir -p /tmp/waf
-TIYI_BOOTSTRAP_ADMIN_PASSWORD='admin123@xxxxxxm' \
+TIYI_AUTH_BOOTSTRAP_ADMIN_PASSWORD='admin123@xxxxxxm' \
   tiyi standalone \
   --addr 0.0.0.0:8080 \
   --state-db /tmp/waf/state.db \
@@ -95,18 +113,58 @@ tiyi user list
 tiyi user reset-password <user-id> --password <new-password>
 ```
 
-## 4. Keep it updated
+## 4. Runtime config via environment (optional)
+
+Prefer `server.yaml` for persistent service configuration. Use environment
+variables only when your service manager, container runtime, or secret manager
+injects config at runtime. Env names mirror config keys: prefix `TIYI_`,
+uppercase the key, and replace dots with underscores. For example,
+`auth.jwt_secret` becomes `TIYI_AUTH_JWT_SECRET`.
+
+Common config env overrides:
+
+| Variable | Config key | When to use |
+|---|---|---|
+| `TIYI_SERVER_ADDR` | `server.addr` | Bind the API/dashboard to a different address. |
+| `TIYI_STORE_STATE_DB` | `store.state_db` | Move the SQLite state database. |
+| `TIYI_LOG_LEVEL` | `log.level` | Temporarily raise or lower process logging. |
+| `TIYI_PROXY_HTTP_ADDR` | `proxy.http_addr` | Change the HTTP data-plane listen address. |
+| `TIYI_PROXY_HTTPS_ADDR` | `proxy.https_addr` | Change the HTTPS data-plane listen address. |
+| `TIYI_PROXY_CADDY_ADMIN_SOCKET` | `proxy.caddy_admin_socket` | Move the embedded Caddy admin socket. |
+| `TIYI_CRYPTO_KEK_FILE` | `crypto.kek_file` | Pin the at-rest encryption KEK path for production. |
+| `TIYI_AUTH_JWT_SECRET` | `auth.jwt_secret` | Set a stable JWT signing secret for production. |
+| `TIYI_AUTH_BOOTSTRAP_ADMIN_USERNAME` | `auth.bootstrap_admin_username` | Choose the first admin username. |
+| `TIYI_AUTH_BOOTSTRAP_ADMIN_PASSWORD` | `auth.bootstrap_admin_password` | Choose the first admin password for automation. |
+| `TIYI_LICENSE_KEY_PATH` | `license.key_path` | Load a signed license file on boot. |
+| `TIYI_UPDATE_REPO` | `update.repo` | Override the GitHub release repo used by update checks. |
+| `TIYI_UPDATE_CHANNEL` | `update.channel` | Use `stable` or `prerelease` for `tiyi update`. |
+| `TIYI_UPDATE_MIRROR` | `update.mirror` | Use `auto`, `github`, or `gitee` for update checks/downloads. |
+
+Less common config keys follow the same rule. Prefer YAML for LDAP/RADIUS,
+token TTLs, cookie settings, and provider-specific auth settings unless your
+deployment platform requires env injection.
+
+## 5. Keep it updated
 
 ```sh
-tiyi self-update --check     # is a newer signed release available?
-tiyi self-update --yes       # download, verify, and install it
+tiyi update --check          # is a newer signed release available?
+tiyi update --yes            # download, verify, and install it
+tiyi update --yes --mirror gitee
 ```
 
-`self-update` verifies the SHA-256 and the Ed25519 release signature against the
-key embedded in the binary before replacing it on disk. **Restart the service**
+`update` verifies the SHA-256 and the Ed25519 release signature against the key
+embedded in the binary before replacing it on disk. **Restart the service**
 after updating. Track pre-release builds with `--channel prerelease`.
 
-## 5. Licensing
+Update environment variables:
+
+| Variable | Default | Meaning |
+|---|---|---|
+| `TIYI_UPDATE_MIRROR` | `auto` | Update-check/download source: `auto`, `github`, or `gitee`. |
+| `TIYI_UPDATE_REPO` | `zzmzm/tiyi` | GitHub `owner/name` for `github` and `auto`. |
+| `TIYI_UPDATE_CHANNEL` | `stable` | `stable` or `prerelease`. |
+
+## 6. Licensing
 
 Tiyi is free and full-featured on a single node. Growing to multiple nodes
 (remote agents) uses a signed license — the single-node experience is

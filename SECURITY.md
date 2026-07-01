@@ -60,7 +60,7 @@ go run ./tools/release verify --pub release-key.pub --in tiyi --sig tiyi.sig
   extracts the tarball, recomputes the SHA-256, and verifies the Ed25519
   signature against the embedded release key before the artifact is stored. A
   tampered or wrong-key artifact is rejected.
-- **Agent self-update** (`apply-binary`): before swapping its executable, an
+- **Agent binary update** (`apply-binary`): before swapping its executable, an
   agent verifies both the advertised SHA-256 and the Ed25519 release signature.
   The update fails closed — an unsigned or unverifiable binary is never applied.
 
@@ -71,6 +71,7 @@ the channel above.
 
 - The local admin socket is passwordless by design and protected by filesystem
   permissions; restrict access to its Unix socket path accordingly.
-- Update checks make outbound HTTPS requests to the configured release API
-  (`update.repo` / `TIYI_UPDATE_REPO`). Set `update.repo` to empty to disable
-  update checks entirely in air-gapped deployments.
+- Update checks make outbound HTTPS requests to the configured release API and
+  mirror (`update.repo` / `TIYI_UPDATE_REPO`, `update.mirror` /
+  `TIYI_UPDATE_MIRROR`). Set `update.repo` to empty to disable update checks
+  entirely in air-gapped deployments.

@@ -20,18 +20,33 @@ download to blocking real attacks.
 ## Install
 
 ```sh
-curl -fsSL https://www.tiyisec.com/install.sh | bash
+curl -fsSL https://www.tiyisec.com/install.sh | bash && sudo tiyi install --now
 ```
 
-<sub>GitHub mirror (same script): `curl -fsSL https://raw.githubusercontent.com/zzmzm/tiyi/main/install.sh | bash`</sub>
+<sub>GitHub mirror (same script): `curl -fsSL https://raw.githubusercontent.com/zzmzm/tiyi/main/install.sh | bash && sudo tiyi install --now`</sub>
+<br>
+<sub>China mirror: `curl -fsSL https://gitee.com/tiyisec/tiyi/raw/main/install.sh | TIYI_MIRROR=gitee bash && sudo tiyi install --now`</sub>
 
 The installer detects your platform (Linux amd64/arm64), downloads the latest
 signed release, verifies its SHA-256 (required) and — when OpenSSL 3.x is
 available — its Ed25519 release signature, then installs `tiyi` to
-`/usr/local/bin`. Override with `TIYI_VERSION`, `TIYI_PREFIX`, or `TIYI_REPO`.
+`/usr/local/bin`. By default it tries GitHub first and falls back to the Gitee
+release mirror; override with `TIYI_MIRROR=github|gitee`, `TIYI_VERSION`,
+`TIYI_PREFIX`, `TIYI_REPO`, or `TIYI_GITEE_REPO`.
 
-Then start a single-host install — server, agent, and dashboard in one process.
-Pick the option that matches your privileges:
+Installer environment variables:
+
+| Variable | Default | Meaning |
+|---|---|---|
+| `TIYI_MIRROR` | `auto` | Download source: `auto` (GitHub primary, Gitee fallback), `github`, or `gitee`. |
+| `TIYI_REPO` | `zzmzm/tiyi` | GitHub `owner/name` used by the installer. |
+| `TIYI_GITEE_REPO` | `tiyisec/tiyi` | Gitee `owner/name` used by the installer. |
+| `TIYI_VERSION` | latest stable | Pin a release tag, for example `v3.0.3`. |
+| `TIYI_PREFIX` | `/usr/local/bin` | Install directory for the `tiyi` binary. |
+
+The one-line command above installs the binary and starts the recommended
+systemd service. For a manual foreground run instead, pick the option that
+matches your privileges:
 
 ```sh
 # Root / sudo — uses the default state dir (/var/lib/tiyi) and ports 80/443
@@ -54,13 +69,13 @@ in, and add your first site. Full walkthrough:
 
 ### Advanced: choose your own admin password
 
-Set `TIYI_BOOTSTRAP_ADMIN_PASSWORD` before the first boot to skip the generated
+Set `TIYI_AUTH_BOOTSTRAP_ADMIN_PASSWORD` before the first boot to skip the generated
 password (ideal for automation, images, and CI) — combine it with either run
 option above. Tiyi uses it verbatim and prints no banner:
 
 ```sh
 mkdir -p /tmp/waf
-TIYI_BOOTSTRAP_ADMIN_PASSWORD='admin123@xxxxxxm' \
+TIYI_AUTH_BOOTSTRAP_ADMIN_PASSWORD='admin123@xxxxxxm' \
   tiyi standalone \
   --state-db /tmp/waf/state.db \
   --caddy-admin-socket /tmp/waf/caddy.sock \
@@ -71,6 +86,37 @@ TIYI_BOOTSTRAP_ADMIN_PASSWORD='admin123@xxxxxxm' \
 
 The username defaults to `admin`. Auto-generation only fires when no users
 exist, so restarts are no-ops.
+
+### Runtime config via environment
+
+Prefer `server.yaml` for persistent service configuration. Use environment
+variables only when your service manager, container runtime, or secret manager
+injects config at runtime. Env names mirror config keys: prefix `TIYI_`,
+uppercase the key, and replace dots with underscores. For example,
+`auth.jwt_secret` becomes `TIYI_AUTH_JWT_SECRET`.
+
+Common config env overrides:
+
+| Variable | Config key | When to use |
+|---|---|---|
+| `TIYI_SERVER_ADDR` | `server.addr` | Bind the API/dashboard to a different address. |
+| `TIYI_STORE_STATE_DB` | `store.state_db` | Move the SQLite state database. |
+| `TIYI_LOG_LEVEL` | `log.level` | Temporarily raise or lower process logging. |
+| `TIYI_PROXY_HTTP_ADDR` | `proxy.http_addr` | Change the HTTP data-plane listen address. |
+| `TIYI_PROXY_HTTPS_ADDR` | `proxy.https_addr` | Change the HTTPS data-plane listen address. |
+| `TIYI_PROXY_CADDY_ADMIN_SOCKET` | `proxy.caddy_admin_socket` | Move the embedded Caddy admin socket. |
+| `TIYI_CRYPTO_KEK_FILE` | `crypto.kek_file` | Pin the at-rest encryption KEK path for production. |
+| `TIYI_AUTH_JWT_SECRET` | `auth.jwt_secret` | Set a stable JWT signing secret for production. |
+| `TIYI_AUTH_BOOTSTRAP_ADMIN_USERNAME` | `auth.bootstrap_admin_username` | Choose the first admin username. |
+| `TIYI_AUTH_BOOTSTRAP_ADMIN_PASSWORD` | `auth.bootstrap_admin_password` | Choose the first admin password for automation. |
+| `TIYI_LICENSE_KEY_PATH` | `license.key_path` | Load a signed license file on boot. |
+| `TIYI_UPDATE_REPO` | `update.repo` | Override the GitHub release repo used by update checks. |
+| `TIYI_UPDATE_CHANNEL` | `update.channel` | Use `stable` or `prerelease` for `tiyi update`. |
+| `TIYI_UPDATE_MIRROR` | `update.mirror` | Use `auto`, `github`, or `gitee` for update checks/downloads. |
+
+Less common config keys follow the same rule. Prefer YAML for LDAP/RADIUS,
+token TTLs, cookie settings, and provider-specific auth settings unless your
+deployment platform requires env injection.
 
 ## Free and full-featured on a single node
 
@@ -131,13 +177,22 @@ openssl pkeyutl -verify -pubin -inkey release-key.pem -rawin \
 A running Tiyi can update itself from this repo's releases:
 
 ```sh
-tiyi self-update --check     # is a newer signed release available?
-tiyi self-update --yes       # download, verify, and install it
+tiyi update --check          # is a newer signed release available?
+tiyi update --yes            # download, verify, and install it
+tiyi update --yes --mirror gitee
 ```
 
-`self-update` verifies the full Ed25519 signature chain against the embedded
-release key before swapping the on-disk binary; restart the service afterward.
-Track pre-release builds with `--channel prerelease`.
+`update` verifies the full Ed25519 signature chain against the embedded release
+key before swapping the on-disk binary; restart the service afterward. Track
+pre-release builds with `--channel prerelease`.
+
+Update environment variables:
+
+| Variable | Default | Meaning |
+|---|---|---|
+| `TIYI_UPDATE_MIRROR` | `auto` | Update-check/download source: `auto`, `github`, or `gitee`. |
+| `TIYI_UPDATE_REPO` | `zzmzm/tiyi` | GitHub `owner/name` for `github` and `auto`. |
+| `TIYI_UPDATE_CHANNEL` | `stable` | `stable` or `prerelease`. |
 
 ## Documentation
 

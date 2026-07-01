@@ -19,17 +19,31 @@ SQLite + 管理 UI，编译进一个可自托管的 Go 可执行文件。无需 
 ## 安装
 
 ```sh
-curl -fsSL https://www.tiyisec.com/install.sh | bash
+curl -fsSL https://www.tiyisec.com/install.sh | bash && sudo tiyi install --now
 ```
 
-<sub>GitHub 镜像（同一脚本）：`curl -fsSL https://raw.githubusercontent.com/zzmzm/tiyi/main/install.sh | bash`</sub>
+<sub>GitHub 镜像（同一脚本）：`curl -fsSL https://raw.githubusercontent.com/zzmzm/tiyi/main/install.sh | bash && sudo tiyi install --now`</sub>
+<br>
+<sub>中国大陆镜像：`curl -fsSL https://gitee.com/tiyisec/tiyi/raw/main/install.sh | TIYI_MIRROR=gitee bash && sudo tiyi install --now`</sub>
 
 安装脚本会识别平台（Linux amd64/arm64）、下载最新的已签名发行版、校验其
 SHA-256（必需）并在有 OpenSSL 3.x 时校验其 Ed25519 发布签名，然后把 `tiyi`
-安装到 `/usr/local/bin`。可用 `TIYI_VERSION`、`TIYI_PREFIX`、`TIYI_REPO` 覆盖。
+安装到 `/usr/local/bin`。默认先尝试 GitHub，失败或过慢时回退到 Gitee
+Release 镜像；可用 `TIYI_MIRROR=github|gitee`、`TIYI_VERSION`、
+`TIYI_PREFIX`、`TIYI_REPO` 或 `TIYI_GITEE_REPO` 覆盖。
 
-然后拉起单机安装 —— 在一个进程里同时运行 server、agent 与 dashboard。按你的
-权限选择一种方式：
+安装器环境变量：
+
+| 变量 | 默认值 | 含义 |
+|---|---|---|
+| `TIYI_MIRROR` | `auto` | 下载来源：`auto`（GitHub 优先，Gitee 回退）、`github` 或 `gitee`。 |
+| `TIYI_REPO` | `zzmzm/tiyi` | 安装器使用的 GitHub `owner/name`。 |
+| `TIYI_GITEE_REPO` | `tiyisec/tiyi` | 安装器使用的 Gitee `owner/name`。 |
+| `TIYI_VERSION` | 最新稳定版 | 固定发行标签，例如 `v3.0.3`。 |
+| `TIYI_PREFIX` | `/usr/local/bin` | `tiyi` 二进制安装目录。 |
+
+上面的一行命令会安装二进制并启动推荐的 systemd 服务。若要改为前台手动运行，
+按你的权限选择一种方式：
 
 ```sh
 # root / sudo —— 使用默认状态目录（/var/lib/tiyi）与 80/443 端口
@@ -51,13 +65,13 @@ tiyi standalone \
 
 ### 进阶：自定义管理员密码
 
-在首次启动前设置 `TIYI_BOOTSTRAP_ADMIN_PASSWORD`，即可跳过自动生成的密码（非常
+在首次启动前设置 `TIYI_AUTH_BOOTSTRAP_ADMIN_PASSWORD`，即可跳过自动生成的密码（非常
 适合自动化、镜像与 CI）—— 可与上面任一种运行方式组合。Tiyi 会原样采用且不打印
 任何 banner：
 
 ```sh
 mkdir -p /tmp/waf
-TIYI_BOOTSTRAP_ADMIN_PASSWORD='admin123@xxxxxxm' \
+TIYI_AUTH_BOOTSTRAP_ADMIN_PASSWORD='admin123@xxxxxxm' \
   tiyi standalone \
   --state-db /tmp/waf/state.db \
   --caddy-admin-socket /tmp/waf/caddy.sock \
@@ -67,6 +81,35 @@ TIYI_BOOTSTRAP_ADMIN_PASSWORD='admin123@xxxxxxm' \
 ```
 
 用户名默认 `admin`。仅当不存在任何用户时才会自动生成密码，因此重启都是空操作。
+
+### 通过环境变量配置运行时
+
+持久化服务配置优先写入 `server.yaml`。只有当 service manager、容器运行时或
+密钥管理器需要在运行时注入配置时，才使用环境变量。环境变量名与配置键一一对应：
+加 `TIYI_` 前缀，转为大写，并把点替换为下划线。例如 `auth.jwt_secret`
+对应 `TIYI_AUTH_JWT_SECRET`。
+
+常用配置覆盖：
+
+| 变量 | 配置键 | 适用场景 |
+|---|---|---|
+| `TIYI_SERVER_ADDR` | `server.addr` | 把 API / 控制台绑定到不同地址。 |
+| `TIYI_STORE_STATE_DB` | `store.state_db` | 移动 SQLite 状态数据库。 |
+| `TIYI_LOG_LEVEL` | `log.level` | 临时调整进程日志级别。 |
+| `TIYI_PROXY_HTTP_ADDR` | `proxy.http_addr` | 修改 HTTP 数据面监听地址。 |
+| `TIYI_PROXY_HTTPS_ADDR` | `proxy.https_addr` | 修改 HTTPS 数据面监听地址。 |
+| `TIYI_PROXY_CADDY_ADMIN_SOCKET` | `proxy.caddy_admin_socket` | 移动内嵌 Caddy admin socket。 |
+| `TIYI_CRYPTO_KEK_FILE` | `crypto.kek_file` | 为生产环境固定静态加密 KEK 路径。 |
+| `TIYI_AUTH_JWT_SECRET` | `auth.jwt_secret` | 为生产环境设置稳定 JWT 签名密钥。 |
+| `TIYI_AUTH_BOOTSTRAP_ADMIN_USERNAME` | `auth.bootstrap_admin_username` | 指定首个管理员用户名。 |
+| `TIYI_AUTH_BOOTSTRAP_ADMIN_PASSWORD` | `auth.bootstrap_admin_password` | 为自动化指定首个管理员密码。 |
+| `TIYI_LICENSE_KEY_PATH` | `license.key_path` | 启动时加载签名 license 文件。 |
+| `TIYI_UPDATE_REPO` | `update.repo` | 覆盖更新检查使用的 GitHub release 仓库。 |
+| `TIYI_UPDATE_CHANNEL` | `update.channel` | 为 `tiyi update` 使用 `stable` 或 `prerelease`。 |
+| `TIYI_UPDATE_MIRROR` | `update.mirror` | 更新检查/下载使用 `auto`、`github` 或 `gitee`。 |
+
+较少使用的配置键也遵循同一规则。LDAP/RADIUS、token 生命周期、cookie 设置与
+认证后端细项优先写 YAML，除非部署平台必须通过环境变量注入。
 
 ## 单节点免费且功能完整
 
@@ -116,15 +159,24 @@ openssl pkeyutl -verify -pubin -inkey release-key.pem -rawin \
 
 ## 更新
 
-运行中的 Tiyi 可以从本仓库的 releases 自更新：
+运行中的 Tiyi 可以从本仓库的 releases 原地更新：
 
 ```sh
-tiyi self-update --check     # 是否有更新的已签名发行版？
-tiyi self-update --yes       # 下载、校验并安装
+tiyi update --check          # 是否有更新的已签名发行版？
+tiyi update --yes            # 下载、校验并安装
+tiyi update --yes --mirror gitee
 ```
 
-`self-update` 会在替换磁盘上的二进制之前，针对内嵌的发布公钥校验完整的 Ed25519
+`update` 会在替换磁盘上的二进制之前，针对内嵌的发布公钥校验完整的 Ed25519
 签名链；更新后请重启服务。使用 `--channel prerelease` 可跟踪预发布版本。
+
+更新环境变量：
+
+| 变量 | 默认值 | 含义 |
+|---|---|---|
+| `TIYI_UPDATE_MIRROR` | `auto` | 更新检查/下载来源：`auto`、`github` 或 `gitee`。 |
+| `TIYI_UPDATE_REPO` | `zzmzm/tiyi` | `github` 与 `auto` 使用的 GitHub `owner/name`。 |
+| `TIYI_UPDATE_CHANNEL` | `stable` | `stable` 或 `prerelease`。 |
 
 ## 文档
 
