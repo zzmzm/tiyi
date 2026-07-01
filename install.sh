@@ -8,8 +8,9 @@
 #   ./install.sh
 #
 # Downloads the latest (or TIYI_VERSION) signed release for this platform,
-# verifies its SHA-256 (required) and Ed25519 release signature (best effort,
-# needs OpenSSL 3.x + xxd), and installs the tiyi binary.
+# verifies its SHA-256 (required) and Ed25519 release signature when supported
+# by local OpenSSL (best effort, needs pkeyutl -rawin + xxd), and installs the
+# tiyi binary.
 #
 # Environment overrides:
 #   TIYI_MIRROR      auto | github | gitee     (default: auto)
@@ -177,10 +178,14 @@ echo "  ✓ SHA-256 verified"
 
 # --- 2. Ed25519 signature (best effort) ------------------------------------
 verify_ed25519() {
-	# Needs OpenSSL 3.x (-rawin) + xxd to build the SPKI PEM from the raw key.
+	# Needs an OpenSSL build with pkeyutl -rawin plus xxd to build the SPKI PEM
+	# from the raw key. CentOS 7/8 OpenSSL builds commonly lack -rawin.
 	command -v openssl >/dev/null || return 2
 	command -v xxd >/dev/null || return 2
 	[ -s "$tmp/SHA256SUMS.sig" ] || return 2
+	if ! openssl pkeyutl -help 2>&1 | grep -q -- '-rawin'; then
+		return 2
+	fi
 	local keyhex der pem
 	keyhex=$(printf '%s' "$RELEASE_PUBKEY_B64" | base64 -d 2>/dev/null | xxd -p -c 256 | tr -d '\n')
 	[ -n "$keyhex" ] || return 2
@@ -203,7 +208,7 @@ else
 	if [ "$rc" = "1" ]; then
 		err "Ed25519 signature verification FAILED — refusing to install"
 	fi
-	echo "  ! skipping Ed25519 verification (needs OpenSSL 3.x + xxd and SHA256SUMS.sig);"
+	echo "  ! skipping Ed25519 verification (needs OpenSSL pkeyutl -rawin + xxd and SHA256SUMS.sig);"
 	echo "    SHA-256 over HTTPS still applied. 'tiyi update' fully verifies signatures."
 fi
 

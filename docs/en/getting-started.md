@@ -48,8 +48,9 @@ tarball. First check the checksum:
 sha256sum --check --ignore-missing SHA256SUMS
 ```
 
-To verify the Ed25519 signature of the checksums with OpenSSL 3.x, build a PEM
-from the published raw public key (`release-key.pub`):
+To verify the Ed25519 signature of the checksums with an OpenSSL build that
+supports `pkeyutl -rawin`, build a PEM from the published raw public key
+(`release-key.pub`):
 
 ```sh
 { printf '302a300506032b6570032100'; base64 -d release-key.pub | xxd -p -c 256; } \

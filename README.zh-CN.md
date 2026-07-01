@@ -1,4 +1,4 @@
-# Tiyi（体翼）
+# 太一
 
 **单可执行文件即一套完整的 Web 应用防火墙。** Caddy + Coraza + OWASP CRS 4 +
 SQLite + 管理 UI，编译进一个可自托管的 Go 可执行文件。无需 Docker、无需外部
@@ -27,7 +27,7 @@ curl -fsSL https://www.tiyisec.com/install.sh | bash && sudo tiyi install --now
 <sub>中国大陆镜像：`curl -fsSL https://gitee.com/tiyisec/tiyi/raw/main/install.sh | TIYI_MIRROR=gitee bash && sudo tiyi install --now`</sub>
 
 安装脚本会识别平台（Linux amd64/arm64）、下载最新的已签名发行版、校验其
-SHA-256（必需）并在有 OpenSSL 3.x 时校验其 Ed25519 发布签名，然后把 `tiyi`
+SHA-256（必需）并在本机 OpenSSL 支持 `pkeyutl -rawin` 时校验其 Ed25519 发布签名，然后把 `tiyi`
 安装到 `/usr/local/bin`。默认先尝试 GitHub，失败或过慢时回退到 Gitee
 Release 镜像；可用 `TIYI_MIRROR=github|gitee`、`TIYI_VERSION`、
 `TIYI_PREFIX`、`TIYI_REPO` 或 `TIYI_GITEE_REPO` 覆盖。
@@ -66,7 +66,7 @@ tiyi standalone \
 ### 进阶：自定义管理员密码
 
 在首次启动前设置 `TIYI_AUTH_BOOTSTRAP_ADMIN_PASSWORD`，即可跳过自动生成的密码（非常
-适合自动化、镜像与 CI）—— 可与上面任一种运行方式组合。Tiyi 会原样采用且不打印
+适合自动化、镜像与 CI）—— 可与上面任一种运行方式组合。太一会原样采用且不打印
 任何 banner：
 
 ```sh
@@ -113,7 +113,7 @@ TIYI_AUTH_BOOTSTRAP_ADMIN_PASSWORD='admin123@xxxxxxm' \
 
 ## 单节点免费且功能完整
 
-一个 Tiyi 节点给你**完整**的 WAF —— 而不是阉割版的免费档。下面的一切都已包含，
+一个太一节点给你**完整**的 WAF —— 而不是阉割版的免费档。下面的一切都已包含，
 无需任何授权即可本地运行：
 
 - **开箱即用的 OWASP CRS 4** —— 按站点覆盖、偏执级别、异常评分、排除包，以及自
@@ -136,7 +136,7 @@ TIYI_AUTH_BOOTSTRAP_ADMIN_PASSWORD='admin123@xxxxxxm' \
 
 ## 这个仓库里有什么
 
-这是 Tiyi 的**分发渠道** —— 安装脚本、公开的发布签名公钥与文档。编译并签名的
+这是太一的**分发渠道** —— 安装脚本、公开的发布签名公钥与文档。编译并签名的
 二进制作为资产附在每个 [GitHub Release](../../releases) 上（不提交进仓库）。
 
 ## 手动校验下载
@@ -159,7 +159,7 @@ openssl pkeyutl -verify -pubin -inkey release-key.pem -rawin \
 
 ## 更新
 
-运行中的 Tiyi 可以从本仓库的 releases 原地更新：
+运行中的太一可以从本仓库的 releases 原地更新：
 
 ```sh
 tiyi update --check          # 是否有更新的已签名发行版？
@@ -186,7 +186,7 @@ tiyi update --yes --mirror gitee
 
 ## Codex skill
 
-使用 Codex 的运维人员可以安装 Tiyi operator skill，用于安装、standalone、Web UI、
+使用 Codex 的运维人员可以安装太一 operator skill，用于安装、standalone、Web UI、
 CLI、发布、授权与排障流程：
 
 ```sh
@@ -206,4 +206,4 @@ curl -fsSL https://raw.githubusercontent.com/zzmzm/tiyi/main/skills/tiyi-operato
 - 第三方归属声明：[NOTICE](NOTICE)。
 - 安全策略与漏洞报告：[SECURITY.md](SECURITY.md)。
 
-“Tiyi”与 Tiyi logo 是 Tiyi Authors 的商标。
+“太一”与太一 logo 是 Tiyi Authors 的商标。

@@ -28,8 +28,8 @@ curl -fsSL https://www.tiyisec.com/install.sh | bash && sudo tiyi install --now
 <sub>China mirror: `curl -fsSL https://gitee.com/tiyisec/tiyi/raw/main/install.sh | TIYI_MIRROR=gitee bash && sudo tiyi install --now`</sub>
 
 The installer detects your platform (Linux amd64/arm64), downloads the latest
-signed release, verifies its SHA-256 (required) and — when OpenSSL 3.x is
-available — its Ed25519 release signature, then installs `tiyi` to
+signed release, verifies its SHA-256 (required) and — when local OpenSSL
+supports `pkeyutl -rawin` — its Ed25519 release signature, then installs `tiyi` to
 `/usr/local/bin`. By default it tries GitHub first and falls back to the Gitee
 release mirror; override with `TIYI_MIRROR=github|gitee`, `TIYI_VERSION`,
 `TIYI_PREFIX`, `TIYI_REPO`, or `TIYI_GITEE_REPO`.
@@ -164,7 +164,7 @@ Every release attaches `SHA256SUMS`, `SHA256SUMS.sig`, and
 # checksums (required):
 sha256sum --check --ignore-missing SHA256SUMS
 
-# Ed25519 signature of the checksums (OpenSSL 3.x):
+# Ed25519 signature of the checksums (OpenSSL with pkeyutl -rawin):
 openssl pkeyutl -verify -pubin -inkey release-key.pem -rawin \
     -in SHA256SUMS -sigfile <(base64 -d SHA256SUMS.sig)
 ```
