@@ -19,18 +19,20 @@ SQLite + 管理 UI，编译进一个可自托管的 Go 可执行文件。无需 
 ## 安装
 
 ```sh
-curl -fsSL https://www.tiyisec.com/install.sh | bash && sudo /usr/local/bin/tiyi install --now
+curl -fsSL https://www.tiyisec.com/install.sh | bash && (sudo tiyi install --now || sudo /usr/local/bin/tiyi install --now)
 ```
 
-<sub>GitHub 镜像（同一脚本）：`curl -fsSL https://raw.githubusercontent.com/zzmzm/tiyi/main/install.sh | bash && sudo /usr/local/bin/tiyi install --now`</sub>
+<sub>GitHub 镜像（同一脚本）：`curl -fsSL https://raw.githubusercontent.com/zzmzm/tiyi/main/install.sh | bash && (sudo tiyi install --now || sudo /usr/local/bin/tiyi install --now)`</sub>
 <br>
-<sub>中国大陆镜像：`curl -fsSL https://gitee.com/tiyisec/tiyi/raw/main/install.sh | TIYI_MIRROR=gitee bash && sudo /usr/local/bin/tiyi install --now`</sub>
+<sub>中国大陆镜像：`curl -fsSL https://gitee.com/tiyisec/tiyi/raw/main/install.sh | TIYI_MIRROR=gitee bash && (sudo tiyi install --now || sudo /usr/local/bin/tiyi install --now)`</sub>
 
 安装脚本会识别平台（Linux amd64/arm64）、下载最新的已签名发行版、校验其
 SHA-256（必需）并在本机 OpenSSL 支持 `pkeyutl -rawin` 时校验其 Ed25519 发布签名，然后把 `tiyi`
 安装到 `/usr/local/bin`。默认先尝试 GitHub，失败或过慢时回退到 Gitee
 Release 镜像；可用 `TIYI_MIRROR=github|gitee`、`TIYI_VERSION`、
-`TIYI_PREFIX`、`TIYI_REPO` 或 `TIYI_GITEE_REPO` 覆盖。
+`TIYI_PREFIX`、`TIYI_REPO` 或 `TIYI_GITEE_REPO` 覆盖。启动服务的命令默认先试
+`sudo tiyi`；在 CentOS/RHEL 上，如果 sudo 找不到 `/usr/local/bin`，回退命令会
+直接运行 `/usr/local/bin/tiyi`。安装脚本不会创建 symlink。
 
 安装器环境变量：
 
@@ -47,11 +49,11 @@ Release 镜像；可用 `TIYI_MIRROR=github|gitee`、`TIYI_VERSION`、
 
 ```sh
 # root / sudo —— 使用默认状态目录（/var/lib/tiyi）与 80/443 端口
-sudo /usr/local/bin/tiyi standalone
+sudo tiyi standalone || sudo /usr/local/bin/tiyi standalone
 
 # 普通用户（不用 sudo）—— 可写路径 + 高端口
 mkdir -p /tmp/waf
-/usr/local/bin/tiyi standalone \
+tiyi standalone \
   --state-db /tmp/waf/state.db \
   --caddy-admin-socket /tmp/waf/caddy.sock \
   --admin-socket /tmp/waf/admin.sock \
@@ -72,7 +74,7 @@ mkdir -p /tmp/waf
 ```sh
 mkdir -p /tmp/waf
 TIYI_AUTH_BOOTSTRAP_ADMIN_PASSWORD='admin123@xxxxxxm' \
-  /usr/local/bin/tiyi standalone \
+  tiyi standalone \
   --state-db /tmp/waf/state.db \
   --caddy-admin-socket /tmp/waf/caddy.sock \
   --admin-socket /tmp/waf/admin.sock \

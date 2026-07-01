@@ -68,7 +68,7 @@ openssl pkeyutl -verify -pubin -inkey release-key.pem -rawin \
 存放在 `/var/lib/tiyi` 并监听 80/443 端口，因此默认方式需要 root：
 
 ```sh
-sudo /usr/local/bin/tiyi standalone
+sudo tiyi standalone || sudo /usr/local/bin/tiyi standalone
 ```
 
 首次启动时，太一会自动创建 `admin` 账户，并向控制台打印一次性随机密码 —— 请在
@@ -88,7 +88,7 @@ sudo /usr/local/bin/tiyi standalone
 ```sh
 mkdir -p /tmp/waf
 TIYI_AUTH_BOOTSTRAP_ADMIN_PASSWORD='admin123@xxxxxxm' \
-  /usr/local/bin/tiyi standalone \
+  tiyi standalone \
   --addr 0.0.0.0:8080 \
   --state-db /tmp/waf/state.db \
   --caddy-admin-socket /tmp/waf/caddy.sock \

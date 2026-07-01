@@ -73,7 +73,7 @@ default Tiyi stores its state under `/var/lib/tiyi` and binds ports 80/443, so
 the default invocation needs root:
 
 ```sh
-sudo /usr/local/bin/tiyi standalone
+sudo tiyi standalone || sudo /usr/local/bin/tiyi standalone
 ```
 
 On first boot Tiyi auto-creates an `admin` account and prints a one-time random
@@ -95,7 +95,7 @@ no root is needed:
 ```sh
 mkdir -p /tmp/waf
 TIYI_AUTH_BOOTSTRAP_ADMIN_PASSWORD='admin123@xxxxxxm' \
-  /usr/local/bin/tiyi standalone \
+  tiyi standalone \
   --addr 0.0.0.0:8080 \
   --state-db /tmp/waf/state.db \
   --caddy-admin-socket /tmp/waf/caddy.sock \

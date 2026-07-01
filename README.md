@@ -20,19 +20,21 @@ download to blocking real attacks.
 ## Install
 
 ```sh
-curl -fsSL https://www.tiyisec.com/install.sh | bash && sudo /usr/local/bin/tiyi install --now
+curl -fsSL https://www.tiyisec.com/install.sh | bash && (sudo tiyi install --now || sudo /usr/local/bin/tiyi install --now)
 ```
 
-<sub>GitHub mirror (same script): `curl -fsSL https://raw.githubusercontent.com/zzmzm/tiyi/main/install.sh | bash && sudo /usr/local/bin/tiyi install --now`</sub>
+<sub>GitHub mirror (same script): `curl -fsSL https://raw.githubusercontent.com/zzmzm/tiyi/main/install.sh | bash && (sudo tiyi install --now || sudo /usr/local/bin/tiyi install --now)`</sub>
 <br>
-<sub>China mirror: `curl -fsSL https://gitee.com/tiyisec/tiyi/raw/main/install.sh | TIYI_MIRROR=gitee bash && sudo /usr/local/bin/tiyi install --now`</sub>
+<sub>China mirror: `curl -fsSL https://gitee.com/tiyisec/tiyi/raw/main/install.sh | TIYI_MIRROR=gitee bash && (sudo tiyi install --now || sudo /usr/local/bin/tiyi install --now)`</sub>
 
 The installer detects your platform (Linux amd64/arm64), downloads the latest
 signed release, verifies its SHA-256 (required) and — when local OpenSSL
 supports `pkeyutl -rawin` — its Ed25519 release signature, then installs `tiyi` to
 `/usr/local/bin`. By default it tries GitHub first and falls back to the Gitee
 release mirror; override with `TIYI_MIRROR=github|gitee`, `TIYI_VERSION`,
-`TIYI_PREFIX`, `TIYI_REPO`, or `TIYI_GITEE_REPO`.
+`TIYI_PREFIX`, `TIYI_REPO`, or `TIYI_GITEE_REPO`. The service-start command
+tries `sudo tiyi` first; on CentOS/RHEL, if sudo cannot find `/usr/local/bin`,
+the fallback runs `/usr/local/bin/tiyi` directly. No symlink is created.
 
 Installer environment variables:
 
@@ -50,11 +52,11 @@ matches your privileges:
 
 ```sh
 # Root / sudo — uses the default state dir (/var/lib/tiyi) and ports 80/443
-sudo /usr/local/bin/tiyi standalone
+sudo tiyi standalone || sudo /usr/local/bin/tiyi standalone
 
 # Normal user (no sudo) — writable paths and high ports
 mkdir -p /tmp/waf
-/usr/local/bin/tiyi standalone \
+tiyi standalone \
   --state-db /tmp/waf/state.db \
   --caddy-admin-socket /tmp/waf/caddy.sock \
   --admin-socket /tmp/waf/admin.sock \
@@ -76,7 +78,7 @@ option above. Tiyi uses it verbatim and prints no banner:
 ```sh
 mkdir -p /tmp/waf
 TIYI_AUTH_BOOTSTRAP_ADMIN_PASSWORD='admin123@xxxxxxm' \
-  /usr/local/bin/tiyi standalone \
+  tiyi standalone \
   --state-db /tmp/waf/state.db \
   --caddy-admin-socket /tmp/waf/caddy.sock \
   --admin-socket /tmp/waf/admin.sock \
