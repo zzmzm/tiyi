@@ -13,7 +13,7 @@ curl -fsSL https://www.tiyisec.com/install.sh | bash
 `https://raw.githubusercontent.com/zzmzm/tiyi/main/install.sh`，中国大陆镜像在
 `https://gitee.com/tiyisec/tiyi/raw/main/install.sh`。
 安装二进制后,脚本会用彩色提示检查 sudo PATH 以及 80/443/8080 端口监听者。
-后续版本也会把同样的检查暴露为 `tiyi doctor`。
+安装后的二进制也通过 `tiyi doctor` 提供同样检查。
 
 默认安装器先尝试 GitHub，失败或过慢时回退到 Gitee Release 镜像。必要时可强制
 使用 Gitee：
@@ -25,7 +25,7 @@ curl -fsSL https://gitee.com/tiyisec/tiyi/raw/main/install.sh | TIYI_MIRROR=gite
 指定版本或更改安装目录：
 
 ```sh
-TIYI_VERSION=v3.0.3 TIYI_PREFIX="$HOME/.local/bin" \
+TIYI_VERSION=v3.0.4 TIYI_PREFIX="$HOME/.local/bin" \
   bash -c "$(curl -fsSL https://www.tiyisec.com/install.sh)"
 ```
 
@@ -36,7 +36,7 @@ TIYI_VERSION=v3.0.3 TIYI_PREFIX="$HOME/.local/bin" \
 | `TIYI_MIRROR` | `auto` | 下载来源：`auto`（GitHub 优先，Gitee 回退）、`github` 或 `gitee`。 |
 | `TIYI_REPO` | `zzmzm/tiyi` | 安装器使用的 GitHub `owner/name`。 |
 | `TIYI_GITEE_REPO` | `tiyisec/tiyi` | 安装器使用的 Gitee `owner/name`。 |
-| `TIYI_VERSION` | 最新稳定版 | 固定发行标签，例如 `v3.0.3`。 |
+| `TIYI_VERSION` | 最新稳定版 | 固定发行标签，例如 `v3.0.4`。 |
 | `TIYI_PREFIX` | `/usr/local/bin` | `tiyi` 二进制安装目录。 |
 
 ## 2. 手动校验下载（可选）

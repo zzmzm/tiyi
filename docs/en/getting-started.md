@@ -15,8 +15,8 @@ script is mirrored at
 `https://raw.githubusercontent.com/zzmzm/tiyi/main/install.sh`, with a China
 mirror at `https://gitee.com/tiyisec/tiyi/raw/main/install.sh`.
 After installing the binary, the script runs a colored environment check for
-sudo PATH and listeners on ports 80/443/8080. Later releases also expose the
-same checks as `tiyi doctor`.
+sudo PATH and listeners on ports 80/443/8080. The installed binary also exposes
+the same checks as `tiyi doctor`.
 
 By default the installer tries GitHub first and falls back to the Gitee release
 mirror. Force Gitee when needed:
@@ -28,7 +28,7 @@ curl -fsSL https://gitee.com/tiyisec/tiyi/raw/main/install.sh | TIYI_MIRROR=gite
 Pin a version or change the install prefix:
 
 ```sh
-TIYI_VERSION=v3.0.3 TIYI_PREFIX="$HOME/.local/bin" \
+TIYI_VERSION=v3.0.4 TIYI_PREFIX="$HOME/.local/bin" \
   bash -c "$(curl -fsSL https://www.tiyisec.com/install.sh)"
 ```
 
@@ -39,7 +39,7 @@ Installer environment variables:
 | `TIYI_MIRROR` | `auto` | Download source: `auto` (GitHub primary, Gitee fallback), `github`, or `gitee`. |
 | `TIYI_REPO` | `zzmzm/tiyi` | GitHub `owner/name` used by the installer. |
 | `TIYI_GITEE_REPO` | `tiyisec/tiyi` | Gitee `owner/name` used by the installer. |
-| `TIYI_VERSION` | latest stable | Pin a release tag, for example `v3.0.3`. |
+| `TIYI_VERSION` | latest stable | Pin a release tag, for example `v3.0.4`. |
 | `TIYI_PREFIX` | `/usr/local/bin` | Install directory for the `tiyi` binary. |
 
 ## 2. Verify a download manually (optional)

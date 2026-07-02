@@ -43,7 +43,7 @@ Release 镜像；可用 `TIYI_MIRROR=github|gitee`、`TIYI_VERSION`、
 | `TIYI_MIRROR` | `auto` | 下载来源：`auto`（GitHub 优先，Gitee 回退）、`github` 或 `gitee`。 |
 | `TIYI_REPO` | `zzmzm/tiyi` | 安装器使用的 GitHub `owner/name`。 |
 | `TIYI_GITEE_REPO` | `tiyisec/tiyi` | 安装器使用的 Gitee `owner/name`。 |
-| `TIYI_VERSION` | 最新稳定版 | 固定发行标签，例如 `v3.0.3`。 |
+| `TIYI_VERSION` | 最新稳定版 | 固定发行标签，例如 `v3.0.4`。 |
 | `TIYI_PREFIX` | `/usr/local/bin` | `tiyi` 二进制安装目录。 |
 
 上面的一行命令会安装二进制并启动推荐的 systemd 服务。若要改为前台手动运行，

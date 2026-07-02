@@ -46,7 +46,7 @@ Installer environment variables:
 | `TIYI_MIRROR` | `auto` | Download source: `auto` (GitHub primary, Gitee fallback), `github`, or `gitee`. |
 | `TIYI_REPO` | `zzmzm/tiyi` | GitHub `owner/name` used by the installer. |
 | `TIYI_GITEE_REPO` | `tiyisec/tiyi` | Gitee `owner/name` used by the installer. |
-| `TIYI_VERSION` | latest stable | Pin a release tag, for example `v3.0.3`. |
+| `TIYI_VERSION` | latest stable | Pin a release tag, for example `v3.0.4`. |
 | `TIYI_PREFIX` | `/usr/local/bin` | Install directory for the `tiyi` binary. |
 
 The one-line command above installs the binary and starts the recommended
