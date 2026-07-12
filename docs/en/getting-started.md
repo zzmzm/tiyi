@@ -28,7 +28,7 @@ curl -fsSL https://gitee.com/tiyisec/tiyi/raw/main/install.sh | TIYI_MIRROR=gite
 Pin a version or change the install prefix:
 
 ```sh
-TIYI_VERSION=v3.0.8 TIYI_PREFIX="$HOME/.local/bin" \
+TIYI_VERSION=v3.1.0 TIYI_PREFIX="$HOME/.local/bin" \
   bash -c "$(curl -fsSL https://www.tiyisec.com/install.sh)"
 ```
 
@@ -39,7 +39,7 @@ Installer environment variables:
 | `TIYI_MIRROR` | `auto` | Download source: `auto` (GitHub primary, Gitee fallback), `github`, or `gitee`. |
 | `TIYI_REPO` | `zzmzm/tiyi` | GitHub `owner/name` used by the installer. |
 | `TIYI_GITEE_REPO` | `tiyisec/tiyi` | Gitee `owner/name` used by the installer. |
-| `TIYI_VERSION` | latest stable | Pin a release tag, for example `v3.0.8`. |
+| `TIYI_VERSION` | latest stable | Pin a release tag, for example `v3.1.0`. |
 | `TIYI_PREFIX` | `/usr/local/bin` | Install directory for the `tiyi` binary. |
 
 ## 2. Verify a download manually (optional)
@@ -81,9 +81,13 @@ sudo tiyi standalone
 
 On first boot Tiyi auto-creates an `admin` account and prints a one-time random
 password to the console — copy it before it scrolls away (it is stored only as a
-hash). Open `http://127.0.0.1:8080`, sign in as `admin`, and add your first
-site. For the full operator flow (config file, admin socket, sites, upstreams,
-certificates, WAF policies), see <https://www.tiyisec.com/docs/>.
+hash). Open `http://127.0.0.1:8080` and sign in as `admin`; the console lands
+at **Operations → Overview**. Its stable work areas are Operations,
+Application Delivery, Protection, Fleet, Events & Logs, Detection & Response,
+and Administration. Permission filtering hides empty groups without changing
+deep links. Add your first site under **Application Delivery → Sites**. For the
+full operator flow (config file, admin socket, sites, upstreams, certificates,
+WAF policies), see <https://www.tiyisec.com/docs/>.
 
 To run as a normal user without `sudo`, point Tiyi at writable paths and high
 ports — the advanced command below does exactly that.
