@@ -59,11 +59,13 @@ First-run rules:
 Common smoke path:
 
 ```sh
-./bin/tiyi upstream create --name demo-backend --target http://127.0.0.1:9000
-./bin/tiyi site create --name demo --hostname demo.local --upstream demo-backend --policy "Built-in Standard" --tls none
-./bin/tiyi site enable demo
+python3 -m http.server 9000
+./bin/tiyi site create --name demo --host demo.local --upstream-url http://127.0.0.1:9000 --tls none
 curl -H 'Host: demo.local' 'http://127.0.0.1:8180/?id=1%27%20OR%20%271%27=%271'
 ```
+
+New sites are active immediately. The one-step create path makes the upstream
+pool and uses the built-in Standard policy.
 
 ## Modes
 
@@ -90,6 +92,10 @@ tiyi agent --api http://primary:8080 --enrollment-token "$TOKEN" --state-dir /va
 
 ## Troubleshooting
 
+- v3.2 development/test cutover: pre-v3.2 state databases, agent identity
+  markers, and cached bundles are rejected by design. Preserve source
+  manifests/secrets as needed, reset the old test state, and re-enroll agents;
+  do not copy the legacy database forward.
 - No dashboard login: check whether users exist. For `standalone`, inspect the first-run password banner or reset over the local admin socket. For `server`, intentionally create credentials with `TIYI_AUTH_BOOTSTRAP_ADMIN_PASSWORD` or `tiyi admin init`.
 - CLI cannot connect locally: verify the admin socket path, mode, group, and that the command is run as a user with access to the socket.
 - Proxy ports fail to bind: use unprivileged `--proxy-http-addr` / `--proxy-https-addr` for local QA, or grant `CAP_NET_BIND_SERVICE` under systemd for ports 80/443.

@@ -28,7 +28,7 @@ curl -fsSL https://gitee.com/tiyisec/tiyi/raw/main/install.sh | TIYI_MIRROR=gite
 Pin a version or change the install prefix:
 
 ```sh
-TIYI_VERSION=v3.1.0 TIYI_PREFIX="$HOME/.local/bin" \
+TIYI_VERSION=v3.2.0 TIYI_PREFIX="$HOME/.local/bin" \
   bash -c "$(curl -fsSL https://www.tiyisec.com/install.sh)"
 ```
 
@@ -39,7 +39,7 @@ Installer environment variables:
 | `TIYI_MIRROR` | `auto` | Download source: `auto` (GitHub primary, Gitee fallback), `github`, or `gitee`. |
 | `TIYI_REPO` | `zzmzm/tiyi` | GitHub `owner/name` used by the installer. |
 | `TIYI_GITEE_REPO` | `tiyisec/tiyi` | Gitee `owner/name` used by the installer. |
-| `TIYI_VERSION` | latest stable | Pin a release tag, for example `v3.1.0`. |
+| `TIYI_VERSION` | latest stable | Pin a release tag, for example `v3.2.0`. |
 | `TIYI_PREFIX` | `/usr/local/bin` | Install directory for the `tiyi` binary. |
 
 ## 2. Verify a download manually (optional)
@@ -71,6 +71,9 @@ base64.
 
 ## 3. Run
 
+> Moving an older development/test instance to v3.2 requires a clean state and
+> agent re-enrollment. Read the [v3.2 reset guide](upgrade-v3.2.md) first.
+
 A single-host install runs the server, agent, and dashboard in one process. By
 default Tiyi stores its state under `/var/lib/tiyi` and binds ports 80/443, so
 the default invocation needs root:
@@ -87,7 +90,8 @@ Application Delivery, Protection, Fleet, Events & Logs, Detection & Response,
 and Administration. Permission filtering hides empty groups without changing
 deep links. Add your first site under **Application Delivery → Sites**. For the
 full operator flow (config file, admin socket, sites, upstreams, certificates,
-WAF policies), see <https://www.tiyisec.com/docs/>.
+WAF policies), continue with the [operations guide](operations.md). For errors,
+use [troubleshooting](troubleshooting.md).
 
 To run as a normal user without `sudo`, point Tiyi at writable paths and high
 ports — the advanced command below does exactly that.

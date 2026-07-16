@@ -46,7 +46,7 @@ Installer environment variables:
 | `TIYI_MIRROR` | `auto` | Download source: `auto` (GitHub primary, Gitee fallback), `github`, or `gitee`. |
 | `TIYI_REPO` | `zzmzm/tiyi` | GitHub `owner/name` used by the installer. |
 | `TIYI_GITEE_REPO` | `tiyisec/tiyi` | Gitee `owner/name` used by the installer. |
-| `TIYI_VERSION` | latest stable | Pin a release tag, for example `v3.1.0`. |
+| `TIYI_VERSION` | latest stable | Pin a release tag, for example `v3.2.0`. |
 | `TIYI_PREFIX` | `/usr/local/bin` | Install directory for the `tiyi` binary. |
 
 The one-line command above installs the binary and starts the recommended
@@ -71,6 +71,11 @@ Tiyi prints a one-time `admin` password on first boot. Open the dashboard, sign
 in, and add your first site. Full walkthrough:
 [`docs/en/getting-started.md`](docs/en/getting-started.md) ·
 [中文](docs/zh/getting-started.md).
+
+> **v3.2 development/test cutover:** v3.2 intentionally rejects pre-v3.2
+> databases and agent identity/bundle state. There is no supported production
+> upgrade population yet; follow the [clean-state reset guide](docs/en/upgrade-v3.2.md)
+> instead of copying a v3.1 test database forward.
 
 ### Advanced: choose your own admin password
 
@@ -136,10 +141,11 @@ Everything below is included and runs locally with no license:
 - **Path-based routing** — fan one host out to many upstream pools by path
   prefix, each with its own health probe.
 - **Built-in observability** — a telemetry pipeline with Top-K, a per-site URL
-  tree, and a Prometheus exporter — no external time-series database.
+  tree, API Inventory, exact hot-path counters, retained findings, and a
+  Prometheus exporter — no external time-series database.
 - **Security incidents, not a firehose** — related events fold into actionable
-  incidents with a tracked lifecycle and optional, default-off automated
-  response.
+  incidents and persistent attack campaigns with evidence timelines, MITRE
+  projections, a tracked lifecycle, and optional default-off advisory AI.
 - **Tamper-evident audit chain**, **SIEM egress** (RFC 5424 / CEF / LEEF),
   **alert lifecycle** with Webhook / Slack / PagerDuty / Feishu / WeCom,
   **RBAC + OIDC**, and an optional, default-off **AI Copilot** that stays
@@ -201,8 +207,12 @@ Update environment variables:
 
 ## Documentation
 
-- English: [`docs/en/getting-started.md`](docs/en/getting-started.md)
-- 中文: [`docs/zh/getting-started.md`](docs/zh/getting-started.md)
+- English hub: [`docs/en/README.md`](docs/en/README.md)
+- 中文文档中心: [`docs/zh/README.md`](docs/zh/README.md)
+- First run: [getting started](docs/en/getting-started.md) · [快速开始](docs/zh/getting-started.md)
+- Daily work: [operations](docs/en/operations.md) · [日常运维](docs/zh/operations.md)
+- Problems: [troubleshooting](docs/en/troubleshooting.md) · [排障](docs/zh/troubleshooting.md)
+- v3.2 cutover: [state reset](docs/en/upgrade-v3.2.md) · [状态重置](docs/zh/upgrade-v3.2.md)
 - Website & full docs: <https://www.tiyisec.com>
 
 ## Codex skill

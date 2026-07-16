@@ -25,7 +25,7 @@ curl -fsSL https://gitee.com/tiyisec/tiyi/raw/main/install.sh | TIYI_MIRROR=gite
 指定版本或更改安装目录：
 
 ```sh
-TIYI_VERSION=v3.1.0 TIYI_PREFIX="$HOME/.local/bin" \
+TIYI_VERSION=v3.2.0 TIYI_PREFIX="$HOME/.local/bin" \
   bash -c "$(curl -fsSL https://www.tiyisec.com/install.sh)"
 ```
 
@@ -36,7 +36,7 @@ TIYI_VERSION=v3.1.0 TIYI_PREFIX="$HOME/.local/bin" \
 | `TIYI_MIRROR` | `auto` | 下载来源：`auto`（GitHub 优先，Gitee 回退）、`github` 或 `gitee`。 |
 | `TIYI_REPO` | `zzmzm/tiyi` | 安装器使用的 GitHub `owner/name`。 |
 | `TIYI_GITEE_REPO` | `tiyisec/tiyi` | 安装器使用的 Gitee `owner/name`。 |
-| `TIYI_VERSION` | 最新稳定版 | 固定发行标签，例如 `v3.1.0`。 |
+| `TIYI_VERSION` | 最新稳定版 | 固定发行标签，例如 `v3.2.0`。 |
 | `TIYI_PREFIX` | `/usr/local/bin` | `tiyi` 二进制安装目录。 |
 
 ## 2. 手动校验下载（可选）
@@ -66,6 +66,9 @@ openssl pkeyutl -verify -pubin -inkey release-key.pem -rawin \
 
 ## 3. 运行
 
+> 把旧开发/测试环境切换到 v3.2 前，必须使用干净状态并重新注册 Agent。请先阅读
+> [v3.2 重置指南](upgrade-v3.2.md)。
+
 单机安装会在一个进程中同时运行服务端、agent 和仪表盘。默认情况下太一把状态
 存放在 `/var/lib/tiyi` 并监听 80/443 端口，因此默认方式需要 root：
 
@@ -78,8 +81,8 @@ sudo tiyi standalone
 `admin` 登录后会进入**运行态势 → 总览**。稳定工作域为运行态势、应用交付、
 防护策略、节点集群、事件与日志、检测与响应、系统管理；权限过滤会隐藏空分组，
 但不会改变深链地址。前往**应用交付 → 站点**添加第一个站点。完整的运维流程
-（配置文件、管理套接字、站点、上游、证书、WAF 策略）见
-<https://www.tiyisec.com/zh/docs/>。
+（配置文件、管理套接字、站点、上游、证书、WAF 策略）请继续阅读
+[日常运维](operations.md)；遇到错误请查看[排障](troubleshooting.md)。
 
 若要以普通用户身份（不用 `sudo`）运行，把太一指向可写路径并使用高端口 ——
 下面的进阶命令正是这么做的。

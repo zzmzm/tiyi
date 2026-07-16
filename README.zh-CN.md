@@ -43,7 +43,7 @@ Release 镜像；可用 `TIYI_MIRROR=github|gitee`、`TIYI_VERSION`、
 | `TIYI_MIRROR` | `auto` | 下载来源：`auto`（GitHub 优先，Gitee 回退）、`github` 或 `gitee`。 |
 | `TIYI_REPO` | `zzmzm/tiyi` | 安装器使用的 GitHub `owner/name`。 |
 | `TIYI_GITEE_REPO` | `tiyisec/tiyi` | 安装器使用的 Gitee `owner/name`。 |
-| `TIYI_VERSION` | 最新稳定版 | 固定发行标签，例如 `v3.1.0`。 |
+| `TIYI_VERSION` | 最新稳定版 | 固定发行标签，例如 `v3.2.0`。 |
 | `TIYI_PREFIX` | `/usr/local/bin` | `tiyi` 二进制安装目录。 |
 
 上面的一行命令会安装二进制并启动推荐的 systemd 服务。若要改为前台手动运行，
@@ -66,6 +66,10 @@ tiyi standalone \
 首次启动时会打印一次性的 `admin` 密码。打开仪表盘登录，并添加第一个站点。完整
 教程：[`docs/zh/getting-started.md`](docs/zh/getting-started.md) ·
 [English](docs/en/getting-started.md)。
+
+> **v3.2 开发/测试切换：** v3.2 会明确拒绝 pre-v3.2 数据库以及旧 Agent
+> 身份/bundle 状态。目前没有需要兼容的正式用户升级群体；不要复制 v3.1 测试
+> 数据库，请按[干净状态重置指南](docs/zh/upgrade-v3.2.md)操作。
 
 ### 进阶：自定义管理员密码
 
@@ -125,10 +129,11 @@ TIYI_AUTH_BOOTSTRAP_ADMIN_PASSWORD='admin123@xxxxxxm' \
 - **反向代理 + 自动 TLS** —— 底层是 Caddy：ACME HTTP-01 与 DNS-01（Cloudflare）、
   通配符证书与上传的企业证书。
 - **路径路由** —— 把一个主机按路径前缀分发到多个上游池，每个都有独立健康探测。
-- **内置可观测性** —— 带 Top-K 的遥测流水线、按站点的 URL 树，以及 Prometheus
-  导出器 —— 无需外部时序数据库。
+- **内置可观测性** —— 带 Top-K 的遥测流水线、按站点的 URL 树、API Inventory、
+  数据面精确计数与保留 Finding，以及 Prometheus 导出器 —— 无需外部时序数据库。
 - **是安全事件，而不是告警洪流** —— 相关事件聚合成可操作的 incident，带完整生命
-  周期与可选的、默认关闭的自动响应。
+  周期；持久化 Attack Campaign 提供证据时间线与 MITRE 投影，可选 AI 默认关闭且
+  仅提供建议。
 - **防篡改审计链**、**SIEM 转发**（RFC 5424 / CEF / LEEF）、带 Webhook / Slack /
   PagerDuty / 飞书 / 企业微信的**告警生命周期**、**RBAC + OIDC**，以及一个可选的、
   默认关闭、始终只做顾问、绝不进入请求路径的 **AI Copilot**。
@@ -184,8 +189,12 @@ tiyi update --yes --mirror gitee
 
 ## 文档
 
-- 中文：[`docs/zh/getting-started.md`](docs/zh/getting-started.md)
-- English：[`docs/en/getting-started.md`](docs/en/getting-started.md)
+- 中文文档中心：[`docs/zh/README.md`](docs/zh/README.md)
+- English hub：[`docs/en/README.md`](docs/en/README.md)
+- 首次运行：[快速开始](docs/zh/getting-started.md) · [getting started](docs/en/getting-started.md)
+- 日常工作：[日常运维](docs/zh/operations.md) · [operations](docs/en/operations.md)
+- 遇到问题：[排障](docs/zh/troubleshooting.md) · [troubleshooting](docs/en/troubleshooting.md)
+- v3.2 切换：[状态重置](docs/zh/upgrade-v3.2.md) · [state reset](docs/en/upgrade-v3.2.md)
 - 官网与完整文档：<https://www.tiyisec.com>
 
 ## Codex skill
