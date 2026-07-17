@@ -76,11 +76,22 @@ per-rule pass.
 
 ## 5. Operate agents
 
-Issue short-lived enrollment tokens, install the generated command on the
-target node, and verify online state plus applied revision:
+Install the signed binary from the public release channel on every target node,
+then issue a short-lived enrollment token and start the agent with that token.
+Verify online state and the applied revision after enrollment:
 
 ```sh
-tiyi agents issue-token --tag edge --ttl 1h
+# On the target node:
+curl -fsSL https://www.tiyisec.com/install.sh | bash
+
+# On the primary, issue a token; then copy its token value to the target node:
+tiyi agents issue-token --tag edge --ttl-seconds 3600
+
+# On the target node:
+sudo tiyi agent --api http://primary:8080 --enrollment-token <token> \
+  --state-dir /var/lib/tiyi/agent
+
+# Back on the primary:
 tiyi agents list
 ```
 
@@ -109,4 +120,3 @@ tiyi audit verify
 Keep `state.db`, the KEK, uploaded certificate sources, license file, and
 declarative manifests in the backup plan. Test restoration rather than only
 testing backup creation.
-

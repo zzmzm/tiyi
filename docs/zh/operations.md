@@ -67,11 +67,21 @@ pass 限制得更严格。
 
 ## 5. 运维 Agent
 
-签发短期注册 token，在目标节点运行生成的安装命令，并检查在线状态与已应用
-revision：
+每台目标节点都先从公开发行渠道安装签名二进制，再签发短期注册 token 并用它启动
+Agent。入网后检查在线状态与已应用 revision：
 
 ```sh
-tiyi agents issue-token --tag edge --ttl 1h
+# 在目标节点上：
+curl -fsSL https://www.tiyisec.com/install.sh | bash
+
+# 在主节点上签发 token，再把输出中的 token 值复制到目标节点：
+tiyi agents issue-token --tag edge --ttl-seconds 3600
+
+# 在目标节点上：
+sudo tiyi agent --api http://primary:8080 --enrollment-token <token> \
+  --state-dir /var/lib/tiyi/agent
+
+# 回到主节点：
 tiyi agents list
 ```
 
@@ -98,4 +108,3 @@ tiyi audit verify
 
 把 `state.db`、KEK、上传证书源文件、license 与声明式清单纳入备份。必须测试恢复，
 不能只测试“生成了备份”。
-
