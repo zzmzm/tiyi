@@ -46,7 +46,7 @@ Installer environment variables:
 | `TIYI_MIRROR` | `auto` | Download source: `auto` (GitHub primary, Gitee fallback), `github`, or `gitee`. |
 | `TIYI_REPO` | `zzmzm/tiyi` | GitHub `owner/name` used by the installer. |
 | `TIYI_GITEE_REPO` | `tiyisec/tiyi` | Gitee `owner/name` used by the installer. |
-| `TIYI_VERSION` | latest stable | Pin a release tag, for example `v3.2.0`. |
+| `TIYI_VERSION` | latest stable | Pin a release tag, for example `v3.3.1`. |
 | `TIYI_PREFIX` | `/usr/local/bin` | Install directory for the `tiyi` binary. |
 
 The one-line command above installs the binary and starts the recommended
@@ -140,13 +140,14 @@ Everything below is included and runs locally with no license:
   DNS-01 (Cloudflare), wildcard certs, and uploaded enterprise certs.
 - **Path-based routing** — fan one host out to many upstream pools by path
   prefix, each with its own health probe.
-- **Built-in observability** — a telemetry pipeline with Top-K, a per-site URL
-  tree, API Inventory, exact hot-path counters, retained findings, and a
-  Prometheus exporter — no external time-series database.
-- **Security incidents, not a firehose** — related events fold into actionable
-  incidents and persistent attack campaigns with evidence timelines, MITRE
-  projections, a tracked lifecycle, and optional default-off advisory AI.
-- **Tamper-evident audit chain**, **SIEM egress** (RFC 5424 / CEF / LEEF),
+- **Built-in observability** — exact counters, normalized URL/UA Top, a per-site
+  API Inventory, immutable SecurityFacts, optional bounded request-header/body
+  evidence, and a Prometheus exporter — no external time-series database.
+- **Direct investigation, not a firehose** — Security Events pivots immutable
+  facts by attacker/type/target, Attack Logs preserves request-level rule
+  evidence, and optional default-off AI remains advisory.
+- **Tamper-evident audit chain**, producer-direct **SIEM egress** (native
+  Caddy/Coraza or RFC 5424 / CEF / LEEF / OCSF over UDP/TCP/TLS),
   **alert lifecycle** with Webhook / Slack / PagerDuty / Feishu / WeCom,
   **RBAC + OIDC**, and an optional, default-off **AI Copilot** that stays
   advisory and never sits in the request path.

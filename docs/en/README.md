@@ -19,13 +19,15 @@ the result. Use the path that matches the job in front of you.
 ```text
 client -> listener/TLS -> site + path route -> WAF policy -> upstream
                               |                    |
-                              +-> access facts     +-> findings/incidents
-                                                     -> campaigns/alerts/SIEM
+                              +-> exact counters   +-> immutable SecurityFacts
+                                                     -> optional evidence/alerts
+                                                     -> producer-direct SIEM
 ```
 
 Start investigations with a site, time range, and `X-Request-Id`. Tiyi keeps
-exact hot-path counters separate from retained evidence and export delivery, so
-an unavailable SIEM or a slow analytical worker cannot hold up proxy traffic.
+exact hot-path counters separate from immutable facts, optional retained
+evidence, and export delivery, so an unavailable SIEM or a slow storage worker
+cannot hold up proxy traffic.
 
 ## Supported operator interfaces
 
@@ -37,4 +39,3 @@ an unavailable SIEM or a slow analytical worker cannot hold up proxy traffic.
 
 Run `tiyi <command> --help` for the exact flags supported by your installed
 binary. If a reference and the binary disagree, the binary is authoritative.
-

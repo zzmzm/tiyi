@@ -25,7 +25,7 @@ curl -fsSL https://gitee.com/tiyisec/tiyi/raw/main/install.sh | TIYI_MIRROR=gite
 指定版本或更改安装目录：
 
 ```sh
-TIYI_VERSION=v3.2.0 TIYI_PREFIX="$HOME/.local/bin" \
+TIYI_VERSION=v3.3.1 TIYI_PREFIX="$HOME/.local/bin" \
   bash -c "$(curl -fsSL https://www.tiyisec.com/install.sh)"
 ```
 
@@ -36,7 +36,7 @@ TIYI_VERSION=v3.2.0 TIYI_PREFIX="$HOME/.local/bin" \
 | `TIYI_MIRROR` | `auto` | 下载来源：`auto`（GitHub 优先，Gitee 回退）、`github` 或 `gitee`。 |
 | `TIYI_REPO` | `zzmzm/tiyi` | 安装器使用的 GitHub `owner/name`。 |
 | `TIYI_GITEE_REPO` | `tiyisec/tiyi` | 安装器使用的 Gitee `owner/name`。 |
-| `TIYI_VERSION` | 最新稳定版 | 固定发行标签，例如 `v3.2.0`。 |
+| `TIYI_VERSION` | 最新稳定版 | 固定发行标签，例如 `v3.3.1`。 |
 | `TIYI_PREFIX` | `/usr/local/bin` | `tiyi` 二进制安装目录。 |
 
 ## 2. 手动校验下载（可选）
@@ -78,8 +78,8 @@ sudo tiyi standalone
 
 首次启动时，太一会自动创建 `admin` 账户，并向控制台打印一次性随机密码 —— 请在
 它滚走之前复制下来（它仅以哈希形式存储）。打开 `http://127.0.0.1:8080`，用
-`admin` 登录后会进入**运行态势 → 总览**。稳定工作域为运行态势、应用交付、
-防护策略、节点集群、事件与日志、检测与响应、系统管理；权限过滤会隐藏空分组，
+`admin` 登录后会进入**总览**。稳定工作域为总览、应用交付、防护策略、节点集群、
+安全与流量、告警与通知、系统监控、系统管理；权限过滤会隐藏空分组，
 但不会改变深链地址。前往**应用交付 → 站点**添加第一个站点。完整的运维流程
 （配置文件、管理套接字、站点、上游、证书、WAF 策略）请继续阅读
 [日常运维](operations.md)；遇到错误请查看[排障](troubleshooting.md)。

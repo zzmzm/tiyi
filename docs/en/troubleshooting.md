@@ -77,10 +77,12 @@ bundle.
 
 ## Counters exist but evidence or SIEM is late
 
-Open **Monitoring → Log Pipeline** and inspect queue depth, drops, retries, and
-panic counters. Exact traffic counters, retained evidence, and detail/SIEM
-delivery are independent. Test the destination from the Tiyi host and fix the
-consumer without restarting a healthy data plane unless diagnostics require it.
+Open **System Monitoring → Log Pipeline** and inspect queue depth, drops,
+retries, and panic counters. Request Evidence adds local/store/upload lanes;
+direct SIEM adds raw-source and per-destination lanes. Exact traffic counters,
+immutable SecurityFacts, retained evidence, and SIEM delivery are independent.
+Test the destination from the producing node and fix the consumer without
+restarting a healthy data plane unless diagnostics require it.
 
 ## Collect a safe support bundle
 
@@ -88,4 +90,3 @@ Include version, mode, sanitized config, unit definition, health output,
 `tiyi doctor`, recent relevant journals, site/upstream IDs, timestamp/timezone,
 and request ID. Remove JWTs, passwords, enrollment tokens, private keys, DNS
 credentials, cookies, and sensitive request bodies.
-

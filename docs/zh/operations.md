@@ -27,26 +27,38 @@ tiyi site list
 
 ## 2. 建立基线
 
-在 **Overview** 选择站点和时间范围，检查请求率、拦截率、状态码、延迟与 Top
-攻击源。通过 **Monitoring → Telemetry Explorer** 深入查看并使用 API Inventory。
+在**总览**选择站点和时间范围，检查请求率、拦截率、状态码、Top 攻击源、
+规范化 URL Top 与固定 UA 类别。通过**安全与流量 → API Inventory**查看发现资产。
 
-观测管道有三个彼此独立的真相平面：
+观测管道有四个彼此独立的真相平面：
 
 - 数据面精确流量与拦截计数；
-- 用于调查的紧凑保留证据（`SecurityFact` 与 `Finding`）；
-- 独立重试的明细/SIEM 投递。
+- 用于直接调查的不可变紧凑 `SecurityFact`；
+- 受独立策略、保留期与存储配额控制的可选明细和请求证据；
+- 每个目标一条有界队列的生产节点直达 SIEM。
 
-消费者落后时查看 **Monitoring → Log Pipeline**。SIEM 变慢不能改变精确计数，
+消费者落后时查看**系统监控 → 日志管道**。SIEM 变慢不能改变精确计数，
 也不能阻塞代理请求。
+
+### 请求证据与直达 SIEM
+
+请求证据默认关闭。在**系统管理 → 设置 → 全局日志与证据策略**配置全局策略，再从
+站点的**日志与证据**抽屉按需覆盖。`security_only` 为产生 SecurityFact 的请求保留
+证据；`retained_logs` 把证据附着到已保留的攻击/访问行。Cookie、Authorization、
+API key、个人数据与请求体按设计不脱敏，必须限制日志读取权限并使用短保留期。
+
+在**系统管理 → 设置 → SIEM**配置目标。每个目标独立选择源生 Caddy 访问 JSON、
+Coraza 审计 JSON 或太一格式事件，并通过 UDP/TCP/TLS 投递。队列满和网络错误只会
+丢弃该目标当前事件并增加其管道计数，绝不会拖慢 WAF 响应。
 
 ## 3. 调查告警
 
-1. 打开 **Detection & Response → Active Alerts**，跟随证据链接。
+1. 打开**告警与通知 → 告警中心**，跟随证据链接。
 2. 固定站点和时间范围，复制 `X-Request-Id`/唯一请求 ID。
-3. 把 Security Finding 与访问、错误证据关联起来。
-4. 查看 Incident 生命周期、来源/目标、Geo/ASN（仅供参考）与 MITRE 投影。
-5. 多个 Incident 形成更大来源/目标/TTP 模式时，检查持久化 Attack Campaign。
-6. 确认、分派、记录；只有在原因或安全缓解措施验证后才解决。
+3. 在**安全与流量 → 安全事件**按攻击者、攻击类型或目标分析不可变事实。
+4. 打开匹配的**攻击日志**，再按请求 ID 关联访问日志和运行时错误。
+5. 仅在获得授权且确有需要时加载请求证据；Geo/ASN 只能作为网络出口参考。
+6. 确认、记录；只有在原因或安全缓解措施验证后才解决。
 
 AI enrich 默认关闭、结构化且仅提供建议。未核对保留证据和编译后策略前，不要应用
 AI 建议。
@@ -92,8 +104,8 @@ tiyi agents list
 
 每天检查：
 
-- 健康、磁盘、证书到期、Agent 与日志管道积压；
-- firing 告警、开放 Incident、Campaign 变化与异常 API Inventory；
+- 健康、磁盘、证书到期、Agent 与证据/日志管道积压；
+- firing 告警、SecurityFact 趋势与异常 API Inventory；
 - SIEM/通知通道投递失败和审计链。
 
 变更前后：

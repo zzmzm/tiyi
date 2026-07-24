@@ -16,7 +16,7 @@
 #   TIYI_MIRROR      auto | github | gitee     (default: auto)
 #   TIYI_REPO        GitHub owner/name         (default: zzmzm/tiyi)
 #   TIYI_GITEE_REPO  Gitee owner/name          (default: tiyisec/tiyi)
-#   TIYI_VERSION     pin a tag, e.g. v3.3.0    (default: latest stable)
+#   TIYI_VERSION     pin a tag, e.g. v3.3.1    (default: latest stable)
 #   TIYI_PREFIX      install directory         (default: /usr/local/bin)
 set -euo pipefail
 

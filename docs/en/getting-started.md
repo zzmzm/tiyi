@@ -28,7 +28,7 @@ curl -fsSL https://gitee.com/tiyisec/tiyi/raw/main/install.sh | TIYI_MIRROR=gite
 Pin a version or change the install prefix:
 
 ```sh
-TIYI_VERSION=v3.2.0 TIYI_PREFIX="$HOME/.local/bin" \
+TIYI_VERSION=v3.3.1 TIYI_PREFIX="$HOME/.local/bin" \
   bash -c "$(curl -fsSL https://www.tiyisec.com/install.sh)"
 ```
 
@@ -39,7 +39,7 @@ Installer environment variables:
 | `TIYI_MIRROR` | `auto` | Download source: `auto` (GitHub primary, Gitee fallback), `github`, or `gitee`. |
 | `TIYI_REPO` | `zzmzm/tiyi` | GitHub `owner/name` used by the installer. |
 | `TIYI_GITEE_REPO` | `tiyisec/tiyi` | Gitee `owner/name` used by the installer. |
-| `TIYI_VERSION` | latest stable | Pin a release tag, for example `v3.2.0`. |
+| `TIYI_VERSION` | latest stable | Pin a release tag, for example `v3.3.1`. |
 | `TIYI_PREFIX` | `/usr/local/bin` | Install directory for the `tiyi` binary. |
 
 ## 2. Verify a download manually (optional)
@@ -85,10 +85,10 @@ sudo tiyi standalone
 On first boot Tiyi auto-creates an `admin` account and prints a one-time random
 password to the console — copy it before it scrolls away (it is stored only as a
 hash). Open `http://127.0.0.1:8080` and sign in as `admin`; the console lands
-at **Operations → Overview**. Its stable work areas are Operations,
-Application Delivery, Protection, Fleet, Events & Logs, Detection & Response,
-and Administration. Permission filtering hides empty groups without changing
-deep links. Add your first site under **Application Delivery → Sites**. For the
+at **Overview**. Its stable work areas are Overview, Application Delivery,
+Protection, Agent Fleet, Security & Traffic, Alerts & Notifications, System
+Monitoring, and System Administration. Permission filtering hides empty groups
+without changing deep links. Add your first site under **Application Delivery → Sites**. For the
 full operator flow (config file, admin socket, sites, upstreams, certificates,
 WAF policies), continue with the [operations guide](operations.md). For errors,
 use [troubleshooting](troubleshooting.md).

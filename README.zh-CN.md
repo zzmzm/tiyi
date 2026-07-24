@@ -43,7 +43,7 @@ Release 镜像；可用 `TIYI_MIRROR=github|gitee`、`TIYI_VERSION`、
 | `TIYI_MIRROR` | `auto` | 下载来源：`auto`（GitHub 优先，Gitee 回退）、`github` 或 `gitee`。 |
 | `TIYI_REPO` | `zzmzm/tiyi` | 安装器使用的 GitHub `owner/name`。 |
 | `TIYI_GITEE_REPO` | `tiyisec/tiyi` | 安装器使用的 Gitee `owner/name`。 |
-| `TIYI_VERSION` | 最新稳定版 | 固定发行标签，例如 `v3.2.0`。 |
+| `TIYI_VERSION` | 最新稳定版 | 固定发行标签，例如 `v3.3.1`。 |
 | `TIYI_PREFIX` | `/usr/local/bin` | `tiyi` 二进制安装目录。 |
 
 上面的一行命令会安装二进制并启动推荐的 systemd 服务。若要改为前台手动运行，
@@ -129,12 +129,13 @@ TIYI_AUTH_BOOTSTRAP_ADMIN_PASSWORD='admin123@xxxxxxm' \
 - **反向代理 + 自动 TLS** —— 底层是 Caddy：ACME HTTP-01 与 DNS-01（Cloudflare）、
   通配符证书与上传的企业证书。
 - **路径路由** —— 把一个主机按路径前缀分发到多个上游池，每个都有独立健康探测。
-- **内置可观测性** —— 带 Top-K 的遥测流水线、按站点的 URL 树、API Inventory、
-  数据面精确计数与保留 Finding，以及 Prometheus 导出器 —— 无需外部时序数据库。
-- **是安全事件，而不是告警洪流** —— 相关事件聚合成可操作的 incident，带完整生命
-  周期；持久化 Attack Campaign 提供证据时间线与 MITRE 投影，可选 AI 默认关闭且
-  仅提供建议。
-- **防篡改审计链**、**SIEM 转发**（RFC 5424 / CEF / LEEF）、带 Webhook / Slack /
+- **内置可观测性** —— 精确计数、规范化 URL/UA Top、按站点的 API Inventory、
+  不可变 SecurityFact、可选的有界请求头/请求体证据，以及 Prometheus 导出器 ——
+  无需外部时序数据库。
+- **直接调查，而不是告警洪流** —— 安全事件按攻击者/类型/目标分析不可变事实，
+  攻击日志保留请求级规则证据；可选 AI 默认关闭且始终只提供建议。
+- **防篡改审计链**、生产节点直达 **SIEM 转发**（源生 Caddy/Coraza 或
+  RFC 5424 / CEF / LEEF / OCSF，通过 UDP/TCP/TLS）、带 Webhook / Slack /
   PagerDuty / 飞书 / 企业微信的**告警生命周期**、**RBAC + OIDC**，以及一个可选的、
   默认关闭、始终只做顾问、绝不进入请求路径的 **AI Copilot**。
 - **一套 CLI、一套 API** —— 同一份 ConnectRPC schema 同时驱动 Web UI、`tiyi`

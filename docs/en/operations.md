@@ -32,28 +32,47 @@ each route after saving.
 ## 2. Establish a baseline
 
 Use **Overview** to select a site and time range, then check request rate,
-blocked rate, status classes, latency, and top attackers. Use **Monitoring →
-Telemetry Explorer** for a deeper breakdown and the API Inventory view.
+blocked rate, status classes, top attackers, normalized URL Top, and fixed UA
+classes. Use **Security & Traffic → API Inventory** for discovered assets.
 
-The observation pipeline has three independent truth planes:
+The observation pipeline has four independent truth planes:
 
 - exact hot-path traffic and block counters;
-- compact retained evidence (`SecurityFact` and `Finding`) for investigation;
-- independently retried detail/SIEM delivery.
+- immutable compact `SecurityFact` records for direct investigation;
+- optional retained detail and Request Evidence under independent policy,
+  retention, and storage quotas;
+- producer-direct SIEM delivery with one bounded queue per destination.
 
-Check **Monitoring → Log Pipeline** when a consumer falls behind. A slow SIEM
+Check **System Monitoring → Log Pipeline** when a consumer falls behind. A slow SIEM
 must not change exact counters or block proxy requests.
+
+### Request Evidence and direct SIEM
+
+Request Evidence is off by default. Configure the global policy under
+**System Administration → Settings → Global logging & evidence policy**, then
+optionally override a site from its **Logging & evidence** drawer.
+`security_only` retains evidence for requests that produced a SecurityFact;
+`retained_logs` attaches it to retained Attack/Access rows. Captured Cookie,
+Authorization, API keys, personal data, and bodies are intentionally
+unredacted. Restrict log-read access and use short retention.
+
+Configure destinations under **System Administration → Settings → SIEM**. Each
+target independently selects native Caddy access JSON, native Coraza audit
+JSON, or Tiyi-formatted events over UDP/TCP/TLS. Queue-full and network errors
+drop only that target's event and increment its pipeline lane; they never
+delay a WAF response.
 
 ## 3. Investigate an alert
 
-1. Open **Detection & Response → Active Alerts** and follow the evidence link.
+1. Open **Alerts & Notifications → Alert Center** and follow the evidence link.
 2. Pin the site and time range. Copy the `X-Request-Id` / unique request ID.
-3. Correlate the security finding with access and error evidence.
-4. Review the Incident lifecycle, source/target, Geo/ASN (advisory), and MITRE
-   projection.
-5. Review or triage the persistent Attack Campaign when several incidents form
-   a larger source/target/TTP pattern.
-6. Acknowledge, assign, add a note, then resolve only after the cause or safe
+3. Use **Security & Traffic → Security Events** to pivot immutable facts by
+   attacker, attack type, or target.
+4. Open the matching **Attack Logs** row, then correlate Access and Runtime
+   Error rows by request ID.
+5. Load Request Evidence only when authorized and needed; treat Geo/ASN as
+   advisory network-exit metadata.
+6. Acknowledge, add a note, then resolve only after the cause or safe
    mitigation is verified.
 
 AI enrichment is optional, default-off, structured, and advisory. Never apply
@@ -103,8 +122,8 @@ connected agent on an old revision as different failures.
 
 Daily:
 
-- health, disk space, certificate expiry, agents, and log-pipeline backlog;
-- firing alerts, open incidents, campaign changes, and unusual API inventory;
+- health, disk space, certificate expiry, agents, and evidence/pipeline backlog;
+- firing alerts, SecurityFact trends, and unusual API inventory;
 - failed SIEM/channel deliveries and audit-chain verification.
 
 Before and after a change:
