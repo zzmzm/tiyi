@@ -12,7 +12,7 @@
 请通过声明式清单或 Web UI 重新创建配置。删除旧测试状态前，保留仍需使用的源
 YAML、证书、license 文件与 KEK。
 
-## Standalone 或 Server
+## Controller
 
 ```sh
 sudo systemctl stop tiyi

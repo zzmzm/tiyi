@@ -48,7 +48,7 @@ must not change exact counters or block proxy requests.
 
 ### Request Evidence and direct SIEM
 
-Request Evidence is off by default. Configure the global policy under
+Fresh installations default Request Evidence to `security_only`. Configure the global policy under
 **System Administration → Settings → Global logging & evidence policy**, then
 optionally override a site from its **Logging & evidence** drawer.
 `security_only` retains evidence for requests that produced a SecurityFact;
@@ -95,24 +95,20 @@ per-rule pass.
 
 ## 5. Operate agents
 
-Install the signed binary from the public release channel on every target node,
-then issue a short-lived enrollment token and start the agent with that token.
-Verify online state and the applied revision after enrollment:
+In **Nodes → Install**, issue the one-use token and follow the separately shown
+download and systemd steps:
 
 ```sh
-# On the target node:
-curl -fsSL https://www.tiyisec.com/install.sh | bash
-
-# On the primary, issue a token; then copy its token value to the target node:
-tiyi agents issue-token --tag edge --ttl-seconds 3600
-
-# On the target node:
-sudo tiyi agent --api http://primary:8080 --enrollment-token <token> \
-  --state-dir /var/lib/tiyi/agent
-
-# Back on the primary:
-tiyi agents list
+sudo curl -fsSL -o /usr/local/bin/tiyi 'https://tiyi.example.com/download/tiyi'
+sudo chmod 0755 /usr/local/bin/tiyi
+sudo mkdir -p /etc/tiyi
+printf 'TIYI_CONTROLLER_URL=https://tiyi.example.com\nTIYI_AGENT_ENROLLMENT_TOKEN=<one-use-token>\n' | sudo tee /etc/tiyi/tiyi-agent.env >/dev/null
+sudo chmod 0600 /etc/tiyi/tiyi-agent.env
+sudo tiyi install --mode agent --unit-name tiyi-agent --now
 ```
+
+Verify online state and the applied revision in Nodes or with
+`tiyi agents list`.
 
 Use agent groups for stable targeting. Before a rollout, check the bundle diff;
 afterward check apply results and proxy health. Treat an offline agent and a

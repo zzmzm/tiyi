@@ -71,8 +71,8 @@ bundle.
 - Read both server and agent journals around the same timestamp.
 - Distinguish offline, rejected identity/protocol, signature failure, and apply
   failure.
-- v3.2 rejects pre-v3.2 agent identity/bundle state; follow the
-  [reset guide](upgrade-v3.2.md) and re-enroll.
+- v3.4.0 rejects databases below schema 47 plus older Agent identity/bundle
+  state; follow the [reset guide](upgrade-v3.4.md) and re-enroll.
 - Confirm the applied revision/hash after reconnect, not only online state.
 
 ## Counters exist but evidence or SIEM is late

@@ -16,7 +16,7 @@
 #   TIYI_MIRROR      auto | github | gitee     (default: auto)
 #   TIYI_REPO        GitHub owner/name         (default: zzmzm/tiyi)
 #   TIYI_GITEE_REPO  Gitee owner/name          (default: tiyisec/tiyi)
-#   TIYI_VERSION     pin a tag, e.g. v3.3.1    (default: latest stable)
+#   TIYI_VERSION     pin a tag, e.g. v3.4.0    (default: latest stable)
 #   TIYI_PREFIX      install directory         (default: /usr/local/bin)
 set -euo pipefail
 
@@ -30,6 +30,26 @@ PREFIX="${TIYI_PREFIX:-/usr/local/bin}"
 RELEASE_PUBKEY_B64="RIH4Xm2V8NjU4byn/xq+36xQG38dWQ9eQB39Bk+Aze4="
 
 err() { echo "error: $*" >&2; exit 1; }
+
+installer_usage() {
+	cat <<'EOF'
+Usage:
+  install.sh
+
+Installs or updates the Tiyi Controller binary. Remote Agents are installed
+from the step-by-step workflow under Nodes -> Install.
+EOF
+}
+
+if [ "$#" -gt 0 ]; then
+	case "$1" in
+	-h | --help)
+		installer_usage
+		exit 0
+		;;
+	*) err "unknown installer argument '$1'" ;;
+	esac
+fi
 
 case "$MIRROR" in
 	auto | github | gitee) ;;

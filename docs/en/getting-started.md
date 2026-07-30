@@ -28,7 +28,7 @@ curl -fsSL https://gitee.com/tiyisec/tiyi/raw/main/install.sh | TIYI_MIRROR=gite
 Pin a version or change the install prefix:
 
 ```sh
-TIYI_VERSION=v3.3.1 TIYI_PREFIX="$HOME/.local/bin" \
+TIYI_VERSION=v3.4.0 TIYI_PREFIX="$HOME/.local/bin" \
   bash -c "$(curl -fsSL https://www.tiyisec.com/install.sh)"
 ```
 
@@ -39,7 +39,7 @@ Installer environment variables:
 | `TIYI_MIRROR` | `auto` | Download source: `auto` (GitHub primary, Gitee fallback), `github`, or `gitee`. |
 | `TIYI_REPO` | `zzmzm/tiyi` | GitHub `owner/name` used by the installer. |
 | `TIYI_GITEE_REPO` | `tiyisec/tiyi` | Gitee `owner/name` used by the installer. |
-| `TIYI_VERSION` | latest stable | Pin a release tag, for example `v3.3.1`. |
+| `TIYI_VERSION` | latest stable | Pin a release tag, for example `v3.4.0`. |
 | `TIYI_PREFIX` | `/usr/local/bin` | Install directory for the `tiyi` binary. |
 
 ## 2. Verify a download manually (optional)
@@ -71,15 +71,16 @@ base64.
 
 ## 3. Run
 
-> Moving an older development/test instance to v3.2 requires a clean state and
-> agent re-enrollment. Read the [v3.2 reset guide](upgrade-v3.2.md) first.
+> Moving an older installation to v3.4.0 requires fresh state for databases
+> below schema 47 and Agent re-enrollment. Read the
+> [v3.4 reset guide](upgrade-v3.4.md) first.
 
-A single-host install runs the server, agent, and dashboard in one process. By
-default Tiyi stores its state under `/var/lib/tiyi` and binds ports 80/443, so
-the default invocation needs root:
+A single-host install runs the complete Tiyi instance with its built-in local
+data plane and dashboard in one process. By default Tiyi stores its state under
+`/var/lib/tiyi` and binds ports 80/443, so the default invocation needs root:
 
 ```sh
-sudo tiyi standalone
+sudo tiyi run
 ```
 
 On first boot Tiyi auto-creates an `admin` account and prints a one-time random
@@ -106,7 +107,7 @@ no root is needed:
 ```sh
 mkdir -p /tmp/waf
 TIYI_AUTH_BOOTSTRAP_ADMIN_PASSWORD='admin123@xxxxxxm' \
-  tiyi standalone \
+  tiyi run \
   --addr 0.0.0.0:8080 \
   --state-db /tmp/waf/state.db \
   --caddy-admin-socket /tmp/waf/caddy.sock \
@@ -125,9 +126,26 @@ tiyi user list
 tiyi user reset-password <user-id> --password <new-password>
 ```
 
+### Add a remote node
+
+In **Nodes → Install**, choose the URL, tags, and token TTL, then issue the
+token. Follow the separate binary download and systemd instructions:
+
+```sh
+sudo curl -fsSL -o /usr/local/bin/tiyi 'https://tiyi.example.com/download/tiyi'
+sudo chmod 0755 /usr/local/bin/tiyi
+sudo mkdir -p /etc/tiyi
+printf 'TIYI_CONTROLLER_URL=https://tiyi.example.com\nTIYI_AGENT_ENROLLMENT_TOKEN=<one-use-token>\n' | sudo tee /etc/tiyi/tiyi-agent.env >/dev/null
+sudo chmod 0600 /etc/tiyi/tiyi-agent.env
+sudo tiyi install --mode agent --unit-name tiyi-agent --now
+```
+
+The page also shows the raw token, foreground command, and complete
+download-and-start script.
+
 ## 4. Runtime config via environment (optional)
 
-Prefer `server.yaml` for persistent service configuration. Use environment
+Prefer `tiyi.yaml` for persistent service configuration. Use environment
 variables only when your service manager, container runtime, or secret manager
 injects config at runtime. Env names mirror config keys: prefix `TIYI_`,
 uppercase the key, and replace dots with underscores. For example,

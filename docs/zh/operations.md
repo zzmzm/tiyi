@@ -42,7 +42,7 @@ tiyi site list
 
 ### 请求证据与直达 SIEM
 
-请求证据默认关闭。在**系统管理 → 设置 → 全局日志与证据策略**配置全局策略，再从
+新安装的请求证据默认使用 `security_only`。在**系统管理 → 设置 → 全局日志与证据策略**配置全局策略，再从
 站点的**日志与证据**抽屉按需覆盖。`security_only` 为产生 SecurityFact 的请求保留
 证据；`retained_logs` 把证据附着到已保留的攻击/访问行。Cookie、Authorization、
 API key、个人数据与请求体按设计不脱敏，必须限制日志读取权限并使用短保留期。
@@ -79,23 +79,19 @@ pass 限制得更严格。
 
 ## 5. 运维 Agent
 
-每台目标节点都先从公开发行渠道安装签名二进制，再签发短期注册 token 并用它启动
-Agent。入网后检查在线状态与已应用 revision：
+在 **节点 → 安装远端节点** 中签发一次性 Token，再按页面分别显示的下载与
+systemd 步骤操作：
 
 ```sh
-# 在目标节点上：
-curl -fsSL https://www.tiyisec.com/install.sh | bash
-
-# 在主节点上签发 token，再把输出中的 token 值复制到目标节点：
-tiyi agents issue-token --tag edge --ttl-seconds 3600
-
-# 在目标节点上：
-sudo tiyi agent --api http://primary:8080 --enrollment-token <token> \
-  --state-dir /var/lib/tiyi/agent
-
-# 回到主节点：
-tiyi agents list
+sudo curl -fsSL -o /usr/local/bin/tiyi 'https://tiyi.example.com/download/tiyi'
+sudo chmod 0755 /usr/local/bin/tiyi
+sudo mkdir -p /etc/tiyi
+printf 'TIYI_CONTROLLER_URL=https://tiyi.example.com\nTIYI_AGENT_ENROLLMENT_TOKEN=<一次性Token>\n' | sudo tee /etc/tiyi/tiyi-agent.env >/dev/null
+sudo chmod 0600 /etc/tiyi/tiyi-agent.env
+sudo tiyi install --mode agent --unit-name tiyi-agent --now
 ```
+
+在节点页或用 `tiyi agents list` 检查在线状态与已应用 revision。
 
 使用 Agent Group 做稳定目标选择。发布前检查 bundle diff，发布后检查 apply 结果和
 代理健康。离线 Agent 与“在线但停留在旧 revision”是两种不同故障。

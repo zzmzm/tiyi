@@ -25,7 +25,7 @@ curl -fsSL https://gitee.com/tiyisec/tiyi/raw/main/install.sh | TIYI_MIRROR=gite
 指定版本或更改安装目录：
 
 ```sh
-TIYI_VERSION=v3.3.1 TIYI_PREFIX="$HOME/.local/bin" \
+TIYI_VERSION=v3.4.0 TIYI_PREFIX="$HOME/.local/bin" \
   bash -c "$(curl -fsSL https://www.tiyisec.com/install.sh)"
 ```
 
@@ -36,7 +36,7 @@ TIYI_VERSION=v3.3.1 TIYI_PREFIX="$HOME/.local/bin" \
 | `TIYI_MIRROR` | `auto` | 下载来源：`auto`（GitHub 优先，Gitee 回退）、`github` 或 `gitee`。 |
 | `TIYI_REPO` | `zzmzm/tiyi` | 安装器使用的 GitHub `owner/name`。 |
 | `TIYI_GITEE_REPO` | `tiyisec/tiyi` | 安装器使用的 Gitee `owner/name`。 |
-| `TIYI_VERSION` | 最新稳定版 | 固定发行标签，例如 `v3.3.1`。 |
+| `TIYI_VERSION` | 最新稳定版 | 固定发行标签，例如 `v3.4.0`。 |
 | `TIYI_PREFIX` | `/usr/local/bin` | `tiyi` 二进制安装目录。 |
 
 ## 2. 手动校验下载（可选）
@@ -66,19 +66,19 @@ openssl pkeyutl -verify -pubin -inkey release-key.pem -rawin \
 
 ## 3. 运行
 
-> 把旧开发/测试环境切换到 v3.2 前，必须使用干净状态并重新注册 Agent。请先阅读
-> [v3.2 重置指南](upgrade-v3.2.md)。
+> 把旧安装切换到 v3.4.0 时，schema 低于 47 的数据库必须使用新状态，并重新注册
+> Agent。请先阅读 [v3.4 重置指南](upgrade-v3.4.md)。
 
-单机安装会在一个进程中同时运行服务端、agent 和仪表盘。默认情况下太一把状态
-存放在 `/var/lib/tiyi` 并监听 80/443 端口，因此默认方式需要 root：
+单机安装会在一个进程中运行完整太一、本机内置数据平面和管理界面。默认情况下太一
+把状态存放在 `/var/lib/tiyi` 并监听 80/443 端口，因此默认方式需要 root：
 
 ```sh
-sudo tiyi standalone
+sudo tiyi run
 ```
 
 首次启动时，太一会自动创建 `admin` 账户，并向控制台打印一次性随机密码 —— 请在
 它滚走之前复制下来（它仅以哈希形式存储）。打开 `http://127.0.0.1:8080`，用
-`admin` 登录后会进入**总览**。稳定工作域为总览、应用交付、防护策略、节点集群、
+`admin` 登录后会进入**总览**。稳定工作域为总览、应用交付、防护策略、节点、
 安全与流量、告警与通知、系统监控、系统管理；权限过滤会隐藏空分组，
 但不会改变深链地址。前往**应用交付 → 站点**添加第一个站点。完整的运维流程
 （配置文件、管理套接字、站点、上游、证书、WAF 策略）请继续阅读
@@ -96,7 +96,7 @@ sudo tiyi standalone
 ```sh
 mkdir -p /tmp/waf
 TIYI_AUTH_BOOTSTRAP_ADMIN_PASSWORD='admin123@xxxxxxm' \
-  tiyi standalone \
+  tiyi run \
   --addr 0.0.0.0:8080 \
   --state-db /tmp/waf/state.db \
   --caddy-admin-socket /tmp/waf/caddy.sock \
@@ -114,9 +114,25 @@ tiyi user list
 tiyi user reset-password <user-id> --password <new-password>
 ```
 
+### 添加远端节点
+
+在 **节点 → 安装远端节点** 中选择 URL、标签和 Token 有效期，再签发 Token。
+然后按页面分别显示的二进制下载与 systemd 步骤操作：
+
+```sh
+sudo curl -fsSL -o /usr/local/bin/tiyi 'https://tiyi.example.com/download/tiyi'
+sudo chmod 0755 /usr/local/bin/tiyi
+sudo mkdir -p /etc/tiyi
+printf 'TIYI_CONTROLLER_URL=https://tiyi.example.com\nTIYI_AGENT_ENROLLMENT_TOKEN=<一次性Token>\n' | sudo tee /etc/tiyi/tiyi-agent.env >/dev/null
+sudo chmod 0600 /etc/tiyi/tiyi-agent.env
+sudo tiyi install --mode agent --unit-name tiyi-agent --now
+```
+
+页面还会显示原始 Token、前台命令和完整下载启动脚本。
+
 ## 4. 通过环境变量配置运行时（可选）
 
-持久化服务配置优先写入 `server.yaml`。只有当 service manager、容器运行时或
+持久化服务配置优先写入 `tiyi.yaml`。只有当 service manager、容器运行时或
 密钥管理器需要在运行时注入配置时，才使用环境变量。环境变量名与配置键一一对应：
 加 `TIYI_` 前缀，转为大写，并把点替换为下划线。例如 `auth.jwt_secret`
 对应 `TIYI_AUTH_JWT_SECRET`。

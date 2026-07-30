@@ -14,7 +14,7 @@ Configuration should be recreated from declarative manifests or the Web UI.
 Keep any source YAML, certificates, license file, and KEK that you need before
 removing the old test state.
 
-## Standalone or server
+## Controller
 
 ```sh
 sudo systemctl stop tiyi

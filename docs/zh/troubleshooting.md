@@ -64,7 +64,8 @@ DNS-01 要求受支持 provider 与正确范围凭据。不要把 provider 密�
 - 对比 Server URL、注册 token 有效期、时钟、DNS 与网络路径。
 - 在同一时间点读取 Server 与 Agent journal。
 - 区分离线、身份/协议拒绝、签名失败与 apply 失败。
-- v3.2 拒绝 pre-v3.2 Agent 身份/bundle 状态；按[重置指南](upgrade-v3.2.md)重新注册。
+- v3.4.0 拒绝 schema 低于 47 的数据库和旧 Agent 身份/bundle 状态；按
+  [重置指南](upgrade-v3.4.md)重新注册。
 - 重连后确认 applied revision/hash，不能只看 online。
 
 ## 有计数但证据或 SIEM 延迟

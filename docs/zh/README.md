@@ -10,7 +10,7 @@
 | 安装单节点并验证一次真实拦截 | [快速开始](getting-started.md) |
 | 发布站点、调优 WAF、调查流量与运维 Agent | [日常运维](operations.md) |
 | 排查启动、路由、TLS、WAF、登录、Agent 或遥测问题 | [排障](troubleshooting.md) |
-| 把开发/测试环境切换到 v3.2 | [v3.2 状态重置](upgrade-v3.2.md) |
+| 把旧安装切换到 v3.4 单 Controller schema | [v3.4 干净状态重置](upgrade-v3.4.md) |
 | 浏览完整 CLI、API、部署和概念参考 | [tiyisec.com/docs](https://www.tiyisec.com/zh/docs/) |
 
 ## 一次请求如何流过太一

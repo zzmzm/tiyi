@@ -43,7 +43,7 @@ Release 镜像；可用 `TIYI_MIRROR=github|gitee`、`TIYI_VERSION`、
 | `TIYI_MIRROR` | `auto` | 下载来源：`auto`（GitHub 优先，Gitee 回退）、`github` 或 `gitee`。 |
 | `TIYI_REPO` | `zzmzm/tiyi` | 安装器使用的 GitHub `owner/name`。 |
 | `TIYI_GITEE_REPO` | `tiyisec/tiyi` | 安装器使用的 Gitee `owner/name`。 |
-| `TIYI_VERSION` | 最新稳定版 | 固定发行标签，例如 `v3.3.1`。 |
+| `TIYI_VERSION` | 最新稳定版 | 固定发行标签，例如 `v3.4.0`。 |
 | `TIYI_PREFIX` | `/usr/local/bin` | `tiyi` 二进制安装目录。 |
 
 上面的一行命令会安装二进制并启动推荐的 systemd 服务。若要改为前台手动运行，
@@ -51,11 +51,11 @@ Release 镜像；可用 `TIYI_MIRROR=github|gitee`、`TIYI_VERSION`、
 
 ```sh
 # root / sudo —— 使用默认状态目录（/var/lib/tiyi）与 80/443 端口
-sudo tiyi standalone
+sudo tiyi run
 
 # 普通用户（不用 sudo）—— 可写路径 + 高端口
 mkdir -p /tmp/waf
-tiyi standalone \
+tiyi run \
   --state-db /tmp/waf/state.db \
   --caddy-admin-socket /tmp/waf/caddy.sock \
   --admin-socket /tmp/waf/admin.sock \
@@ -67,9 +67,9 @@ tiyi standalone \
 教程：[`docs/zh/getting-started.md`](docs/zh/getting-started.md) ·
 [English](docs/en/getting-started.md)。
 
-> **v3.2 开发/测试切换：** v3.2 会明确拒绝 pre-v3.2 数据库以及旧 Agent
-> 身份/bundle 状态。目前没有需要兼容的正式用户升级群体；不要复制 v3.1 测试
-> 数据库，请按[干净状态重置指南](docs/zh/upgrade-v3.2.md)操作。
+> **v3.4.0 干净状态边界：**单 Controller 构建会拒绝 schema 低于 47 的数据库
+> 和旧 Agent 身份/bundle 状态。不要把旧状态复制进新安装，请按
+> [干净状态重置指南](docs/zh/upgrade-v3.4.md)操作。
 
 ### 进阶：自定义管理员密码
 
@@ -80,7 +80,7 @@ tiyi standalone \
 ```sh
 mkdir -p /tmp/waf
 TIYI_AUTH_BOOTSTRAP_ADMIN_PASSWORD='admin123@xxxxxxm' \
-  tiyi standalone \
+  tiyi run \
   --state-db /tmp/waf/state.db \
   --caddy-admin-socket /tmp/waf/caddy.sock \
   --admin-socket /tmp/waf/admin.sock \
@@ -92,7 +92,7 @@ TIYI_AUTH_BOOTSTRAP_ADMIN_PASSWORD='admin123@xxxxxxm' \
 
 ### 通过环境变量配置运行时
 
-持久化服务配置优先写入 `server.yaml`。只有当 service manager、容器运行时或
+持久化服务配置优先写入 `tiyi.yaml`。只有当 service manager、容器运行时或
 密钥管理器需要在运行时注入配置时，才使用环境变量。环境变量名与配置键一一对应：
 加 `TIYI_` 前缀，转为大写，并把点替换为下划线。例如 `auth.jwt_secret`
 对应 `TIYI_AUTH_JWT_SECRET`。
@@ -141,8 +141,23 @@ TIYI_AUTH_BOOTSTRAP_ADMIN_PASSWORD='admin123@xxxxxxm' \
 - **一套 CLI、一套 API** —— 同一份 ConnectRPC schema 同时驱动 Web UI、`tiyi`
   CLI 与 agent 流；`tiyi apply -f site.yaml` 完全声明式。
 
-想扩展到多台机器随时可以：签名授权许可会提升远程 agent 配额，从而点亮二进制中
-已内建的多节点拓扑（热备 HA、N 个边缘 agent）。单节点体验始终不变。
+想扩展到多台机器随时可以：签名授权许可会提升远程 Agent 配额。一个始终可写的
+Controller 固定包含本机节点；直接添加远程数据平面即可，无需切换模式或角色。
+Controller 中断期间，远程 Agent 继续使用最后一次已接受的签名 bundle。
+
+通过 **节点 → 安装远端节点** 分步下载二进制、签发一次性 Token，并选择 systemd
+或前台运行方式。推荐的服务流程是：
+
+```sh
+sudo curl -fsSL -o /usr/local/bin/tiyi 'https://tiyi.example.com/download/tiyi'
+sudo chmod 0755 /usr/local/bin/tiyi
+sudo mkdir -p /etc/tiyi
+printf 'TIYI_CONTROLLER_URL=https://tiyi.example.com\nTIYI_AGENT_ENROLLMENT_TOKEN=<一次性Token>\n' | sudo tee /etc/tiyi/tiyi-agent.env >/dev/null
+sudo chmod 0600 /etc/tiyi/tiyi-agent.env
+sudo tiyi install --mode agent --unit-name tiyi-agent --now
+```
+
+页面还会显示原始 Token、前台命令和完整下载启动脚本。
 
 ## 这个仓库里有什么
 
@@ -195,12 +210,12 @@ tiyi update --yes --mirror gitee
 - 首次运行：[快速开始](docs/zh/getting-started.md) · [getting started](docs/en/getting-started.md)
 - 日常工作：[日常运维](docs/zh/operations.md) · [operations](docs/en/operations.md)
 - 遇到问题：[排障](docs/zh/troubleshooting.md) · [troubleshooting](docs/en/troubleshooting.md)
-- v3.2 切换：[状态重置](docs/zh/upgrade-v3.2.md) · [state reset](docs/en/upgrade-v3.2.md)
+- v3.4 切换：[状态重置](docs/zh/upgrade-v3.4.md) · [state reset](docs/en/upgrade-v3.4.md)
 - 官网与完整文档：<https://www.tiyisec.com>
 
 ## Codex skill
 
-使用 Codex 的运维人员可以安装太一 operator skill，用于安装、standalone、Web UI、
+使用 Codex 的运维人员可以安装太一 operator skill，用于安装、run、Web UI、
 CLI、发布、授权与排障流程：
 
 ```sh

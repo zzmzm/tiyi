@@ -46,7 +46,7 @@ Installer environment variables:
 | `TIYI_MIRROR` | `auto` | Download source: `auto` (GitHub primary, Gitee fallback), `github`, or `gitee`. |
 | `TIYI_REPO` | `zzmzm/tiyi` | GitHub `owner/name` used by the installer. |
 | `TIYI_GITEE_REPO` | `tiyisec/tiyi` | Gitee `owner/name` used by the installer. |
-| `TIYI_VERSION` | latest stable | Pin a release tag, for example `v3.3.1`. |
+| `TIYI_VERSION` | latest stable | Pin a release tag, for example `v3.4.0`. |
 | `TIYI_PREFIX` | `/usr/local/bin` | Install directory for the `tiyi` binary. |
 
 The one-line command above installs the binary and starts the recommended
@@ -55,11 +55,11 @@ matches your privileges:
 
 ```sh
 # Root / sudo — uses the default state dir (/var/lib/tiyi) and ports 80/443
-sudo tiyi standalone
+sudo tiyi run
 
 # Normal user (no sudo) — writable paths and high ports
 mkdir -p /tmp/waf
-tiyi standalone \
+tiyi run \
   --state-db /tmp/waf/state.db \
   --caddy-admin-socket /tmp/waf/caddy.sock \
   --admin-socket /tmp/waf/admin.sock \
@@ -72,10 +72,10 @@ in, and add your first site. Full walkthrough:
 [`docs/en/getting-started.md`](docs/en/getting-started.md) ·
 [中文](docs/zh/getting-started.md).
 
-> **v3.2 development/test cutover:** v3.2 intentionally rejects pre-v3.2
-> databases and agent identity/bundle state. There is no supported production
-> upgrade population yet; follow the [clean-state reset guide](docs/en/upgrade-v3.2.md)
-> instead of copying a v3.1 test database forward.
+> **v3.4.0 clean-state boundary:** the single-Controller build rejects databases
+> below schema 47 plus older Agent identity/bundle state. Follow the
+> [clean-state reset guide](docs/en/upgrade-v3.4.md) instead of copying old
+> state into the new installation.
 
 ### Advanced: choose your own admin password
 
@@ -86,7 +86,7 @@ option above. Tiyi uses it verbatim and prints no banner:
 ```sh
 mkdir -p /tmp/waf
 TIYI_AUTH_BOOTSTRAP_ADMIN_PASSWORD='admin123@xxxxxxm' \
-  tiyi standalone \
+  tiyi run \
   --state-db /tmp/waf/state.db \
   --caddy-admin-socket /tmp/waf/caddy.sock \
   --admin-socket /tmp/waf/admin.sock \
@@ -99,7 +99,7 @@ exist, so restarts are no-ops.
 
 ### Runtime config via environment
 
-Prefer `server.yaml` for persistent service configuration. Use environment
+Prefer `tiyi.yaml` for persistent service configuration. Use environment
 variables only when your service manager, container runtime, or secret manager
 injects config at runtime. Env names mirror config keys: prefix `TIYI_`,
 uppercase the key, and replace dots with underscores. For example,
@@ -155,10 +155,26 @@ Everything below is included and runs locally with no license:
   `tiyi` CLI, and the agent stream; `tiyi apply -f site.yaml` is fully
   declarative.
 
-Grow past one box whenever you want: a signed license lifts the remote-agent
-budget so the multi-node topologies already built into the binary
-(warm-secondary HA, N edge agents) light up. The single-node experience never
-changes.
+Grow past one box whenever you want: a signed license lifts the remote-Agent
+budget. One writable Controller always includes its built-in local node; add
+remote data planes without changing Controller modes or roles. During a
+Controller outage, remote Agents continue serving their last accepted signed
+bundle.
+
+Use **Nodes → Install** to download the binary, issue a one-use token, and
+choose the systemd or foreground instructions. The recommended service path is:
+
+```sh
+sudo curl -fsSL -o /usr/local/bin/tiyi 'https://tiyi.example.com/download/tiyi'
+sudo chmod 0755 /usr/local/bin/tiyi
+sudo mkdir -p /etc/tiyi
+printf 'TIYI_CONTROLLER_URL=https://tiyi.example.com\nTIYI_AGENT_ENROLLMENT_TOKEN=<one-use-token>\n' | sudo tee /etc/tiyi/tiyi-agent.env >/dev/null
+sudo chmod 0600 /etc/tiyi/tiyi-agent.env
+sudo tiyi install --mode agent --unit-name tiyi-agent --now
+```
+
+The page also exposes the raw token, foreground command, and complete
+download-and-start script.
 
 ## What's in this repo
 
@@ -213,13 +229,13 @@ Update environment variables:
 - First run: [getting started](docs/en/getting-started.md) · [快速开始](docs/zh/getting-started.md)
 - Daily work: [operations](docs/en/operations.md) · [日常运维](docs/zh/operations.md)
 - Problems: [troubleshooting](docs/en/troubleshooting.md) · [排障](docs/zh/troubleshooting.md)
-- v3.2 cutover: [state reset](docs/en/upgrade-v3.2.md) · [状态重置](docs/zh/upgrade-v3.2.md)
+- v3.4 cutover: [state reset](docs/en/upgrade-v3.4.md) · [状态重置](docs/zh/upgrade-v3.4.md)
 - Website & full docs: <https://www.tiyisec.com>
 
 ## Codex skill
 
 Operators using Codex can install the Tiyi operator skill for guided install,
-standalone, Web UI, CLI, release, license, and troubleshooting workflows:
+run, Web UI, CLI, release, license, and troubleshooting workflows:
 
 ```sh
 SKILL_DIR="${CODEX_HOME:-$HOME/.codex}/skills/tiyi-operator"

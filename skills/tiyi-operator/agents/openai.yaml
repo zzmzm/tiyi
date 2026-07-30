@@ -1,4 +1,4 @@
 interface:
   display_name: "Tiyi Operator"
   short_description: "Operate Tiyi from install to troubleshooting"
-  default_prompt: "Use $tiyi-operator to run Tiyi standalone, configure admin access, manage CLI workflows, and troubleshoot an operator issue."
+  default_prompt: "Use $tiyi-operator to run a single Tiyi Controller, configure admin access, manage CLI workflows, and troubleshoot an operator issue."
