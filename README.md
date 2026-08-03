@@ -232,10 +232,14 @@ Update environment variables:
 - v3.4 cutover: [state reset](docs/en/upgrade-v3.4.md) · [状态重置](docs/zh/upgrade-v3.4.md)
 - Website & full docs: <https://www.tiyisec.com>
 
-## Codex skill
+## AI agent skill (Codex and Claude Code)
 
-Operators using Codex can install the Tiyi operator skill for guided install,
-run, Web UI, CLI, release, license, and troubleshooting workflows:
+Install the `tiyi-operator` skill to let Codex, Claude Code, and compatible
+agents safely inspect, configure, maintain, and troubleshoot an installed Tiyi
+WAF. The skill uses signed binaries and supported operator interfaces only; it
+does not contain source-build or release-publishing workflows.
+
+Codex personal install:
 
 ```sh
 SKILL_DIR="${CODEX_HOME:-$HOME/.codex}/skills/tiyi-operator"
@@ -245,6 +249,19 @@ curl -fsSL https://raw.githubusercontent.com/zzmzm/tiyi/main/skills/tiyi-operato
 curl -fsSL https://raw.githubusercontent.com/zzmzm/tiyi/main/skills/tiyi-operator/agents/openai.yaml \
   -o "$SKILL_DIR/agents/openai.yaml"
 ```
+
+Claude Code personal install:
+
+```sh
+SKILL_DIR="$HOME/.claude/skills/tiyi-operator"
+mkdir -p "$SKILL_DIR"
+curl -fsSL https://raw.githubusercontent.com/zzmzm/tiyi/main/skills/tiyi-operator/SKILL.md \
+  -o "$SKILL_DIR/SKILL.md"
+```
+
+For a project-scoped Claude Code install, use
+`.claude/skills/tiyi-operator/` instead. In mainland China, replace the URL
+prefix with `https://gitee.com/tiyisec/tiyi/raw/main`.
 
 The published source lives in [`skills/tiyi-operator/`](skills/tiyi-operator/).
 

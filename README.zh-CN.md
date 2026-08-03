@@ -213,10 +213,13 @@ tiyi update --yes --mirror gitee
 - v3.4 切换：[状态重置](docs/zh/upgrade-v3.4.md) · [state reset](docs/en/upgrade-v3.4.md)
 - 官网与完整文档：<https://www.tiyisec.com>
 
-## Codex skill
+## AI Agent Skill（Codex 与 Claude Code）
 
-使用 Codex 的运维人员可以安装太一 operator skill，用于安装、run、Web UI、
-CLI、发布、授权与排障流程：
+安装 `tiyi-operator` Skill 后，Codex、Claude Code 及其他兼容 Agent 可以安全地
+检查、配置、维护和排查已经安装的太一 WAF。Skill 只使用签名二进制与受支持的运维
+入口，不包含源码构建或发行版发布流程。
+
+Codex 个人安装：
 
 ```sh
 SKILL_DIR="${CODEX_HOME:-$HOME/.codex}/skills/tiyi-operator"
@@ -226,6 +229,19 @@ curl -fsSL https://raw.githubusercontent.com/zzmzm/tiyi/main/skills/tiyi-operato
 curl -fsSL https://raw.githubusercontent.com/zzmzm/tiyi/main/skills/tiyi-operator/agents/openai.yaml \
   -o "$SKILL_DIR/agents/openai.yaml"
 ```
+
+Claude Code 个人安装：
+
+```sh
+SKILL_DIR="$HOME/.claude/skills/tiyi-operator"
+mkdir -p "$SKILL_DIR"
+curl -fsSL https://raw.githubusercontent.com/zzmzm/tiyi/main/skills/tiyi-operator/SKILL.md \
+  -o "$SKILL_DIR/SKILL.md"
+```
+
+如需仅对当前项目生效，请将 Claude Code Skill 安装到
+`.claude/skills/tiyi-operator/`。中国大陆可把 URL 前缀替换为
+`https://gitee.com/tiyisec/tiyi/raw/main`。
 
 发布源码位于 [`skills/tiyi-operator/`](skills/tiyi-operator/)。
 

@@ -1,4 +1,4 @@
 interface:
-  display_name: "Tiyi Operator"
-  short_description: "Operate Tiyi from install to troubleshooting"
-  default_prompt: "Use $tiyi-operator to run a single Tiyi Controller, configure admin access, manage CLI workflows, and troubleshoot an operator issue."
+  display_name: "Tiyi WAF Operations"
+  short_description: "Safely operate and maintain Tiyi WAF"
+  default_prompt: "Use $tiyi-operator to inspect my Tiyi WAF, propose the safest operational change, and verify it after I confirm."
