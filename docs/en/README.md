@@ -11,6 +11,7 @@ the result. Use the path that matches the job in front of you.
 | Install one node and block a test attack | [Getting started](getting-started.md) |
 | Publish sites, tune WAF, investigate traffic, and operate agents | [Operations](operations.md) |
 | Diagnose startup, routing, TLS, WAF, login, agent, or telemetry problems | [Troubleshooting](troubleshooting.md) |
+| Replace v3.4.0 or earlier with v3.5.0 | [v3.5.0 full uninstall upgrade](upgrade-v3.5.md) |
 | Move an older installation to the v3.4 single-Controller schema | [v3.4 clean-state reset](upgrade-v3.4.md) |
 | Browse the full CLI, API, deployment, and concepts reference | [tiyisec.com/docs](https://www.tiyisec.com/docs/) |
 

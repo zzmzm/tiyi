@@ -319,27 +319,41 @@ compatibility. Restore the database, partitions, KEK, certificates, license,
 and config as one set with original ownership/modes. Start in a controlled
 window, then verify health, login, sites, certificates, policy compilation,
 Agents, logs, and real traffic. Never copy state across a documented clean-state
-boundary; notably, older pre-v3.4/schema-below-47 state requires the published
-reset and Agent re-enrollment procedure.
+boundary.
 
 ### Update Tiyi
 
 1. Read the release notes and compatibility/reset guidance for the current-to-
    target version.
-2. Record `tiyi version`, health, unit/config, Agent revisions, and a tested
-   rollback package; take a consistent backup of coupled state.
-3. Check without changing anything:
+2. For a v3.5.0 target with v3.4.0 or earlier installed, do not offer in-place
+   update, restart, state reuse, or rollback. Explain that all historical data
+   and configuration will be deleted. Stop the service and require a verified,
+   root-restricted backup of state, config, KEK, certificate sources, license,
+   logs, and the unit definition before destructive double-confirmation.
+   Then follow the public v3.5.0 guide: `sudo tiyi uninstall --purge`, install
+   and confirm the signed v3.5.0 binary, and run `sudo tiyi install --now`.
+   Recreate resources and re-enroll every Agent. Never restore the old database
+   into v3.5.0, and never run only
+   `systemctl restart tiyi` after purge; the unit no longer exists.
+   Guide: `https://www.tiyisec.com/docs/upgrade-v3.5.html` (English) or
+   `https://www.tiyisec.com/zh/docs/upgrade-v3.5.html` (中文).
+3. For compatible targets, record `tiyi version`, health, unit/config, Agent
+   revisions, and a tested rollback package; take a consistent backup of
+   coupled state.
+4. Check without changing anything:
 
 ```sh
 tiyi update --check
 ```
 
-4. Show the chosen version/channel/mirror, service restart, Agent rollout order,
+5. Show the chosen version/channel/mirror, service restart, Agent rollout order,
    expected interruption, and rollback; obtain confirmation.
-5. Run `tiyi update --yes` (use `--mirror gitee` when selected). Tiyi verifies
-   SHA-256 and Ed25519 signatures before atomically replacing the binary.
-6. Restart the service deliberately; `tiyi update` does not restart it.
-7. Verify version, health, dashboard/API, site routing, TLS, WAF behavior,
+6. Run `sudo tiyi update --yes` for a root-owned system binary (use
+   `--mirror gitee` when selected). Omit `sudo` only for a user-writable install
+   prefix. Tiyi verifies SHA-256 and Ed25519 signatures before atomically
+   replacing the binary.
+7. Restart the service deliberately; `tiyi update` does not restart it.
+8. Verify version, health, dashboard/API, site routing, TLS, WAF behavior,
    telemetry, audit chain, Agents, and representative traffic before expanding
    a rollout.
 

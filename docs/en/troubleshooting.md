@@ -13,8 +13,8 @@ ss -ltnp
 tiyi system health
 ```
 
-For an agent, use `tiyi-agent` as the unit name. For a foreground development
-run, inspect the terminal and the paths supplied on the command line.
+For an agent, use `tiyi-agent` as the unit name. For a manual foreground run,
+inspect the terminal and the paths supplied on the command line.
 
 ## The dashboard does not open
 
@@ -54,7 +54,7 @@ browser request to an IP without the configured Host is not a valid site test.
 - Confirm the request reached the intended site and WAF is enabled.
 - Check effective policy, engine state, paranoia level, thresholds, bypasses,
   IP-list precedence, and path-scoped overrides.
-- Search Findings/Security evidence by request ID and rule ID.
+- Search **Security Events** and **Attack Logs** by request ID and rule ID.
 - Test with an untrusted source; a global/site allow or bypass can be decisive.
 - Preview compiled policy before changing it.
 
@@ -74,6 +74,25 @@ bundle.
 - v3.4.0 rejects databases below schema 47 plus older Agent identity/bundle
   state; follow the [reset guide](upgrade-v3.4.md) and re-enroll.
 - Confirm the applied revision/hash after reconnect, not only online state.
+
+## v3.5.0 fails after update and restart
+
+If the previous installation was v3.4.0 or earlier, either of these startup
+errors means the old state cannot be reused:
+
+```text
+store: migration 0016_telemetry_rollups.sql sha256 drift ...
+store: clean-break state reset required (schema=..., minimum=47) ...
+```
+
+`tiyi update` may already have installed the valid v3.5.0 binary; the failure
+is opening old state. Stop retrying the unit and follow the
+[v3.5.0 complete uninstall guide](upgrade-v3.5.md). The required sequence is
+stop the service, verify a complete backup of state/configuration/secrets,
+`sudo tiyi uninstall --purge`, confirm total data loss, ensure the binary is
+v3.5.0, then run `sudo tiyi install --now`. A plain `systemctl restart tiyi`
+cannot work after purge because the unit was removed. Do not copy the backed-up
+v3.4 database into the new v3.5 state directory.
 
 ## Counters exist but evidence or SIEM is late
 

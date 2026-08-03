@@ -1,5 +1,9 @@
 # Move an older installation to Tiyi v3.4.0
 
+> Upgrading to v3.5.0 instead? Do not use this historical procedure. v3.5.0
+> requires a [complete uninstall and clean installation](upgrade-v3.5.md),
+> including from the published v3.4.0 release.
+
 Tiyi v3.4.0 is a clean-break single-Controller release. It deliberately
 rejects state databases below schema 47 instead of guessing how to translate
 legacy Controller roles, local-Agent identity, replication state, or older

@@ -87,7 +87,8 @@ Prefer the narrowest change:
 3. use log-only/canary behavior where the feature supports it;
 4. scope an exclusion to the exact site/path/rule;
 5. send both malicious and legitimate regression requests;
-6. monitor blocked rate, status codes, and new findings after apply.
+6. monitor blocked rate, status codes, SecurityFacts, and attack logs after
+   apply.
 
 An IP allow list is not a substitute for a rule exclusion. A WAF bypass skips
 remaining inspection and should be restricted more tightly than a normal

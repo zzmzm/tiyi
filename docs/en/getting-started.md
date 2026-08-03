@@ -71,9 +71,10 @@ base64.
 
 ## 3. Run
 
-> Moving an older installation to v3.4.0 requires fresh state for databases
-> below schema 47 and Agent re-enrollment. Read the
-> [v3.4 reset guide](upgrade-v3.4.md) first.
+> Replacing v3.4.0 or any earlier installation with v3.5.0 requires a complete
+> backup followed by a complete purge and clean install. It deletes all old
+> state and requires Agent re-enrollment. Read the
+> [v3.5.0 upgrade guide](upgrade-v3.5.md) first.
 
 A single-host install runs the complete Tiyi instance with its built-in local
 data plane and dashboard in one process. By default Tiyi stores its state under
@@ -176,15 +177,23 @@ deployment platform requires env injection.
 
 ## 5. Keep it updated
 
+> **v3.5.0 exception:** do not use the generic update-and-restart sequence when
+> the installed version is v3.4.0 or earlier. Follow the
+> [backup and complete uninstall upgrade](upgrade-v3.5.md). The commands below
+> are the normal flow only for releases whose compatibility notes allow
+> in-place state.
+
 ```sh
 tiyi update --check          # is a newer signed release available?
-tiyi update --yes            # download, verify, and install it
-tiyi update --yes --mirror gitee
+sudo tiyi update --yes       # download, verify, and install it
+sudo tiyi update --yes --mirror gitee
 ```
 
 `update` verifies the SHA-256 and the Ed25519 release signature against the key
-embedded in the binary before replacing it on disk. **Restart the service**
-after updating. Track pre-release builds with `--channel prerelease`.
+embedded in the binary before replacing it on disk. It does not restart the
+service. Track pre-release builds with `--channel prerelease`, and always read
+the target release's compatibility guide before restarting. Omit `sudo` only
+when the installed binary is in a user-writable prefix.
 
 Update environment variables:
 

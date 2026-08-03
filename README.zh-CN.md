@@ -67,9 +67,10 @@ tiyi run \
 教程：[`docs/zh/getting-started.md`](docs/zh/getting-started.md) ·
 [English](docs/en/getting-started.md)。
 
-> **v3.4.0 干净状态边界：**单 Controller 构建会拒绝 schema 低于 47 的数据库
-> 和旧 Agent 身份/bundle 状态。不要把旧状态复制进新安装，请按
-> [干净状态重置指南](docs/zh/upgrade-v3.4.md)操作。
+> **升级到 v3.5.0：**v3.4.0 及更早安装必须先完成破坏性完整卸载，再安装全新的
+> v3.5.0 服务。必须先停止服务并验证状态、配置和密钥已完整备份。请阅读
+> [v3.5.0 升级指引](docs/zh/upgrade-v3.5.md)，不要直接执行通用的 update 后重启
+> 流程。
 
 ### 进阶：自定义管理员密码
 
@@ -184,16 +185,22 @@ openssl pkeyutl -verify -pubin -inkey release-key.pem -rawin \
 
 ## 更新
 
+> 从 v3.4.0 或更早版本切换到 v3.5.0 不适用下面的通用流程，必须先执行
+> 完整备份，再执行
+> [`tiyi uninstall --purge` 并全新安装](docs/zh/upgrade-v3.5.md)。
+
 运行中的太一可以从本仓库的 releases 原地更新：
 
 ```sh
 tiyi update --check          # 是否有更新的已签名发行版？
-tiyi update --yes            # 下载、校验并安装
-tiyi update --yes --mirror gitee
+sudo tiyi update --yes       # 下载、校验并安装
+sudo tiyi update --yes --mirror gitee
 ```
 
 `update` 会在替换磁盘上的二进制之前，针对内嵌的发布公钥校验完整的 Ed25519
-签名链；更新后请重启服务。使用 `--channel prerelease` 可跟踪预发布版本。
+签名链，但不会重启服务。重启前必须阅读目标版本的兼容性指引。使用
+`--channel prerelease` 可跟踪预发布版本。只有二进制安装在当前用户可写目录时才
+省略 `sudo`。
 
 更新环境变量：
 
@@ -210,6 +217,7 @@ tiyi update --yes --mirror gitee
 - 首次运行：[快速开始](docs/zh/getting-started.md) · [getting started](docs/en/getting-started.md)
 - 日常工作：[日常运维](docs/zh/operations.md) · [operations](docs/en/operations.md)
 - 遇到问题：[排障](docs/zh/troubleshooting.md) · [troubleshooting](docs/en/troubleshooting.md)
+- v3.5 升级：[完整卸载](docs/zh/upgrade-v3.5.md) · [full uninstall](docs/en/upgrade-v3.5.md)
 - v3.4 切换：[状态重置](docs/zh/upgrade-v3.4.md) · [state reset](docs/en/upgrade-v3.4.md)
 - 官网与完整文档：<https://www.tiyisec.com>
 

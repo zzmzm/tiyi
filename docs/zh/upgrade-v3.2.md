@@ -47,6 +47,5 @@ sudo journalctl -u tiyi-agent -n 100 --no-pager
 1. `tiyi --version` 显示 `v3.2.0`。
 2. `tiyi system health` 为健康。
 3. 创建一个站点，发送一次正常请求与一次 CRS 测试请求。
-4. 确认精确请求/拦截计数、Security Finding，并可按 `X-Request-Id` 跨流查询。
+4. 确认精确请求/拦截计数、SecurityFact，并可按 `X-Request-Id` 跨流查询。
 5. 确认所有远程 Agent 在线，journal 中不再出现旧格式错误。
-

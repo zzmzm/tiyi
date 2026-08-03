@@ -13,7 +13,7 @@ ss -ltnp
 tiyi system health
 ```
 
-Agent 使用 `tiyi-agent` unit 名。开发环境前台运行时，查看终端以及命令行指定的路径。
+Agent 使用 `tiyi-agent` unit 名。手动前台运行时，查看终端以及命令行指定的路径。
 
 ## 无法打开控制台
 
@@ -50,7 +50,7 @@ scheme/端口与健康探针。浏览器直接访问 IP 而不带配置 Host，�
 
 - 确认请求进入预期站点且 WAF 已启用。
 - 检查有效策略、engine state、偏执级别、阈值、bypass、IP 列表优先级和路径覆盖。
-- 按请求 ID 和规则 ID 查询 Finding/Security 证据。
+- 按请求 ID 和规则 ID 查询**安全事件**与**攻击日志**。
 - 使用不受信任来源测试；global/site allow 或 bypass 会决定最终结果。
 - 修改前预览编译后的策略。
 
@@ -67,6 +67,22 @@ DNS-01 要求受支持 provider 与正确范围凭据。不要把 provider 密�
 - v3.4.0 拒绝 schema 低于 47 的数据库和旧 Agent 身份/bundle 状态；按
   [重置指南](upgrade-v3.4.md)重新注册。
 - 重连后确认 applied revision/hash，不能只看 online。
+
+## v3.5.0 在 update 并重启后失败
+
+旧安装为 v3.4.0 或更早版本时，出现以下任一启动错误都表示不能复用旧状态：
+
+```text
+store: migration 0016_telemetry_rollups.sql sha256 drift ...
+store: clean-break state reset required (schema=..., minimum=47) ...
+```
+
+`tiyi update` 可能已经正确安装 v3.5.0 二进制；失败点是打开旧状态。不要继续反复
+启动，按 [v3.5.0 完整卸载指引](upgrade-v3.5.md)操作。正确顺序是停止服务、验证
+状态/配置/密钥已完整备份，再执行 `sudo tiyi uninstall --purge`、确认全部数据
+丢失、确认二进制为 v3.5.0，最后运行 `sudo tiyi install --now`。purge 会删除 unit，
+因此只执行 `systemctl restart tiyi` 不可能恢复服务。不要把备份的 v3.4 数据库复制
+到新的 v3.5 状态目录。
 
 ## 有计数但证据或 SIEM 延迟
 
