@@ -17,24 +17,21 @@ download to blocking real attacks.
   <img src="https://img.shields.io/badge/releases-signed%20(Ed25519)-blue" alt="Signed releases">
 </p>
 
-## Watch Tiyi stop an attack
+## Tiyi in 76 seconds
 
-<p align="center">
-  <img src="https://www.tiyisec.com/assets/video/tiyi-demo.gif" alt="Inline Tiyi demo: install, add an upstream and site, block SQL injection, inspect the event, and review the dashboard" width="920" />
-</p>
-
+Install one binary, route an upstream, publish a site, block SQL injection,
+and inspect the evidence — one complete operator path.
 
 https://github.com/user-attachments/assets/9d5b2eed-3956-41e6-bc39-b8c7048b7f44
 
-
 <p align="center">
-  <sub>Inline preview plays automatically · 1 min 16 sec · no audio</sub>
+  <sub>Native GitHub player · 1 min 16 sec · no audio</sub>
   <br />
-  <a href="https://www.tiyisec.com/assets/video/tiyi-demo.mp4">Watch demo (1080p)</a>
+  <a href="https://www.tiyisec.com/">Guided web demo</a>
   ·
-  <a href="https://www.tiyisec.com/assets/video/tiyi-demo-1440p.mp4">1440p</a>
+  <a href="https://www.tiyisec.com/assets/video/tiyi-demo.mp4">1080p MP4</a>
   ·
-  <a href="https://www.tiyisec.com/">Website</a>
+  <a href="https://www.tiyisec.com/assets/video/tiyi-demo-1440p.mp4">1440p MP4</a>
 </p>
 
 ## Install

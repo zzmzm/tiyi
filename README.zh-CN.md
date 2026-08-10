@@ -16,20 +16,21 @@ SQLite + 管理 UI，编译进一个可自托管的 Go 可执行文件。无需 
   <img src="https://img.shields.io/badge/releases-signed%20(Ed25519)-blue" alt="Signed releases">
 </p>
 
-## 看太一拦截一次攻击
+## 76 秒看懂太一
+
+安装一个二进制、配置上游、发布站点、拦截 SQL 注入并检查证据——一条完整的
+运维路径。
+
+https://github.com/user-attachments/assets/9d5b2eed-3956-41e6-bc39-b8c7048b7f44
 
 <p align="center">
-  <img src="https://www.tiyisec.com/assets/video/tiyi-demo.gif" alt="太一内嵌演示：安装、添加上游与站点、拦截 SQL 注入、分析安全事件并查看仪表盘" width="920" />
-</p>
-
-<p align="center">
-  <sub>内嵌预览自动播放 · 1 分 16 秒 · 无音频</sub>
+  <sub>GitHub 原生播放器 · 1 分 16 秒 · 无音频</sub>
   <br />
-  <a href="https://www.tiyisec.com/assets/video/tiyi-demo.mp4">观看演示（1080p）</a>
+  <a href="https://www.tiyisec.com/zh/">网页引导演示</a>
   ·
-  <a href="https://www.tiyisec.com/assets/video/tiyi-demo-1440p.mp4">1440p</a>
+  <a href="https://www.tiyisec.com/assets/video/tiyi-demo.mp4">1080p MP4</a>
   ·
-  <a href="https://www.tiyisec.com/zh/">官网</a>
+  <a href="https://www.tiyisec.com/assets/video/tiyi-demo-1440p.mp4">1440p MP4</a>
 </p>
 
 ## 安装
