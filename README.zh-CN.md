@@ -16,13 +16,15 @@ SQLite + 管理 UI，编译进一个可自托管的 Go 可执行文件。无需 
   <img src="https://img.shields.io/badge/releases-signed%20(Ed25519)-blue" alt="Signed releases">
 </p>
 
+## 看太一拦截一次攻击
+
 <p align="center">
-  <a href="https://www.tiyisec.com/assets/video/tiyi-demo.mp4">
-    <img src="https://www.tiyisec.com/assets/video/tiyi-demo.gif" alt="太一演示：安装、添加上游与站点、拦截 SQLi、打开 Dashboard" width="920" />
-  </a>
+  <img src="https://www.tiyisec.com/assets/video/tiyi-demo.gif" alt="太一内嵌演示：安装、添加上游与站点、拦截 SQL 注入、分析安全事件并查看仪表盘" width="920" />
 </p>
 
 <p align="center">
+  <sub>内嵌预览自动播放 · 1 分 16 秒 · 无音频</sub>
+  <br />
   <a href="https://www.tiyisec.com/assets/video/tiyi-demo.mp4">观看演示（1080p）</a>
   ·
   <a href="https://www.tiyisec.com/assets/video/tiyi-demo-1440p.mp4">1440p</a>
