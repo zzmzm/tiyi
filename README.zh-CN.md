@@ -16,6 +16,20 @@ SQLite + 管理 UI，编译进一个可自托管的 Go 可执行文件。无需 
   <img src="https://img.shields.io/badge/releases-signed%20(Ed25519)-blue" alt="Signed releases">
 </p>
 
+<p align="center">
+  <a href="https://www.tiyisec.com/assets/video/tiyi-demo.mp4">
+    <img src="https://www.tiyisec.com/assets/video/tiyi-demo.gif" alt="太一演示：安装、添加上游与站点、拦截 SQLi、打开 Dashboard" width="920" />
+  </a>
+</p>
+
+<p align="center">
+  <a href="https://www.tiyisec.com/assets/video/tiyi-demo.mp4">观看演示（1080p）</a>
+  ·
+  <a href="https://www.tiyisec.com/assets/video/tiyi-demo-1440p.mp4">1440p</a>
+  ·
+  <a href="https://www.tiyisec.com/zh/">官网</a>
+</p>
+
 ## 安装
 
 ```sh

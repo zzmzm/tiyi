@@ -17,6 +17,20 @@ download to blocking real attacks.
   <img src="https://img.shields.io/badge/releases-signed%20(Ed25519)-blue" alt="Signed releases">
 </p>
 
+<p align="center">
+  <a href="https://www.tiyisec.com/assets/video/tiyi-demo.mp4">
+    <img src="https://www.tiyisec.com/assets/video/tiyi-demo.gif" alt="Tiyi demo: install, add upstream and site, block SQLi, then open the dashboard" width="920" />
+  </a>
+</p>
+
+<p align="center">
+  <a href="https://www.tiyisec.com/assets/video/tiyi-demo.mp4">Watch demo (1080p)</a>
+  ·
+  <a href="https://www.tiyisec.com/assets/video/tiyi-demo-1440p.mp4">1440p</a>
+  ·
+  <a href="https://www.tiyisec.com/">Website</a>
+</p>
+
 ## Install
 
 ```sh
