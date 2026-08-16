@@ -64,25 +64,18 @@ DNS-01 要求受支持 provider 与正确范围凭据。不要把 provider 密�
 - 对比 Server URL、注册 token 有效期、时钟、DNS 与网络路径。
 - 在同一时间点读取 Server 与 Agent journal。
 - 区分离线、身份/协议拒绝、签名失败与 apply 失败。
-- v3.4.0 拒绝 schema 低于 47 的数据库和旧 Agent 身份/bundle 状态；按
-  [重置指南](upgrade-v3.4.md)重新注册。
+- 目标版本改变身份或协议契约时，应重新注册 Agent；不要强行恢复不兼容的身份、
+  spool 或 bundle 缓存。
 - 重连后确认 applied revision/hash，不能只看 online。
 
-## v3.5.0 在 update 并重启后失败
+## 安装器拒绝主机或启动拒绝状态
 
-旧安装为 v3.4.0 或更早版本时，出现以下任一启动错误都表示不能复用旧状态：
+公开安装器用于干净主机，会拒绝已有二进制、状态数据库、配置或 systemd unit。
+运行时会拒绝 schema 或迁移台账与当前二进制不兼容的状态。
 
-```text
-store: migration 0016_telemetry_rollups.sql sha256 drift ...
-store: clean-break state reset required (schema=..., minimum=47) ...
-```
-
-`tiyi update` 可能已经正确安装 v3.5.0 二进制；失败点是打开旧状态。不要继续反复
-启动，按 [v3.5.0 完整卸载指引](upgrade-v3.5.md)操作。正确顺序是停止服务、验证
-状态/配置/密钥已完整备份，再执行 `sudo tiyi uninstall --purge`、确认全部数据
-丢失、确认二进制为 v3.5.0，最后运行 `sudo tiyi install --now`。purge 会删除 unit，
-因此只执行 `systemctl restart tiyi` 不可能恢复服务。不要把备份的 v3.4 数据库复制
-到新的 v3.5 状态目录。
+不要编辑迁移元数据。请按[升级与迁移指南](upgrade-migration.md)选择兼容的二进制与
+状态、完整迁移安装，或执行文档中的 purge 流程。用 v3.6.0 替换更早版本时，旧状态
+需要执行 purge 流程。
 
 ## 有计数但证据或 SIEM 延迟
 

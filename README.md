@@ -63,7 +63,7 @@ Installer environment variables:
 | `TIYI_MIRROR` | `auto` | Download source: `auto` (GitHub primary, Gitee fallback), `github`, or `gitee`. |
 | `TIYI_REPO` | `zzmzm/tiyi` | GitHub `owner/name` used by the installer. |
 | `TIYI_GITEE_REPO` | `tiyisec/tiyi` | Gitee `owner/name` used by the installer. |
-| `TIYI_VERSION` | latest stable | Pin a release tag, for example `v3.5.0`. |
+| `TIYI_VERSION` | latest stable | Pin a release tag, for example `v3.6.0`. |
 | `TIYI_PREFIX` | `/usr/local/bin` | Install directory for the `tiyi` binary. |
 
 The one-line command above installs the binary and starts the recommended
@@ -89,11 +89,9 @@ in, and add your first site. Full walkthrough:
 [`docs/en/getting-started.md`](docs/en/getting-started.md) ·
 [中文](docs/zh/getting-started.md).
 
-> **Upgrading to v3.5.0:** v3.4.0 and earlier installations require a complete,
-> destructive uninstall before the clean v3.5.0 service is installed. Stop the
-> service and verify a complete state/config/secret backup first. Read the
-> [v3.5.0 upgrade guide](docs/en/upgrade-v3.5.md); do not run a generic
-> update-and-restart sequence.
+> **Existing installation:** use the [upgrade and migration guide](docs/en/upgrade-migration.md)
+> instead of the new-host installer. State created before v3.6.0 is
+> incompatible with v3.6.0 and uses the documented backup and purge flow.
 
 ### Advanced: choose your own admin password
 
@@ -198,7 +196,7 @@ download-and-start script.
 
 This is the **distribution channel** for Tiyi — the installer, the public
 release-signing key, and the docs. Compiled, signed binaries are attached to
-each [GitHub Release](../../releases) (they are not committed to the repo).
+each [GitHub Release](https://github.com/zzmzm/tiyi/releases) (they are not committed to the repo).
 
 ## Verify a download manually
 
@@ -220,11 +218,7 @@ openssl pkeyutl -verify -pubin -inkey release-key.pem -rawin \
 
 ## Updating
 
-> Replacing v3.4.0 or earlier with v3.5.0 is not the generic flow below. It
-> requires a verified backup followed by
-> [`tiyi uninstall --purge` and a clean install](docs/en/upgrade-v3.5.md).
-
-A running Tiyi can update itself from this repo's releases:
+A running Tiyi binary with the `update` command can install a signed release:
 
 ```sh
 tiyi update --check          # is a newer signed release available?
@@ -232,11 +226,11 @@ sudo tiyi update --yes       # download, verify, and install it
 sudo tiyi update --yes --mirror gitee
 ```
 
-`update` verifies the full Ed25519 signature chain against the embedded release
-key before swapping the on-disk binary. It does not restart the service. Read
-the target version's compatibility guide before restarting. Track pre-release
-builds with `--channel prerelease`. Omit `sudo` only when the installed binary
-is in a user-writable prefix.
+`update` validates release metadata and the full Ed25519 signature chain
+against the embedded release key, without a hard-coded version floor. It does
+not decide state/protocol compatibility and does not restart the service. Read
+the target release notes first. Track pre-release builds with
+`--channel prerelease`; omit `sudo` only for a user-writable prefix.
 
 Update environment variables:
 
@@ -253,8 +247,7 @@ Update environment variables:
 - First run: [getting started](docs/en/getting-started.md) · [快速开始](docs/zh/getting-started.md)
 - Daily work: [operations](docs/en/operations.md) · [日常运维](docs/zh/operations.md)
 - Problems: [troubleshooting](docs/en/troubleshooting.md) · [排障](docs/zh/troubleshooting.md)
-- v3.5 upgrade: [full uninstall](docs/en/upgrade-v3.5.md) · [完整卸载](docs/zh/upgrade-v3.5.md)
-- v3.4 cutover: [state reset](docs/en/upgrade-v3.4.md) · [状态重置](docs/zh/upgrade-v3.4.md)
+- Upgrade and migration: [English](docs/en/upgrade-migration.md) · [中文](docs/zh/upgrade-migration.md)
 - Website & full docs: <https://www.tiyisec.com>
 
 ## AI agent skill (Codex and Claude Code)

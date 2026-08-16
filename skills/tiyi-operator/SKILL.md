@@ -325,18 +325,19 @@ boundary.
 
 1. Read the release notes and compatibility/reset guidance for the current-to-
    target version.
-2. For a v3.5.0 target with v3.4.0 or earlier installed, do not offer in-place
-   update, restart, state reuse, or rollback. Explain that all historical data
-   and configuration will be deleted. Stop the service and require a verified,
-   root-restricted backup of state, config, KEK, certificate sources, license,
-   logs, and the unit definition before destructive double-confirmation.
-   Then follow the public v3.5.0 guide: `sudo tiyi uninstall --purge`, install
-   and confirm the signed v3.5.0 binary, and run `sudo tiyi install --now`.
-   Recreate resources and re-enroll every Agent. Never restore the old database
-   into v3.5.0, and never run only
-   `systemctl restart tiyi` after purge; the unit no longer exists.
-   Guide: `https://www.tiyisec.com/docs/upgrade-v3.5.html` (English) or
-   `https://www.tiyisec.com/zh/docs/upgrade-v3.5.html` (中文).
+2. When the target cannot open the current state (including moving state from
+   a release before v3.6.0 to v3.6.0), do not offer state reuse. Stop the
+   service and require a verified, root-restricted backup of the complete
+   state/config set, external KEK, certificate sources, license, logs, binary,
+   and unit definition. Then use the documented sequence:
+   `sudo tiyi uninstall --purge`, update the retained binary with
+   `sudo /usr/local/bin/tiyi update --yes`, and run
+   `sudo /usr/local/bin/tiyi install --now`. Recreate resources and re-enroll
+   Agents when required. Never restore incompatible state into the new live
+   paths, and never run only `systemctl restart tiyi` after purge; the unit no
+   longer exists. Guide:
+   `https://www.tiyisec.com/docs/upgrade-migration.html` (English) or
+   `https://www.tiyisec.com/zh/docs/upgrade-migration.html` (中文).
 3. For compatible targets, record `tiyi version`, health, unit/config, Agent
    revisions, and a tested rollback package; take a consistent backup of
    coupled state.

@@ -114,5 +114,74 @@ tiyi system health
 tiyi audit verify
 ```
 
-把 `state.db`、KEK、上传证书源文件、license 与声明式清单纳入备份。必须测试恢复，
-不能只测试“生成了备份”。
+把完整状态目录、配置、外部 KEK、上传证书源文件、license 与声明式清单纳入备份。
+必须测试恢复，不能只测试“生成了备份”；参见[升级与迁移](upgrade-migration.md)。
+
+## 7. 接入 Prometheus
+
+太一只在受文件权限保护的本地管理 socket 上暴露 OpenMetrics。先在本机验证：
+
+```sh
+sudo curl -fsS --unix-socket /run/tiyi/admin.sock \
+  http://localhost/metrics | grep '^tiyi_' | head
+```
+
+不要用通用 TCP 代理暴露这个 Unix socket：它还提供免密码的本地管理端点。一个安全、
+简单的桥接方法是 node_exporter textfile collector，只转存 metrics 正文。先为
+node_exporter 配置
+`--collector.textfile.directory=/var/lib/node_exporter/textfile_collector`，
+再创建以下 oneshot service 与 timer：
+
+```ini
+# /etc/systemd/system/tiyi-metrics-textfile.service
+[Unit]
+Description=Export Tiyi OpenMetrics to node_exporter textfile collector
+After=tiyi.service
+
+[Service]
+Type=oneshot
+User=root
+UMask=0022
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectHome=true
+ExecStart=/bin/sh -ec '/usr/bin/curl -fsS --unix-socket /run/tiyi/admin.sock http://localhost/metrics -o /var/lib/node_exporter/textfile_collector/tiyi.prom.tmp; /usr/bin/chmod 0644 /var/lib/node_exporter/textfile_collector/tiyi.prom.tmp; /usr/bin/mv -f /var/lib/node_exporter/textfile_collector/tiyi.prom.tmp /var/lib/node_exporter/textfile_collector/tiyi.prom'
+```
+
+```ini
+# /etc/systemd/system/tiyi-metrics-textfile.timer
+[Unit]
+Description=Refresh Tiyi OpenMetrics for node_exporter
+
+[Timer]
+OnBootSec=30s
+OnUnitActiveSec=30s
+AccuracySec=5s
+Unit=tiyi-metrics-textfile.service
+
+[Install]
+WantedBy=timers.target
+```
+
+```sh
+sudo install -d -m 0755 /var/lib/node_exporter/textfile_collector
+sudo systemctl daemon-reload
+sudo systemctl enable --now tiyi-metrics-textfile.timer
+sudo systemctl start tiyi-metrics-textfile.service
+systemctl status tiyi-metrics-textfile.timer --no-pager
+curl -fsS http://127.0.0.1:9100/metrics | grep '^tiyi_' | head
+```
+
+Prometheus 抓取现有 node_exporter target：
+
+```yaml
+scrape_configs:
+  - job_name: node
+    static_configs:
+      - targets: ['tiyi-host.example.com:9100']
+```
+
+主要指标族是 `tiyi_observation_lane_value{lane,field}`、
+`tiyi_observation_pipeline_value{field}` 和
+`tiyi_api_inventory_value{site_id,field}`。应对 timer/oneshot 失败告警，并观察 queue、
+drop 与 panic 字段。若 node_exporter 包使用其他 textfile 目录，请相应调整路径。

@@ -25,7 +25,7 @@ curl -fsSL https://gitee.com/tiyisec/tiyi/raw/main/install.sh | TIYI_MIRROR=gite
 指定版本或更改安装目录：
 
 ```sh
-TIYI_VERSION=v3.5.0 TIYI_PREFIX="$HOME/.local/bin" \
+TIYI_VERSION=v3.6.0 TIYI_PREFIX="$HOME/.local/bin" \
   bash -c "$(curl -fsSL https://www.tiyisec.com/install.sh)"
 ```
 
@@ -36,7 +36,7 @@ TIYI_VERSION=v3.5.0 TIYI_PREFIX="$HOME/.local/bin" \
 | `TIYI_MIRROR` | `auto` | 下载来源：`auto`（GitHub 优先，Gitee 回退）、`github` 或 `gitee`。 |
 | `TIYI_REPO` | `zzmzm/tiyi` | 安装器使用的 GitHub `owner/name`。 |
 | `TIYI_GITEE_REPO` | `tiyisec/tiyi` | 安装器使用的 Gitee `owner/name`。 |
-| `TIYI_VERSION` | 最新稳定版 | 固定发行标签，例如 `v3.5.0`。 |
+| `TIYI_VERSION` | 最新稳定版 | 固定发行标签，例如 `v3.6.0`。 |
 | `TIYI_PREFIX` | `/usr/local/bin` | `tiyi` 二进制安装目录。 |
 
 ## 2. 手动校验下载（可选）
@@ -66,9 +66,8 @@ openssl pkeyutl -verify -pubin -inkey release-key.pem -rawin \
 
 ## 3. 运行
 
-> 用 v3.5.0 替换 v3.4.0 或任意更早安装时，必须先完整备份，再执行完整 purge 和
-> 全新安装；旧状态会被全部删除，Agent 也必须重新注册。请先阅读
-> [v3.5.0 升级指引](upgrade-v3.5.md)。
+> 已有安装时，请先阅读[升级与迁移](upgrade-migration.md)，不要直接执行下面的新主机
+> 步骤。用 v3.6.0 替换更早版本时，旧状态需要执行文档中的备份和 purge 流程。
 
 单机安装会在一个进程中运行完整太一、本机内置数据平面和管理界面。默认情况下太一
 把状态存放在 `/var/lib/tiyi` 并监听 80/443 端口，因此默认方式需要 root：
@@ -162,9 +161,8 @@ sudo tiyi install --mode agent --unit-name tiyi-agent --now
 
 ## 5. 保持更新
 
-> **v3.5.0 例外：**当前版本为 v3.4.0 或更早版本时，不要使用通用的更新后重启
-> 流程。必须按[备份与完整卸载升级指引](upgrade-v3.5.md)操作。下列命令仅适用于目标
-> 发行说明明确允许原地复用状态的常规升级。
+> 这些命令只替换签名二进制，不代表状态或协议一定兼容。应阅读目标版本说明，必要时
+> 按[升级与迁移](upgrade-migration.md)操作。
 
 ```sh
 tiyi update --check          # 是否有更新的已签名发行版？
@@ -172,10 +170,10 @@ sudo tiyi update --yes       # 下载、校验并安装
 sudo tiyi update --yes --mirror gitee
 ```
 
-`update` 会在替换磁盘上的二进制之前，针对内嵌于二进制中的发布公钥校验
-SHA-256 与 Ed25519 签名，但不会重启服务。使用 `--channel prerelease` 可跟踪
-预发布版本；重启前必须先阅读目标发行版的兼容性指引。只有二进制安装在当前用户
-可写目录时才省略 `sudo`。
+`update` 会在替换磁盘上的二进制之前，针对内嵌发布公钥校验 SHA-256 与 Ed25519
+发行签名，但不会重启服务；成功后运行 `sudo systemctl restart tiyi`。使用
+`--channel prerelease` 可跟踪预发布版本。只有二进制安装在当前用户可写目录时才
+省略 `sudo`。
 
 更新环境变量：
 

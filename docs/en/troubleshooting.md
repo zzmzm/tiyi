@@ -71,28 +71,21 @@ bundle.
 - Read both server and agent journals around the same timestamp.
 - Distinguish offline, rejected identity/protocol, signature failure, and apply
   failure.
-- v3.4.0 rejects databases below schema 47 plus older Agent identity/bundle
-  state; follow the [reset guide](upgrade-v3.4.md) and re-enroll.
+- When the target release changes identity or protocol contracts, re-enroll the
+  Agent; never force an incompatible identity, spool, or bundle cache.
 - Confirm the applied revision/hash after reconnect, not only online state.
 
-## v3.5.0 fails after update and restart
+## Installer refuses the host or startup rejects state
 
-If the previous installation was v3.4.0 or earlier, either of these startup
-errors means the old state cannot be reused:
+The public installer is for a clean host and refuses an existing binary, state
+database, configuration, or systemd unit. Runtime rejects state whose schema or
+migration ledger is incompatible with the running binary.
 
-```text
-store: migration 0016_telemetry_rollups.sql sha256 drift ...
-store: clean-break state reset required (schema=..., minimum=47) ...
-```
-
-`tiyi update` may already have installed the valid v3.5.0 binary; the failure
-is opening old state. Stop retrying the unit and follow the
-[v3.5.0 complete uninstall guide](upgrade-v3.5.md). The required sequence is
-stop the service, verify a complete backup of state/configuration/secrets,
-`sudo tiyi uninstall --purge`, confirm total data loss, ensure the binary is
-v3.5.0, then run `sudo tiyi install --now`. A plain `systemctl restart tiyi`
-cannot work after purge because the unit was removed. Do not copy the backed-up
-v3.4 database into the new v3.5 state directory.
+Do not edit migration metadata. Follow the
+[upgrade and migration guide](upgrade-migration.md) to select a compatible
+binary/state pair, move a complete installation, or use the documented purge
+flow. State created before v3.6.0 requires the purge flow when moving to
+v3.6.0.
 
 ## Counters exist but evidence or SIEM is late
 

@@ -133,6 +133,79 @@ tiyi system health
 tiyi audit verify
 ```
 
-Keep `state.db`, the KEK, uploaded certificate sources, license file, and
-declarative manifests in the backup plan. Test restoration rather than only
-testing backup creation.
+Keep the complete state directory, configuration, external KEK, uploaded
+certificate sources, license file, and declarative manifests in the backup
+plan. Test restoration rather than only testing backup creation; see
+[Upgrade and migration](upgrade-migration.md).
+
+## 7. Connect Prometheus
+
+Tiyi exposes OpenMetrics only on the permission-protected local admin socket.
+Verify it locally first:
+
+```sh
+sudo curl -fsS --unix-socket /run/tiyi/admin.sock \
+  http://localhost/metrics | grep '^tiyi_' | head
+```
+
+Do **not** publish that Unix socket through a generic TCP proxy: the socket also
+provides passwordless local-administration endpoints. A safe, simple bridge is
+node_exporter's textfile collector, which publishes only the metrics body.
+Configure node_exporter with
+`--collector.textfile.directory=/var/lib/node_exporter/textfile_collector`, then
+create this oneshot collector and timer:
+
+```ini
+# /etc/systemd/system/tiyi-metrics-textfile.service
+[Unit]
+Description=Export Tiyi OpenMetrics to node_exporter textfile collector
+After=tiyi.service
+
+[Service]
+Type=oneshot
+User=root
+UMask=0022
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectHome=true
+ExecStart=/bin/sh -ec '/usr/bin/curl -fsS --unix-socket /run/tiyi/admin.sock http://localhost/metrics -o /var/lib/node_exporter/textfile_collector/tiyi.prom.tmp; /usr/bin/chmod 0644 /var/lib/node_exporter/textfile_collector/tiyi.prom.tmp; /usr/bin/mv -f /var/lib/node_exporter/textfile_collector/tiyi.prom.tmp /var/lib/node_exporter/textfile_collector/tiyi.prom'
+```
+
+```ini
+# /etc/systemd/system/tiyi-metrics-textfile.timer
+[Unit]
+Description=Refresh Tiyi OpenMetrics for node_exporter
+
+[Timer]
+OnBootSec=30s
+OnUnitActiveSec=30s
+AccuracySec=5s
+Unit=tiyi-metrics-textfile.service
+
+[Install]
+WantedBy=timers.target
+```
+
+```sh
+sudo install -d -m 0755 /var/lib/node_exporter/textfile_collector
+sudo systemctl daemon-reload
+sudo systemctl enable --now tiyi-metrics-textfile.timer
+sudo systemctl start tiyi-metrics-textfile.service
+systemctl status tiyi-metrics-textfile.timer --no-pager
+curl -fsS http://127.0.0.1:9100/metrics | grep '^tiyi_' | head
+```
+
+Prometheus then scrapes the existing node_exporter target:
+
+```yaml
+scrape_configs:
+  - job_name: node
+    static_configs:
+      - targets: ['tiyi-host.example.com:9100']
+```
+
+The main families are `tiyi_observation_lane_value{lane,field}`,
+`tiyi_observation_pipeline_value{field}`, and
+`tiyi_api_inventory_value{site_id,field}`. Alert if the timer or oneshot unit
+fails, and watch queue/drop/panic fields. Adjust paths if your node_exporter
+package uses another textfile directory.

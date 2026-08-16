@@ -60,7 +60,7 @@ Release 镜像；可用 `TIYI_MIRROR=github|gitee`、`TIYI_VERSION`、
 | `TIYI_MIRROR` | `auto` | 下载来源：`auto`（GitHub 优先，Gitee 回退）、`github` 或 `gitee`。 |
 | `TIYI_REPO` | `zzmzm/tiyi` | 安装器使用的 GitHub `owner/name`。 |
 | `TIYI_GITEE_REPO` | `tiyisec/tiyi` | 安装器使用的 Gitee `owner/name`。 |
-| `TIYI_VERSION` | 最新稳定版 | 固定发行标签，例如 `v3.5.0`。 |
+| `TIYI_VERSION` | 最新稳定版 | 固定发行标签，例如 `v3.6.0`。 |
 | `TIYI_PREFIX` | `/usr/local/bin` | `tiyi` 二进制安装目录。 |
 
 上面的一行命令会安装二进制并启动推荐的 systemd 服务。若要改为前台手动运行，
@@ -84,10 +84,8 @@ tiyi run \
 教程：[`docs/zh/getting-started.md`](docs/zh/getting-started.md) ·
 [English](docs/en/getting-started.md)。
 
-> **升级到 v3.5.0：**v3.4.0 及更早安装必须先完成破坏性完整卸载，再安装全新的
-> v3.5.0 服务。必须先停止服务并验证状态、配置和密钥已完整备份。请阅读
-> [v3.5.0 升级指引](docs/zh/upgrade-v3.5.md)，不要直接执行通用的 update 后重启
-> 流程。
+> **已有安装：**不要使用新主机安装器，请先阅读[升级与迁移](docs/zh/upgrade-migration.md)。
+> v3.6.0 与更早版本创建的状态不兼容，需要执行文档中的备份和 purge 流程。
 
 ### 进阶：自定义管理员密码
 
@@ -180,7 +178,7 @@ sudo tiyi install --mode agent --unit-name tiyi-agent --now
 ## 这个仓库里有什么
 
 这是太一的**分发渠道** —— 安装脚本、公开的发布签名公钥与文档。编译并签名的
-二进制作为资产附在每个 [GitHub Release](../../releases) 上（不提交进仓库）。
+二进制作为资产附在每个 [GitHub Release](https://github.com/zzmzm/tiyi/releases) 上（不提交进仓库）。
 
 ## 手动校验下载
 
@@ -202,11 +200,7 @@ openssl pkeyutl -verify -pubin -inkey release-key.pem -rawin \
 
 ## 更新
 
-> 从 v3.4.0 或更早版本切换到 v3.5.0 不适用下面的通用流程，必须先执行
-> 完整备份，再执行
-> [`tiyi uninstall --purge` 并全新安装](docs/zh/upgrade-v3.5.md)。
-
-运行中的太一可以从本仓库的 releases 原地更新：
+带有 `update` 命令的太一二进制可以安装签名发行版：
 
 ```sh
 tiyi update --check          # 是否有更新的已签名发行版？
@@ -214,10 +208,10 @@ sudo tiyi update --yes       # 下载、校验并安装
 sudo tiyi update --yes --mirror gitee
 ```
 
-`update` 会在替换磁盘上的二进制之前，针对内嵌的发布公钥校验完整的 Ed25519
-签名链，但不会重启服务。重启前必须阅读目标版本的兼容性指引。使用
-`--channel prerelease` 可跟踪预发布版本。只有二进制安装在当前用户可写目录时才
-省略 `sudo`。
+`update` 会校验发行元数据和完整 Ed25519 签名链，但没有硬编码版本门槛。它不替代
+状态/协议兼容性判断，也不会重启服务；更新前应阅读目标版本说明。使用
+`--channel prerelease` 可跟踪预发布版本。只有二进制位于当前用户可写目录时才省略
+`sudo`。
 
 更新环境变量：
 
@@ -234,8 +228,7 @@ sudo tiyi update --yes --mirror gitee
 - 首次运行：[快速开始](docs/zh/getting-started.md) · [getting started](docs/en/getting-started.md)
 - 日常工作：[日常运维](docs/zh/operations.md) · [operations](docs/en/operations.md)
 - 遇到问题：[排障](docs/zh/troubleshooting.md) · [troubleshooting](docs/en/troubleshooting.md)
-- v3.5 升级：[完整卸载](docs/zh/upgrade-v3.5.md) · [full uninstall](docs/en/upgrade-v3.5.md)
-- v3.4 切换：[状态重置](docs/zh/upgrade-v3.4.md) · [state reset](docs/en/upgrade-v3.4.md)
+- 升级与迁移：[中文](docs/zh/upgrade-migration.md) · [English](docs/en/upgrade-migration.md)
 - 官网与完整文档：<https://www.tiyisec.com>
 
 ## AI Agent Skill（Codex 与 Claude Code）

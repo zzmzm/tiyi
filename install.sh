@@ -16,7 +16,7 @@
 #   TIYI_MIRROR      auto | github | gitee     (default: auto)
 #   TIYI_REPO        GitHub owner/name         (default: zzmzm/tiyi)
 #   TIYI_GITEE_REPO  Gitee owner/name          (default: tiyisec/tiyi)
-#   TIYI_VERSION     pin a tag, e.g. v3.5.4    (default: latest stable)
+#   TIYI_VERSION     pin a tag, e.g. v3.6.0    (default: latest stable)
 #   TIYI_PREFIX      install directory         (default: /usr/local/bin)
 set -euo pipefail
 
@@ -36,8 +36,10 @@ installer_usage() {
 Usage:
   install.sh
 
-Installs or updates the Tiyi Controller binary. Remote Agents are installed
-from the step-by-step workflow under Nodes -> Install.
+Installs a new Tiyi Controller on a clean host. This script refuses existing
+Tiyi binaries or state; use the documented upgrade or migration workflow for
+an existing installation.
+Remote Agents are installed from the workflow under Nodes -> Install.
 EOF
 }
 
@@ -215,12 +217,9 @@ command -v curl >/dev/null || err "curl is required"
 command -v sha256sum >/dev/null || err "sha256sum is required"
 command -v tar >/dev/null || err "tar is required"
 
-# --- already installed? update in place, then install + start the service --
-# Re-running the installer on a host that already has tiyi stays cheap: use the
-# signed in-place update (which downloads only when a newer release exists)
-# instead of pulling the full tarball again, then (re)install the systemd unit
-# and start it on the new binary. Falls back to a fresh download when the
-# in-place update can't run (e.g. a build with no embedded release key).
+# --- existing-install guard ------------------------------------------------
+# This installer is for a new host. An existing binary can use the signed
+# self-update flow after the operator has protected or purged its state.
 existing=""
 if command -v tiyi >/dev/null 2>&1; then
 	existing=$(command -v tiyi)
@@ -228,22 +227,13 @@ elif [ -x "$PREFIX/tiyi" ]; then
 	existing="$PREFIX/tiyi"
 fi
 if [ -n "$existing" ]; then
-	echo "tiyi already installed: $("$existing" --version 2>/dev/null | head -1 || echo unknown)"
-	echo "  Updating in place via signed update …"
-	if as_root "$existing" update --yes --mirror "$MIRROR" --repo "$GITHUB_REPO"; then
-		# Stop any running instance so the updated binary re-opens the state DB
-		# exclusively during install; install --now then enables + starts it.
-		as_root systemctl stop tiyi.service >/dev/null 2>&1 || true
-		run_install_environment_check "$existing"
-		echo "  Installing/refreshing the systemd service and starting it …"
-		as_root "$existing" install --now
-		echo
-		echo "tiyi is up to date and running. Check it with: systemctl status tiyi"
-		exit 0
-	fi
-	echo "  in-place update unavailable; falling back to a fresh download." >&2
-	echo
+	err "existing Tiyi binary found at $existing; follow the upgrade or migration guide instead of running the new-host installer"
 fi
+for old_path in /var/lib/tiyi/state.db /etc/tiyi/tiyi.yaml /etc/tiyi/server.yaml /etc/systemd/system/tiyi.service; do
+	if [ -e "$old_path" ]; then
+		err "existing Tiyi installation state found at $old_path; follow the upgrade or migration guide before installing"
+	fi
+done
 
 resolve_github_latest() {
 	curl -fsSLI --connect-timeout 5 --max-time 10 -o /dev/null -w '%{url_effective}' "https://github.com/$GITHUB_REPO/releases/latest" |
@@ -291,6 +281,21 @@ elif [ "$selected_mirror" = "auto" ]; then
 fi
 [ -n "$tag" ] || err "could not resolve the latest release tag"
 ver="${tag#v}"
+case "$ver" in
+	"" | *[!0-9A-Za-z.+-]*) err "release tag $tag is not a supported semantic version" ;;
+esac
+version_core="${ver%%[-+]*}"
+case "$version_core" in
+	*.*.*) ;;
+	*) err "release tag $tag is not a supported semantic version" ;;
+esac
+version_major="${version_core%%.*}"
+version_rest="${version_core#*.}"
+version_minor="${version_rest%%.*}"
+version_patch="${version_rest#*.}"
+case "$version_major:$version_minor:$version_patch" in
+	*[!0-9:]* | :* | *::* | *:) err "release tag $tag is not a supported semantic version" ;;
+esac
 tarball="tiyi_${ver}_${os}_${arch}.tar.gz"
 
 tmp=$(mktemp -d)

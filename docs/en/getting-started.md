@@ -28,7 +28,7 @@ curl -fsSL https://gitee.com/tiyisec/tiyi/raw/main/install.sh | TIYI_MIRROR=gite
 Pin a version or change the install prefix:
 
 ```sh
-TIYI_VERSION=v3.5.0 TIYI_PREFIX="$HOME/.local/bin" \
+TIYI_VERSION=v3.6.0 TIYI_PREFIX="$HOME/.local/bin" \
   bash -c "$(curl -fsSL https://www.tiyisec.com/install.sh)"
 ```
 
@@ -39,7 +39,7 @@ Installer environment variables:
 | `TIYI_MIRROR` | `auto` | Download source: `auto` (GitHub primary, Gitee fallback), `github`, or `gitee`. |
 | `TIYI_REPO` | `zzmzm/tiyi` | GitHub `owner/name` used by the installer. |
 | `TIYI_GITEE_REPO` | `tiyisec/tiyi` | Gitee `owner/name` used by the installer. |
-| `TIYI_VERSION` | latest stable | Pin a release tag, for example `v3.5.0`. |
+| `TIYI_VERSION` | latest stable | Pin a release tag, for example `v3.6.0`. |
 | `TIYI_PREFIX` | `/usr/local/bin` | Install directory for the `tiyi` binary. |
 
 ## 2. Verify a download manually (optional)
@@ -71,10 +71,9 @@ base64.
 
 ## 3. Run
 
-> Replacing v3.4.0 or any earlier installation with v3.5.0 requires a complete
-> backup followed by a complete purge and clean install. It deletes all old
-> state and requires Agent re-enrollment. Read the
-> [v3.5.0 upgrade guide](upgrade-v3.5.md) first.
+> Existing installation? Use [Upgrade and migration](upgrade-migration.md)
+> before the new-host steps below. State created before v3.6.0 requires the
+> documented backup and purge flow when moving to v3.6.0.
 
 A single-host install runs the complete Tiyi instance with its built-in local
 data plane and dashboard in one process. By default Tiyi stores its state under
@@ -177,11 +176,9 @@ deployment platform requires env injection.
 
 ## 5. Keep it updated
 
-> **v3.5.0 exception:** do not use the generic update-and-restart sequence when
-> the installed version is v3.4.0 or earlier. Follow the
-> [backup and complete uninstall upgrade](upgrade-v3.5.md). The commands below
-> are the normal flow only for releases whose compatibility notes allow
-> in-place state.
+> These commands replace a signed binary; they do not prove state or protocol
+> compatibility. Read the target release notes and use
+> [Upgrade and migration](upgrade-migration.md) when required.
 
 ```sh
 tiyi update --check          # is a newer signed release available?
@@ -189,11 +186,11 @@ sudo tiyi update --yes       # download, verify, and install it
 sudo tiyi update --yes --mirror gitee
 ```
 
-`update` verifies the SHA-256 and the Ed25519 release signature against the key
-embedded in the binary before replacing it on disk. It does not restart the
-service. Track pre-release builds with `--channel prerelease`, and always read
-the target release's compatibility guide before restarting. Omit `sudo` only
-when the installed binary is in a user-writable prefix.
+`update` verifies the SHA-256 and Ed25519 release signature against the key
+embedded in the binary before replacing it on disk and does not restart the
+service. Restart with `sudo systemctl restart tiyi` after a successful update.
+Track pre-release builds with `--channel prerelease`. Omit `sudo` only when the
+installed binary is in a user-writable prefix.
 
 Update environment variables:
 
