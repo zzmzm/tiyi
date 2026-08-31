@@ -68,20 +68,34 @@ DNS-01 要求受支持 provider 与正确范围凭据。不要把 provider 密�
   spool 或 bundle 缓存。
 - 重连后确认 applied revision/hash，不能只看 online。
 
+## 请求收到太一 503 或绕过 CRS
+
+检查 `X-Tiyi-Enforcement-Reason` 与**日志 → 执行分析**。因果 WAF CPU 拒绝是
+`cpu_overload_reject`，只降级 CRS 是 `cpu_overload_bypass`；源站 503 没有这两类
+决策。修改阈值前先查看对应节点的 WAF 压力趋势，以及受保护本地管理 socket 上的
+`/debug/wafoverload/stats`。观测积压或遥测缺口不会触发 WAF 过载。
+
+## Bot 挑战或 IP 订阅失败
+
+- Bot 防护要求仅 HTTPS 站点。检查证书绑定、浏览器 Cookie/存储策略、系统时间、
+  豁免路径和可信列表引用。人工验证还需要 WebAuthn 支持与用户手势。
+- IP 订阅应检查同步历史、HTTP 状态、响应大小限制、解析器/JSONPath 输出、删除比例
+  hold 与消费者编译结果。更新受保护时，先前已接受快照继续生效。
+
 ## 安装器拒绝主机或启动拒绝状态
 
 公开安装器用于干净主机，会拒绝已有二进制、状态数据库、配置或 systemd unit。
 运行时会拒绝 schema 或迁移台账与当前二进制不兼容的状态。
 
 不要编辑迁移元数据。请按[升级与迁移指南](upgrade-migration.md)选择兼容的二进制与
-状态、完整迁移安装，或执行文档中的 purge 流程。用 v3.6.0 替换更早版本时，旧状态
-需要执行 purge 流程。
+状态、完整迁移安装，或执行文档中的 purge 流程。v3.7.0 无法读取 v3.6.0 或更早版本
+创建的状态，需要执行 purge 并重新注册远程 Agent。
 
 ## 有计数但证据或 SIEM 延迟
 
 打开**系统监控 → 日志管道**，检查队列深度、丢弃、重试与 panic 计数。请求证据会
 新增本地/存储/上传通道，直达 SIEM 会新增原始源和每目标通道。精确流量计数、
-不可变 SecurityFact、保留证据与 SIEM 投递彼此独立。从产生事件的节点测试目标并
+有界 SecurityFact 样本、保留证据与 SIEM 投递彼此独立。从产生事件的节点测试目标并
 修复消费者；除非诊断明确要求，不要重启健康的数据面。
 
 ## 收集安全的支持材料

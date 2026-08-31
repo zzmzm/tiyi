@@ -32,9 +32,10 @@ not restart the running process.
 
 ## Incompatible-state update
 
-v3.6.0 cannot open databases created by earlier releases. For that transition,
-keep the old installation as an offline rollback archive and start with empty
-state and configuration. Do not import the old archive into the new live paths.
+v3.7.0 cannot open state created by v3.6.0 or earlier releases. For this
+transition, keep the old installation as an offline rollback archive and start
+with empty state and configuration. Do not import the old archive into the new
+live paths, and re-enroll every remote Agent after rebuilding the Controller.
 
 ### 1. Stop and archive
 
@@ -80,8 +81,8 @@ sudo /usr/local/bin/tiyi system health
 If the retained binary has no `update` command, verify the archive, remove only
 that exact binary path, then run the public installer. Save the new one-time
 administrator password and recreate reviewed sites, policies, certificates,
-authentication, trust, SIEM, and alert settings. Re-enroll remote Agents when
-the target protocol requires it.
+authentication, trust, SIEM, and alert settings. Re-enroll every remote Agent;
+do not restore its previous identity, spool, or bundle cache into v3.7.0.
 
 ## Move a Controller to another host
 

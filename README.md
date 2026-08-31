@@ -63,7 +63,7 @@ Installer environment variables:
 | `TIYI_MIRROR` | `auto` | Download source: `auto` (GitHub primary, Gitee fallback), `github`, or `gitee`. |
 | `TIYI_REPO` | `zzmzm/tiyi` | GitHub `owner/name` used by the installer. |
 | `TIYI_GITEE_REPO` | `tiyisec/tiyi` | Gitee `owner/name` used by the installer. |
-| `TIYI_VERSION` | latest stable | Pin a release tag, for example `v3.6.0`. |
+| `TIYI_VERSION` | latest stable | Pin a release tag, for example `v3.7.0`. |
 | `TIYI_PREFIX` | `/usr/local/bin` | Install directory for the `tiyi` binary. |
 
 The one-line command above installs the binary and starts the recommended
@@ -90,8 +90,8 @@ in, and add your first site. Full walkthrough:
 [中文](docs/zh/getting-started.md).
 
 > **Existing installation:** use the [upgrade and migration guide](docs/en/upgrade-migration.md)
-> instead of the new-host installer. State created before v3.6.0 is
-> incompatible with v3.6.0 and uses the documented backup and purge flow.
+> instead of the new-host installer. v3.7.0 cannot open state created by
+> v3.6.0 or earlier releases and uses the documented backup and purge flow.
 
 ### Advanced: choose your own admin password
 
@@ -150,15 +150,23 @@ One Tiyi node gives you the **whole** WAF — not a stripped-down free tier.
 Everything below is included and runs locally with no license:
 
 - **OWASP CRS 4 out of the box** — per-site overrides, paranoia levels, anomaly
-  scoring, exclusion packages, and custom SecLang rules, all without forking the
-  ruleset.
+  scoring, exclusion packages, custom SecLang rules, a complete embedded-file
+  integrity manifest, and causal CPU-pressure degradation, all without forking
+  the ruleset.
+- **Adaptive traffic controls** — HTTPS sites can require silent browser
+  proof-of-work or private WebAuthn confirmation; rolling-window rate limits
+  support temporary site/global bans and a separate challenge response.
+- **IP Lists v2 + Country Access** — manual and subscribed provider/file feeds
+  publish atomic snapshots with last-good protection, while country policy is
+  backed by the explicitly active Country database.
 - **Reverse proxy + automatic TLS** — Caddy under the hood, ACME HTTP-01 and
   DNS-01 (Cloudflare), wildcard certs, and uploaded enterprise certs.
 - **Path-based routing** — fan one host out to many upstream pools by path
   prefix, each with its own health probe.
 - **Built-in observability** — exact counters, normalized URL/UA Top, a per-site
-  API Inventory, immutable SecurityFacts, optional bounded request-header/body
-  evidence, and a Prometheus exporter — no external time-series database.
+  API Inventory, bounded client-fair SecurityFact samples, optional bounded
+  request-header/body evidence, and a Prometheus exporter — no external
+  time-series database.
 - **Direct investigation, not a firehose** — Security Events pivots immutable
   facts by attacker/type/target, Attack Logs preserves request-level rule
   evidence, and optional default-off AI remains advisory.
@@ -197,6 +205,9 @@ download-and-start script.
 This is the **distribution channel** for Tiyi — the installer, the public
 release-signing key, and the docs. Compiled, signed binaries are attached to
 each [GitHub Release](https://github.com/zzmzm/tiyi/releases) (they are not committed to the repo).
+
+Current release notes: [v3.7.0](docs/en/release-3.7.0.md) ·
+[中文](docs/zh/release-3.7.0.md).
 
 ## Verify a download manually
 

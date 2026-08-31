@@ -16,7 +16,7 @@
 #   TIYI_MIRROR      auto | github | gitee     (default: auto)
 #   TIYI_REPO        GitHub owner/name         (default: zzmzm/tiyi)
 #   TIYI_GITEE_REPO  Gitee owner/name          (default: tiyisec/tiyi)
-#   TIYI_VERSION     pin a tag, e.g. v3.6.0    (default: latest stable)
+#   TIYI_VERSION     pin a tag, e.g. v3.7.0    (default: latest stable)
 #   TIYI_PREFIX      install directory         (default: /usr/local/bin)
 set -euo pipefail
 
@@ -187,7 +187,7 @@ install_check_port() {
 	if [ -n "$proc" ]; then
 		doctor_detail "Example when appropriate: sudo systemctl stop $proc"
 	fi
-	doctor_detail "Or move Tiyi: set $key to \"$fallback\" in /etc/tiyi/server.yaml."
+	doctor_detail "Or move Tiyi: set $key to \"$fallback\" in /etc/tiyi/tiyi.yaml."
 }
 
 run_install_environment_check() {
@@ -195,7 +195,7 @@ run_install_environment_check() {
 	echo
 	printf '%sInstallation environment check%s\n' "$C_BOLD" "$C_RESET"
 	if "$installed_bin" doctor --help >/dev/null 2>&1; then
-		"$installed_bin" doctor --mode standalone || true
+		"$installed_bin" doctor --mode run || true
 		return
 	fi
 	install_check_sudo_path "$installed_bin"
@@ -409,16 +409,16 @@ Next — start Tiyi as a hardened systemd service (the recommended default):
   Prefer the foreground? It stores state under /var/lib/tiyi and binds ports
   80/443, so it needs root, and prints the admin password to the console:
 
-      sudo tiyi standalone
+      sudo tiyi run
 
   If sudo cannot find tiyi, run:
 
-      sudo "$installed_bin" standalone
+      sudo "$installed_bin" run
 
   To run as a normal user (no sudo), point it at writable paths and high ports:
 
       mkdir -p /tmp/waf
-      tiyi standalone \\
+      tiyi run \\
         --state-db /tmp/waf/state.db \\
         --caddy-admin-socket /tmp/waf/caddy.sock \\
         --admin-socket /tmp/waf/admin.sock \\

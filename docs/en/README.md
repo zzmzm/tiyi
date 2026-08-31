@@ -9,9 +9,11 @@ the result. Use the path that matches the job in front of you.
 | Goal | Start here |
 |---|---|
 | Install one node and block a test attack | [Getting started](getting-started.md) |
+| Copy a complete startup config or declarative manifest | [Configuration templates](configuration.md) |
 | Publish sites, tune WAF, investigate traffic, and operate agents | [Operations](operations.md) |
 | Diagnose startup, routing, TLS, WAF, login, agent, or telemetry problems | [Troubleshooting](troubleshooting.md) |
 | Update, restore, or move an installation | [Upgrade and migration](upgrade-migration.md) |
+| Review the current release and its clean-state transition | [v3.7.0 release notes](release-3.7.0.md) |
 | Browse the full CLI, API, deployment, and concepts reference | [tiyisec.com/docs](https://www.tiyisec.com/docs/) |
 
 ## The request path
@@ -19,13 +21,13 @@ the result. Use the path that matches the job in front of you.
 ```text
 client -> listener/TLS -> site + path route -> WAF policy -> upstream
                               |                    |
-                              +-> exact counters   +-> immutable SecurityFacts
+                              +-> exact counters   +-> bounded SecurityFact samples
                                                      -> optional evidence/alerts
                                                      -> producer-direct SIEM
 ```
 
 Start investigations with a site, time range, and `X-Request-Id`. Tiyi keeps
-exact hot-path counters separate from immutable facts, optional retained
+exact hot-path counters separate from bounded client-fair fact samples, optional retained
 evidence, and export delivery, so an unavailable SIEM or a slow storage worker
 cannot hold up proxy traffic.
 
@@ -35,7 +37,8 @@ cannot hold up proxy traffic.
 - **Local CLI** over the root-owned admin Unix socket; no JWT is required on the
   same host when socket permissions allow access.
 - **Remote CLI/API** over ConnectRPC with `--api` and `--token`.
-- **Declarative apply** with `tiyi diff -f FILE` and `tiyi apply -f FILE`.
+- **Declarative apply** with `tiyi diff -f FILE` and `tiyi apply -f FILE`;
+  start from the [four-kind template](templates/apply.yaml).
 
 Run `tiyi <command> --help` for the exact flags supported by your installed
 binary. If a reference and the binary disagree, the binary is authoritative.

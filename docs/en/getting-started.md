@@ -28,7 +28,7 @@ curl -fsSL https://gitee.com/tiyisec/tiyi/raw/main/install.sh | TIYI_MIRROR=gite
 Pin a version or change the install prefix:
 
 ```sh
-TIYI_VERSION=v3.6.0 TIYI_PREFIX="$HOME/.local/bin" \
+TIYI_VERSION=v3.7.0 TIYI_PREFIX="$HOME/.local/bin" \
   bash -c "$(curl -fsSL https://www.tiyisec.com/install.sh)"
 ```
 
@@ -39,7 +39,7 @@ Installer environment variables:
 | `TIYI_MIRROR` | `auto` | Download source: `auto` (GitHub primary, Gitee fallback), `github`, or `gitee`. |
 | `TIYI_REPO` | `zzmzm/tiyi` | GitHub `owner/name` used by the installer. |
 | `TIYI_GITEE_REPO` | `tiyisec/tiyi` | Gitee `owner/name` used by the installer. |
-| `TIYI_VERSION` | latest stable | Pin a release tag, for example `v3.6.0`. |
+| `TIYI_VERSION` | latest stable | Pin a release tag, for example `v3.7.0`. |
 | `TIYI_PREFIX` | `/usr/local/bin` | Install directory for the `tiyi` binary. |
 
 ## 2. Verify a download manually (optional)
@@ -72,8 +72,8 @@ base64.
 ## 3. Run
 
 > Existing installation? Use [Upgrade and migration](upgrade-migration.md)
-> before the new-host steps below. State created before v3.6.0 requires the
-> documented backup and purge flow when moving to v3.6.0.
+> before the new-host steps below. v3.7.0 cannot open state created by v3.6.0
+> or earlier releases and requires the documented backup and purge flow.
 
 A single-host install runs the complete Tiyi instance with its built-in local
 data plane and dashboard in one process. By default Tiyi stores its state under
@@ -87,12 +87,14 @@ On first boot Tiyi auto-creates an `admin` account and prints a one-time random
 password to the console — copy it before it scrolls away (it is stored only as a
 hash). Open `http://127.0.0.1:8080` and sign in as `admin`; the console lands
 at **Overview**. Its stable work areas are Overview, Application Delivery,
-Protection, Agent Fleet, Security & Traffic, Alerts & Notifications, System
+Protection, Agent Fleet, Logs, Alerts & Notifications, System
 Monitoring, and System Administration. Permission filtering hides empty groups
 without changing deep links. Add your first site under **Application Delivery → Sites**. For the
 full operator flow (config file, admin socket, sites, upstreams, certificates,
-WAF policies), continue with the [operations guide](operations.md). For errors,
-use [troubleshooting](troubleshooting.md).
+WAF policies), continue with the [operations guide](operations.md). To write a
+file without guessing field names, use the complete
+[`tiyi.yaml` and declarative apply templates](configuration.md). For errors, use
+[troubleshooting](troubleshooting.md).
 
 To run as a normal user without `sudo`, point Tiyi at writable paths and high
 ports — the advanced command below does exactly that.
@@ -150,6 +152,10 @@ variables only when your service manager, container runtime, or secret manager
 injects config at runtime. Env names mirror config keys: prefix `TIYI_`,
 uppercase the key, and replace dots with underscores. For example,
 `auth.jwt_secret` becomes `TIYI_AUTH_JWT_SECRET`.
+
+Use the [complete annotated `tiyi.yaml` template](templates/tiyi.yaml) for
+file-based configuration. It includes every supported process key, secure-file
+notes, and a matching [install/validate procedure](configuration.md).
 
 Common config env overrides:
 

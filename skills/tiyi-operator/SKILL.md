@@ -58,7 +58,7 @@ actual installation:
 
 ```sh
 command -v tiyi
-tiyi version
+tiyi --version
 tiyi --help
 tiyi doctor --no-color
 systemctl status tiyi --no-pager
@@ -110,7 +110,7 @@ permissions; do not fall back to a more privileged token without approval.
 
 Use the Web UI for guided configuration, diffs, evidence review, and visual
 status. Typical work areas are Application Delivery, Protection, Agent Fleet,
-Security & Traffic, Alerts & Notifications, System Monitoring, and System
+Logs, Alerts & Notifications, System Monitoring, and System
 Administration. Confirm labels in the installed UI because navigation evolves.
 
 ## Resource map
@@ -122,7 +122,7 @@ Use `tiyi <resource> --help` to discover the exact installed subcommands.
 | Publish and route applications | `site`, `upstream`, Application Delivery |
 | Manage HTTPS | `cert`, site TLS settings, certificate/ACME UI |
 | Configure WAF behavior | `policy`, `rule`, `crs`, `trust`, Protection |
-| Investigate traffic and attacks | `log`, `alert`, `audit`, Security & Traffic |
+| Investigate traffic and attacks | `log`, `alert`, `audit`, Logs |
 | Manage remote data planes | `agents`, `agent-group`, Agent Fleet |
 | Manage operator access | `auth`, `user`, `role`, System Administration |
 | Inspect platform health | `doctor`, `system`, systemd, System Monitoring |
@@ -232,7 +232,7 @@ tiyi policy versions --help
    skips remaining inspection and needs destructive confirmation.
 5. Preview the diff, confirm, apply, and send both the legitimate reproducer
    and malicious regression probes.
-6. Watch blocked rate, status codes, SecurityFacts, attack logs, and audit
+6. Watch blocked rate, status codes, bounded SecurityFact samples, attack logs, and audit
    events. Roll back to the recorded policy version if protection regresses.
 
 Never apply AI Advisor output directly. Treat it as an advisory proposal and
@@ -257,7 +257,7 @@ tiyi system health
 ```
 
 Keep the `X-Request-Id`, site, exact timestamp/timezone, client path, and Agent
-revision. Correlate immutable SecurityFacts, Attack Logs, Access Logs, Runtime
+revision. Correlate bounded SecurityFact samples, Attack Logs, Access Logs, Runtime
 Errors, alerts, and the audit chain. Load unredacted Request Evidence only when
 authorized and necessary.
 
@@ -279,6 +279,18 @@ Common checks:
 - **Blocked request has an empty reply:** query `/debug/logsink/stats` through
   the local admin socket. A nonzero `panicked` counter indicates a recovered
   observability-boundary panic and should be escalated with sanitized evidence.
+- **Tiyi-marked 503 or CRS bypass:** inspect `X-Tiyi-Enforcement-Reason`, Logs
+  -> Enforcement, the node WAF-pressure trend, and local
+  `/debug/wafoverload/stats`. `cpu_overload_reject` returns 503;
+  `cpu_overload_bypass` skips only Coraza/CRS. Observation backlog does not
+  trigger WAF overload.
+- **Bot challenge failure:** confirm the site is HTTPS-only, then inspect
+  certificate/time, narrow exemptions, trusted-list references, browser
+  cookie/storage policy, and WebAuthn support for human verification.
+- **IP subscription protected:** inspect sync history, response limits,
+  parser/JSONPath output, deletion-ratio hold, and consumer compilation. Never
+  bypass an empty/invalid result or silently trust a provider feed; the last
+  accepted snapshot remains active.
 
 Treat Geo/ASN labels as advisory exit-network metadata, not identity.
 
@@ -326,19 +338,20 @@ boundary.
 1. Read the release notes and compatibility/reset guidance for the current-to-
    target version.
 2. When the target cannot open the current state (including moving state from
-   a release before v3.6.0 to v3.6.0), do not offer state reuse. Stop the
+   v3.6.0 or an earlier release to v3.7.0), do not offer state reuse. Stop the
    service and require a verified, root-restricted backup of the complete
    state/config set, external KEK, certificate sources, license, logs, binary,
    and unit definition. Then use the documented sequence:
    `sudo tiyi uninstall --purge`, update the retained binary with
    `sudo /usr/local/bin/tiyi update --yes`, and run
    `sudo /usr/local/bin/tiyi install --now`. Recreate resources and re-enroll
-   Agents when required. Never restore incompatible state into the new live
+   every remote Agent; never restore an old identity, spool, or bundle cache.
+   Never restore incompatible state into the new live
    paths, and never run only `systemctl restart tiyi` after purge; the unit no
    longer exists. Guide:
    `https://www.tiyisec.com/docs/upgrade-migration.html` (English) or
    `https://www.tiyisec.com/zh/docs/upgrade-migration.html` (中文).
-3. For compatible targets, record `tiyi version`, health, unit/config, Agent
+3. For compatible targets, record `tiyi --version`, health, unit/config, Agent
    revisions, and a tested rollback package; take a consistent backup of
    coupled state.
 4. Check without changing anything:

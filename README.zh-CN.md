@@ -60,7 +60,7 @@ Release 镜像；可用 `TIYI_MIRROR=github|gitee`、`TIYI_VERSION`、
 | `TIYI_MIRROR` | `auto` | 下载来源：`auto`（GitHub 优先，Gitee 回退）、`github` 或 `gitee`。 |
 | `TIYI_REPO` | `zzmzm/tiyi` | 安装器使用的 GitHub `owner/name`。 |
 | `TIYI_GITEE_REPO` | `tiyisec/tiyi` | 安装器使用的 Gitee `owner/name`。 |
-| `TIYI_VERSION` | 最新稳定版 | 固定发行标签，例如 `v3.6.0`。 |
+| `TIYI_VERSION` | 最新稳定版 | 固定发行标签，例如 `v3.7.0`。 |
 | `TIYI_PREFIX` | `/usr/local/bin` | `tiyi` 二进制安装目录。 |
 
 上面的一行命令会安装二进制并启动推荐的 systemd 服务。若要改为前台手动运行，
@@ -85,7 +85,7 @@ tiyi run \
 [English](docs/en/getting-started.md)。
 
 > **已有安装：**不要使用新主机安装器，请先阅读[升级与迁移](docs/zh/upgrade-migration.md)。
-> v3.6.0 与更早版本创建的状态不兼容，需要执行文档中的备份和 purge 流程。
+> v3.7.0 无法读取 v3.6.0 或更早版本创建的状态，需要执行文档中的备份和 purge 流程。
 
 ### 进阶：自定义管理员密码
 
@@ -140,14 +140,18 @@ TIYI_AUTH_BOOTSTRAP_ADMIN_PASSWORD='admin123@xxxxxxm' \
 一个太一节点给你**完整**的 WAF —— 而不是阉割版的免费档。下面的一切都已包含，
 无需任何授权即可本地运行：
 
-- **开箱即用的 OWASP CRS 4** —— 按站点覆盖、偏执级别、异常评分、排除包，以及自
-  定义 SecLang 规则，全部无需 fork 规则集。
+- **开箱即用的 OWASP CRS 4** —— 按站点覆盖、偏执级别、异常评分、排除包、自定义
+  SecLang 规则、完整内嵌文件完整性清单与因果 CPU 压力降级，全部无需 fork 规则集。
+- **自适应流量控制** —— HTTPS 站点可要求静默浏览器工作量证明或私密 WebAuthn
+  确认；滚动窗口限速支持站点/全局临时封禁与独立挑战响应。
+- **IP Lists v2 + Country Access** —— 手动列表与 provider/文件订阅以原子快照发布并
+  保留 last-good；国家策略使用明确激活的 Country 数据库。
 - **反向代理 + 自动 TLS** —— 底层是 Caddy：ACME HTTP-01 与 DNS-01（Cloudflare）、
   通配符证书与上传的企业证书。
 - **路径路由** —— 把一个主机按路径前缀分发到多个上游池，每个都有独立健康探测。
 - **内置可观测性** —— 精确计数、规范化 URL/UA Top、按站点的 API Inventory、
-  不可变 SecurityFact、可选的有界请求头/请求体证据，以及 Prometheus 导出器 ——
-  无需外部时序数据库。
+  客户端公平的有界 SecurityFact 样本、可选的有界请求头/请求体证据，以及
+  Prometheus 导出器 —— 无需外部时序数据库。
 - **直接调查，而不是告警洪流** —— 安全事件按攻击者/类型/目标分析不可变事实，
   攻击日志保留请求级规则证据；可选 AI 默认关闭且始终只提供建议。
 - **防篡改审计链**、生产节点直达 **SIEM 转发**（源生 Caddy/Coraza 或
@@ -179,6 +183,9 @@ sudo tiyi install --mode agent --unit-name tiyi-agent --now
 
 这是太一的**分发渠道** —— 安装脚本、公开的发布签名公钥与文档。编译并签名的
 二进制作为资产附在每个 [GitHub Release](https://github.com/zzmzm/tiyi/releases) 上（不提交进仓库）。
+
+当前发行说明：[v3.7.0](docs/zh/release-3.7.0.md) ·
+[English](docs/en/release-3.7.0.md)。
 
 ## 手动校验下载
 

@@ -25,7 +25,7 @@ curl -fsSL https://gitee.com/tiyisec/tiyi/raw/main/install.sh | TIYI_MIRROR=gite
 指定版本或更改安装目录：
 
 ```sh
-TIYI_VERSION=v3.6.0 TIYI_PREFIX="$HOME/.local/bin" \
+TIYI_VERSION=v3.7.0 TIYI_PREFIX="$HOME/.local/bin" \
   bash -c "$(curl -fsSL https://www.tiyisec.com/install.sh)"
 ```
 
@@ -36,7 +36,7 @@ TIYI_VERSION=v3.6.0 TIYI_PREFIX="$HOME/.local/bin" \
 | `TIYI_MIRROR` | `auto` | 下载来源：`auto`（GitHub 优先，Gitee 回退）、`github` 或 `gitee`。 |
 | `TIYI_REPO` | `zzmzm/tiyi` | 安装器使用的 GitHub `owner/name`。 |
 | `TIYI_GITEE_REPO` | `tiyisec/tiyi` | 安装器使用的 Gitee `owner/name`。 |
-| `TIYI_VERSION` | 最新稳定版 | 固定发行标签，例如 `v3.6.0`。 |
+| `TIYI_VERSION` | 最新稳定版 | 固定发行标签，例如 `v3.7.0`。 |
 | `TIYI_PREFIX` | `/usr/local/bin` | `tiyi` 二进制安装目录。 |
 
 ## 2. 手动校验下载（可选）
@@ -67,7 +67,7 @@ openssl pkeyutl -verify -pubin -inkey release-key.pem -rawin \
 ## 3. 运行
 
 > 已有安装时，请先阅读[升级与迁移](upgrade-migration.md)，不要直接执行下面的新主机
-> 步骤。用 v3.6.0 替换更早版本时，旧状态需要执行文档中的备份和 purge 流程。
+> 步骤。v3.7.0 无法读取 v3.6.0 或更早版本创建的状态，需要执行文档中的备份和 purge 流程。
 
 单机安装会在一个进程中运行完整太一、本机内置数据平面和管理界面。默认情况下太一
 把状态存放在 `/var/lib/tiyi` 并监听 80/443 端口，因此默认方式需要 root：
@@ -79,10 +79,12 @@ sudo tiyi run
 首次启动时，太一会自动创建 `admin` 账户，并向控制台打印一次性随机密码 —— 请在
 它滚走之前复制下来（它仅以哈希形式存储）。打开 `http://127.0.0.1:8080`，用
 `admin` 登录后会进入**总览**。稳定工作域为总览、应用交付、防护策略、节点、
-安全与流量、告警与通知、系统监控、系统管理；权限过滤会隐藏空分组，
+日志、告警与通知、系统监控、系统管理；权限过滤会隐藏空分组，
 但不会改变深链地址。前往**应用交付 → 站点**添加第一个站点。完整的运维流程
 （配置文件、管理套接字、站点、上游、证书、WAF 策略）请继续阅读
-[日常运维](operations.md)；遇到错误请查看[排障](troubleshooting.md)。
+[日常运维](operations.md)。需要直接写文件而不猜字段名时，使用完整的
+[`tiyi.yaml` 与声明式 apply 模板](configuration.md)；遇到错误请查看
+[排障](troubleshooting.md)。
 
 若要以普通用户身份（不用 `sudo`）运行，把太一指向可写路径并使用高端口 ——
 下面的进阶命令正是这么做的。
@@ -136,6 +138,9 @@ sudo tiyi install --mode agent --unit-name tiyi-agent --now
 密钥管理器需要在运行时注入配置时，才使用环境变量。环境变量名与配置键一一对应：
 加 `TIYI_` 前缀，转为大写，并把点替换为下划线。例如 `auth.jwt_secret`
 对应 `TIYI_AUTH_JWT_SECRET`。
+
+文件配置请从[完整注释版 `tiyi.yaml` 模板](templates/tiyi.yaml)开始；其中包含
+当前全部进程配置键、安全文件说明，以及配套的[安装/校验步骤](configuration.md)。
 
 常用配置覆盖：
 

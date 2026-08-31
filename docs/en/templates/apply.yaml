@@ -1,0 +1,88 @@
+# Tiyi declarative resource template
+#
+# Replace the example hosts/backend, verify the CRS version with `tiyi crs
+# list`, preview with `tiyi diff -f apply.yaml`, then run
+# `tiyi apply -f apply.yaml`.
+#
+# A spec is a full replacement of the apply-managed fields, not a merge patch.
+# Removing a document does not delete the corresponding resource.
+
+apiVersion: tiyi.io/v1
+kind: Policy
+metadata:
+  name: app-baseline
+spec:
+  engineState: on          # on | detection_only | off
+  blockingMode: anomaly    # anomaly | self_contained
+  crsRulesetRef: "4.25.1" # existing CRS ID or version
+  status: active           # draft | active | archived
+---
+apiVersion: tiyi.io/v1
+kind: Upstream
+metadata:
+  name: app-pool
+spec:
+  backends:
+    - url: http://127.0.0.1:9000
+      weight: 100
+  loadBalance: round_robin
+  # Empty path disables active probes. When enabled, every backend must pass
+  # the Controller's submit-time preflight.
+  healthCheck:
+    path: ""
+    method: GET
+    expectedStatus: 200
+    intervalSeconds: 30
+    timeoutSeconds: 5
+    unhealthyThreshold: 3
+    healthyThreshold: 2
+    followRedirects: false
+    expectedBody: ""
+    host: ""
+  status: active           # active | disabled
+---
+apiVersion: tiyi.io/v1
+kind: Site
+metadata:
+  name: app-example
+spec:
+  primaryHost: app.example.com
+  aliases:
+    - www.app.example.com
+  upstreamRef: app-pool
+  # Use upstreamRef or upstreamsInline, never both.
+  tls:
+    mode: none             # none | uploaded | managed_acme
+    # For TLS, add certRef/minVersion and httpBehavior. Certificates are
+    # created separately with `tiyi cert upload` or `tiyi cert issue`.
+  waf:
+    enabled: true
+    policyRef: app-baseline
+    mode: blocking
+  botProtection:
+    mode: off               # off | browser_check | human_verification
+    challengeTtlSeconds: 120
+    clearanceTtlSeconds: 3600
+    proofDifficulty: 16
+    bindNetwork: true
+    exemptPaths:
+      - /healthz
+    trustedIpListRefs:
+      - office-addresses
+  status: active           # active | disabled
+---
+apiVersion: tiyi.io/v1
+kind: IpList
+metadata:
+  name: office-addresses
+spec:
+  description: Trusted office egress addresses
+  entries:
+    - cidr: 203.0.113.0/24
+      description: Primary office
+    - cidr: 2001:db8:100::/48
+      description: Primary office IPv6
+      expireAt: 2026-12-31T00:00:00Z
+
+# IpList apply manages addresses only. Create a separate IP-list binding to
+# enforce allow/deny/monitor behavior. geo:* is rejected; use Country Access.

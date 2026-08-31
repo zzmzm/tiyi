@@ -75,6 +75,25 @@ bundle.
   Agent; never force an incompatible identity, spool, or bundle cache.
 - Confirm the applied revision/hash after reconnect, not only online state.
 
+## A request gets a Tiyi 503 or bypasses CRS
+
+Check `X-Tiyi-Enforcement-Reason` and **Logs → Enforcement**. A causal WAF CPU
+reject is `cpu_overload_reject`; a CRS-only degradation is
+`cpu_overload_bypass`. An origin 503 has neither decision. Review the affected
+node's WAF pressure trend and `/debug/wafoverload/stats` on the protected local
+admin socket before changing thresholds. Observation backlog or telemetry gaps
+do not trigger WAF overload.
+
+## Bot challenge or IP subscription fails
+
+- Bot protection requires an HTTPS-only site. Check certificate binding,
+  browser cookie/storage policy, system time, exempt paths, and trusted-list
+  references. Human verification additionally requires WebAuthn support and a
+  user gesture.
+- For an IP subscription, inspect sync history, HTTP status, response limits,
+  parser/JSONPath output, deletion-ratio hold, and consumer compile result. The
+  prior accepted snapshot stays active when an update is protected.
+
 ## Installer refuses the host or startup rejects state
 
 The public installer is for a clean host and refuses an existing binary, state
@@ -84,15 +103,15 @@ migration ledger is incompatible with the running binary.
 Do not edit migration metadata. Follow the
 [upgrade and migration guide](upgrade-migration.md) to select a compatible
 binary/state pair, move a complete installation, or use the documented purge
-flow. State created before v3.6.0 requires the purge flow when moving to
-v3.6.0.
+flow. v3.7.0 cannot open state created by v3.6.0 or earlier releases and
+requires the documented purge and remote-Agent re-enrollment flow.
 
 ## Counters exist but evidence or SIEM is late
 
 Open **System Monitoring → Log Pipeline** and inspect queue depth, drops,
 retries, and panic counters. Request Evidence adds local/store/upload lanes;
 direct SIEM adds raw-source and per-destination lanes. Exact traffic counters,
-immutable SecurityFacts, retained evidence, and SIEM delivery are independent.
+bounded SecurityFact samples, retained evidence, and SIEM delivery are independent.
 Test the destination from the producing node and fix the consumer without
 restarting a healthy data plane unless diagnostics require it.
 

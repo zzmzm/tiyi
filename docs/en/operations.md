@@ -33,7 +33,7 @@ each route after saving.
 
 Use **Overview** to select a site and time range, then check request rate,
 blocked rate, status classes, top attackers, normalized URL Top, and fixed UA
-classes. Use **Security & Traffic → API Inventory** for discovered assets.
+classes. Use **Logs → API Inventory** for discovered assets.
 
 The observation pipeline has four independent truth planes:
 
@@ -66,7 +66,7 @@ delay a WAF response.
 
 1. Open **Alerts & Notifications → Alert Center** and follow the evidence link.
 2. Pin the site and time range. Copy the `X-Request-Id` / unique request ID.
-3. Use **Security & Traffic → Security Events** to pivot immutable facts by
+3. Use **Logs → Security Events** to pivot bounded facts by
    attacker, attack type, or target.
 4. Open the matching **Attack Logs** row, then correlate Access and Runtime
    Error rows by request ID.
@@ -93,6 +93,25 @@ Prefer the narrowest change:
 An IP allow list is not a substitute for a rule exclusion. A WAF bypass skips
 remaining inspection and should be restricted more tightly than a normal
 per-rule pass.
+
+### v3.7 adaptive controls
+
+- Configure **Protection → IP Lists** subscriptions as untrusted inputs: preview
+  parser output, bind only an accepted snapshot, and investigate an **Update
+  protected** hold instead of bypassing empty, oversized, or invalid results.
+  Use **Protection → Country Access** for country policy; `geo:*` is not an
+  IP-list entry.
+- Configure site-wide **Bot protection** only on HTTPS-only sites. Start with
+  browser check, exempt only narrow health/login callbacks, and reserve human
+  verification for flows where a private WebAuthn device gesture is acceptable.
+- Under **System Administration → Settings → WAF overload**, keep **Continue
+  full inspection** unless the service has an explicit availability policy.
+  Reject mode returns 503 with `X-Tiyi-Enforcement-Reason:
+  cpu_overload_reject`; bypass mode skips only Coraza/CRS and remains visible in
+  **Logs → Enforcement**.
+- Rate-limit temporary bans and challenge profiles are independent controls.
+  Verify rolling-window thresholds, site/global scope, TTL, and final response
+  in **Logs → Enforcement** before widening rollout.
 
 ## 5. Operate agents
 
@@ -132,6 +151,12 @@ tiyi apply -f desired.yaml
 tiyi system health
 tiyi audit verify
 ```
+
+For a version-controlled change, start from the
+[complete four-kind manifest](templates/apply.yaml) and review the
+[replacement, reference, transaction, and rollback rules](configuration.md)
+before the first apply. In particular, apply specs replace their managed
+fields; they are not merge patches.
 
 Keep the complete state directory, configuration, external KEK, uploaded
 certificate sources, license file, and declarative manifests in the backup
