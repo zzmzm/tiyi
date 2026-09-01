@@ -193,8 +193,11 @@ custom, discover it from the unit/config and pass it explicitly.
 1. Confirm that the upstream is reachable from every serving node.
 2. Inspect existing sites, pools, hostnames, ports, and path routes.
 3. Create or reuse an upstream pool and health probe.
-4. Create the site with the built-in Standard policy or an explicitly reviewed
-   policy. For initial validation, use TLS `none` or a controlled certificate.
+4. Create the site with the built-in Light policy or an explicitly reviewed
+   policy. Light keeps attack and resource-limit blocking enabled while
+   observing common MIME/parser compatibility mismatches; choose Standard
+   explicitly when strict protocol enforcement is required. For initial
+   validation, use TLS `none` or a controlled certificate.
 5. Test locally with the intended Host header before changing DNS:
 
 ```sh

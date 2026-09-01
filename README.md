@@ -63,7 +63,7 @@ Installer environment variables:
 | `TIYI_MIRROR` | `auto` | Download source: `auto` (GitHub primary, Gitee fallback), `github`, or `gitee`. |
 | `TIYI_REPO` | `zzmzm/tiyi` | GitHub `owner/name` used by the installer. |
 | `TIYI_GITEE_REPO` | `tiyisec/tiyi` | Gitee `owner/name` used by the installer. |
-| `TIYI_VERSION` | latest stable | Pin a release tag, for example `v3.7.0`. |
+| `TIYI_VERSION` | latest stable | Pin a release tag, for example `v3.7.1`. |
 | `TIYI_PREFIX` | `/usr/local/bin` | Install directory for the `tiyi` binary. |
 
 The one-line command above installs the binary and starts the recommended
@@ -206,8 +206,8 @@ This is the **distribution channel** for Tiyi — the installer, the public
 release-signing key, and the docs. Compiled, signed binaries are attached to
 each [GitHub Release](https://github.com/zzmzm/tiyi/releases) (they are not committed to the repo).
 
-Current release notes: [v3.7.0](docs/en/release-3.7.0.md) ·
-[中文](docs/zh/release-3.7.0.md).
+Current release notes: [v3.7.1](docs/en/release-3.7.1.md) ·
+[中文](docs/zh/release-3.7.1.md).
 
 ## Verify a download manually
 

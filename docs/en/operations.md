@@ -20,7 +20,9 @@ tiyi site list
 ```
 
 A newly created site is active immediately. The one-step form creates the
-upstream pool and uses the built-in Standard policy. Use **Application
+upstream pool and uses the built-in Light policy. Light keeps attack and
+resource-limit blocking enabled while treating common MIME/parser mismatches
+as compatibility observations. Use **Application
 Delivery → Sites** for TLS, path routes, health state, and per-site security
 overrides. Use an uploaded certificate or managed ACME before changing public
 DNS to the Tiyi listener.

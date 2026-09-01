@@ -12,7 +12,7 @@
 | 发布站点、调优 WAF、调查流量与运维 Agent | [日常运维](operations.md) |
 | 排查启动、路由、TLS、WAF、登录、Agent 或遥测问题 | [排障](troubleshooting.md) |
 | 更新、恢复或迁移现有安装 | [升级与迁移](upgrade-migration.md) |
-| 查看当前版本与干净状态过渡要求 | [v3.7.0 发行说明](release-3.7.0.md) |
+| 查看当前版本与升级路径 | [v3.7.1 发行说明](release-3.7.1.md) |
 | 浏览完整 CLI、API、部署和概念参考 | [tiyisec.com/docs](https://www.tiyisec.com/zh/docs/) |
 
 ## 一次请求如何流过太一

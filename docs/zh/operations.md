@@ -18,7 +18,8 @@ curl -i -H 'Host: shop.example.com' http://127.0.0.1/
 tiyi site list
 ```
 
-新站点创建后立即生效；一步式命令会创建上游池并使用内置 Standard 策略。在
+新站点创建后立即生效；一步式命令会创建上游池并使用内置 Light 策略。Light 保持
+攻击与资源限制拦截，只把常见 MIME/解析器不匹配作为兼容性观察。在
 **Application Delivery → Sites** 管理 TLS、路径路由、健康状态与站点级安全覆盖。
 公网 DNS 指向太一前，请先配置上传证书或托管 ACME。
 
