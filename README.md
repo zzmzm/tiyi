@@ -153,9 +153,12 @@ Everything below is included and runs locally with no license:
   scoring, exclusion packages, custom SecLang rules, a complete embedded-file
   integrity manifest, and causal CPU-pressure degradation, all without forking
   the ruleset.
-- **Adaptive traffic controls** — HTTPS sites can require silent browser
-  proof-of-work or private WebAuthn confirmation; rolling-window rate limits
-  support temporary site/global bans and a separate challenge response.
+- **Bot protection** — HTTPS-only sites can require silent browser proof-of-work
+  or private WebAuthn confirmation, with bounded clearance, path and trusted-IP
+  exemptions, and exact **Logs → Bot Analytics** admission outcomes. The gate
+  verifies visitors; it does not identify bots or invent a pass rate.
+- **Adaptive traffic controls** — rolling-window rate limits support temporary
+  site/global bans and a separate challenge response.
 - **IP Lists v2 + Country Access** — manual and subscribed provider/file feeds
   publish atomic snapshots with last-good protection, while country policy is
   backed by the explicitly active Country database.

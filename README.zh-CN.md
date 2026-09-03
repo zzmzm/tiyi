@@ -142,8 +142,10 @@ TIYI_AUTH_BOOTSTRAP_ADMIN_PASSWORD='admin123@xxxxxxm' \
 
 - **开箱即用的 OWASP CRS 4** —— 按站点覆盖、偏执级别、异常评分、排除包、自定义
   SecLang 规则、完整内嵌文件完整性清单与因果 CPU 压力降级，全部无需 fork 规则集。
-- **自适应流量控制** —— HTTPS 站点可要求静默浏览器工作量证明或私密 WebAuthn
-  确认；滚动窗口限速支持站点/全局临时封禁与独立挑战响应。
+- **Bot 防护** —— 仅 HTTPS 站点可要求静默浏览器工作量证明或私密 WebAuthn 确认，
+  带有界 Clearance、路径/可信 IP 豁免，以及 **日志 → Bot 分析** 的精确准入结果。
+  该门只做访客验证，不识别 Bot，也不编造通过率。
+- **自适应流量控制** —— 滚动窗口限速支持站点/全局临时封禁与独立挑战响应。
 - **IP Lists v2 + Country Access** —— 手动列表与 provider/文件订阅以原子快照发布并
   保留 last-good；国家策略使用明确激活的 Country 数据库。
 - **反向代理 + 自动 TLS** —— 底层是 Caddy：ACME HTTP-01 与 DNS-01（Cloudflare）、
