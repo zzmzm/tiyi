@@ -13,7 +13,7 @@ the result. Use the path that matches the job in front of you.
 | Publish sites, tune WAF, investigate traffic, and operate agents | [Operations](operations.md) |
 | Diagnose startup, routing, TLS, WAF, login, agent, or telemetry problems | [Troubleshooting](troubleshooting.md) |
 | Update, restore, or move an installation | [Upgrade and migration](upgrade-migration.md) |
-| Review the current release and upgrade path | [v3.7.1 release notes](release-3.7.1.md) |
+| Review the current release and upgrade path | [v3.7.2 release notes](release-3.7.2.md) |
 | Browse the full CLI, API, deployment, and concepts reference | [tiyisec.com/docs](https://www.tiyisec.com/docs/) |
 
 ## The request path

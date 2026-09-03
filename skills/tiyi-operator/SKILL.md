@@ -260,9 +260,13 @@ tiyi system health
 ```
 
 Keep the `X-Request-Id`, site, exact timestamp/timezone, client path, and Agent
-revision. Correlate bounded SecurityFact samples, Attack Logs, Access Logs, Runtime
+revision. Start from Overview's protection chain for the five request stages.
+Use Logs → Enforcement for terminal decisions and Logs → Bot Analytics for
+admission outcomes that never became Enforcement decisions. Correlate bounded
+SecurityFact samples, Attack Logs, Access Logs, Runtime
 Errors, alerts, and the audit chain. Load unredacted Request Evidence only when
-authorized and necessary.
+authorized and necessary. The evidence preview starts with an HTTP-style request
+line.
 
 Common checks:
 

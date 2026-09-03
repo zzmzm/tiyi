@@ -33,9 +33,12 @@ each route after saving.
 
 ## 2. Establish a baseline
 
-Use **Overview** to select a site and time range, then check request rate,
-blocked rate, status classes, top attackers, normalized URL Top, and fixed UA
-classes. Use **Logs → API Inventory** for discovered assets.
+Use **Overview** to select a site and time range. Read the protection chain
+first — Bot gate → rate/challenge → IP/country → resource guards → WAF/CRS →
+origin — then check request rate, terminated totals, status classes, top
+attackers, normalized URL Top, and fixed UA classes. The Bot stage opens
+**Logs → Bot Analytics**; other stages open **Logs → Enforcement** already
+filtered. Use **Logs → API Inventory** for discovered assets.
 
 The observation pipeline has four independent truth planes:
 
@@ -56,7 +59,9 @@ optionally override a site from its **Logging & evidence** drawer.
 `security_only` retains evidence for requests that produced a SecurityFact;
 `retained_logs` attaches it to retained Attack/Access rows. Captured Cookie,
 Authorization, API keys, personal data, and bodies are intentionally
-unredacted. Restrict log-read access and use short retention.
+unredacted. Restrict log-read access and use short retention. The in-console
+preview starts with an HTTP-style request line (method, exact target, client
+HTTP version), then Host and captured headers.
 
 Configure destinations under **System Administration → Settings → SIEM**. Each
 target independently selects native Caddy access JSON, native Coraza audit

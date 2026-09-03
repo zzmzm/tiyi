@@ -60,7 +60,7 @@ Release 镜像；可用 `TIYI_MIRROR=github|gitee`、`TIYI_VERSION`、
 | `TIYI_MIRROR` | `auto` | 下载来源：`auto`（GitHub 优先，Gitee 回退）、`github` 或 `gitee`。 |
 | `TIYI_REPO` | `zzmzm/tiyi` | 安装器使用的 GitHub `owner/name`。 |
 | `TIYI_GITEE_REPO` | `tiyisec/tiyi` | 安装器使用的 Gitee `owner/name`。 |
-| `TIYI_VERSION` | 最新稳定版 | 固定发行标签，例如 `v3.7.1`。 |
+| `TIYI_VERSION` | 最新稳定版 | 固定发行标签，例如 `v3.7.2`。 |
 | `TIYI_PREFIX` | `/usr/local/bin` | `tiyi` 二进制安装目录。 |
 
 上面的一行命令会安装二进制并启动推荐的 systemd 服务。若要改为前台手动运行，
@@ -184,8 +184,8 @@ sudo tiyi install --mode agent --unit-name tiyi-agent --now
 这是太一的**分发渠道** —— 安装脚本、公开的发布签名公钥与文档。编译并签名的
 二进制作为资产附在每个 [GitHub Release](https://github.com/zzmzm/tiyi/releases) 上（不提交进仓库）。
 
-当前发行说明：[v3.7.1](docs/zh/release-3.7.1.md) ·
-[English](docs/en/release-3.7.1.md)。
+当前发行说明：[v3.7.2](docs/zh/release-3.7.2.md) ·
+[English](docs/en/release-3.7.2.md)。
 
 ## 手动校验下载
 
