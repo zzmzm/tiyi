@@ -106,96 +106,12 @@ TIYI_AUTH_BOOTSTRAP_ADMIN_PASSWORD='admin123@xxxxxxm' \
 
 用户名默认 `admin`。仅当不存在任何用户时才会自动生成密码，因此重启都是空操作。
 
-### 运行时配置：`tiyi.yaml`
+### 通过环境变量配置运行时
 
-持久化服务配置优先写入 `tiyi.yaml`。它只控制进程启动 —— 监听地址、状态路径、
-认证、更新与 Geo，不会创建站点、上游、WAF 策略或 IP 列表绑定。保存为
-`/etc/tiyi/tiyi.yaml`；打包的 unit 读取该路径。前台进程可用
-`tiyi --config /etc/tiyi/tiyi.yaml run`。
-
-```yaml
-# 太一进程配置模板
-# 保存为 /etc/tiyi/tiyi.yaml。
-
-server:
-  addr: "0.0.0.0:8080"
-
-store:
-  state_db: "/var/lib/tiyi/state.db"
-
-log:
-  # debug | info | warn | error
-  level: "info"
-
-proxy:
-  caddy_admin_socket: "/var/lib/tiyi/caddy-admin.sock"
-  http_addr: ":80"
-  https_addr: ":443"
-
-crypto:
-  # 留空表示 <state-db 所在目录>/kek.bin；太一会创建并持续复用该密钥。
-  # 必须与 state.db 一起备份。若改用外部路径，先创建一个服务用户可读的
-  # 32 字节文件，再把绝对路径写在这里。
-  kek_file: ""
-
-auth:
-  # 生产环境：替换为至少 32 字节的私密随机值。留空会在每次重启时生成临时
-  # 签名密钥，使已有会话失效。可用 openssl rand -base64 48 生成。
-  jwt_secret: ""
-  access_token_ttl: "8h"
-  refresh_token_ttl: "168h"
-  # 对外控制台使用 HTTPS 时设为 true。
-  refresh_cookie_secure: false
-
-  # 只在创建第一个用户时使用。四项全留空时，太一创建 admin 并打印一次性
-  # 随机密码。
-  bootstrap_admin_username: ""
-  bootstrap_admin_password: ""
-  bootstrap_admin_email: ""
-  bootstrap_admin_name: ""
-
-  # local | ldap | radius。外部 provider 只认证已有太一用户，不创建用户或授权。
-  provider: "local"
-  ldap:
-    server: ""
-    bind_dn: ""
-    bind_password: ""
-    base_dn: ""
-    user_filter: "(uid={username})"
-    email_attr: "mail"
-    display_name_attr: "cn"
-    group_attr: "memberOf"
-    start_tls: false
-    skip_tls_verify: false
-  radius:
-    server: ""
-    secret: ""
-    nas_identifier: "tiyi"
-
-license:
-  # 留空保持 Community 单节点行为。
-  key_path: ""
-
-update:
-  repo: "zzmzm/tiyi"
-  channel: "stable" # stable | prerelease
-  mirror: "auto"    # auto | github | gitee
-  api_base_url: "https://api.github.com"
-
-geo:
-  # 离线环境设为 false，再从设置页上传 MMDB。
-  auto_update: true
-  # Go duration，最小 1h。
-  update_interval: "24h"
-```
-
-带注释的完整副本见 [`docs/zh/templates/tiyi.yaml`](docs/zh/templates/tiyi.yaml)。
-站点、上游、策略与 IP 列表使用另一份文件：
-[`docs/zh/templates/apply.yaml`](docs/zh/templates/apply.yaml)。
-
-只有当 service manager、容器运行时或密钥管理器需要在运行时注入配置时，
-才使用环境变量。环境变量名与配置键一一对应：加 `TIYI_` 前缀，转为大写，并把点
-替换为下划线。例如 `auth.jwt_secret` 对应 `TIYI_AUTH_JWT_SECRET`。
+持久化服务配置优先写入 `tiyi.yaml`。只有当 service manager、容器运行时或
+密钥管理器需要在运行时注入配置时，才使用环境变量。环境变量名与配置键一一对应：
+加 `TIYI_` 前缀，转为大写，并把点替换为下划线。例如 `auth.jwt_secret`
+对应 `TIYI_AUTH_JWT_SECRET`。
 
 常用配置覆盖：
 

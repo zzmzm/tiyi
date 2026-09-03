@@ -113,99 +113,12 @@ TIYI_AUTH_BOOTSTRAP_ADMIN_PASSWORD='admin123@xxxxxxm' \
 The username defaults to `admin`. Auto-generation only fires when no users
 exist, so restarts are no-ops.
 
-### Runtime config: `tiyi.yaml`
+### Runtime config via environment
 
-Prefer `tiyi.yaml` for persistent service configuration. It controls process
-startup only — listeners, state path, authentication, update, and Geo. It does
-not create sites, upstreams, WAF policies, or IP-list bindings. Save it as
-`/etc/tiyi/tiyi.yaml`; the packaged unit reads that path. A foreground process
-can use `tiyi --config /etc/tiyi/tiyi.yaml run`.
-
-```yaml
-# Tiyi process configuration template
-# Save as /etc/tiyi/tiyi.yaml.
-
-server:
-  addr: "0.0.0.0:8080"
-
-store:
-  state_db: "/var/lib/tiyi/state.db"
-
-log:
-  # debug | info | warn | error
-  level: "info"
-
-proxy:
-  caddy_admin_socket: "/var/lib/tiyi/caddy-admin.sock"
-  http_addr: ":80"
-  https_addr: ":443"
-
-crypto:
-  # Empty means <state-db-dir>/kek.bin. Tiyi creates and reuses that key.
-  # Back it up with state.db. For an external path, first create a 32-byte
-  # service-readable file and put its absolute path here.
-  kek_file: ""
-
-auth:
-  # Production: replace with a private random value of at least 32 bytes.
-  # Empty creates an ephemeral signing secret and invalidates sessions on every
-  # restart. One way to generate a value: openssl rand -base64 48
-  jwt_secret: ""
-  access_token_ttl: "8h"
-  refresh_token_ttl: "168h"
-  # Use true when the public console URL is HTTPS.
-  refresh_cookie_secure: false
-
-  # First user only. Leave all fields empty for admin + a one-time random
-  # password printed by Tiyi.
-  bootstrap_admin_username: ""
-  bootstrap_admin_password: ""
-  bootstrap_admin_email: ""
-  bootstrap_admin_name: ""
-
-  # local | ldap | radius. External providers authenticate existing Tiyi users
-  # and do not create users or grant roles.
-  provider: "local"
-  ldap:
-    server: ""
-    bind_dn: ""
-    bind_password: ""
-    base_dn: ""
-    user_filter: "(uid={username})"
-    email_attr: "mail"
-    display_name_attr: "cn"
-    group_attr: "memberOf"
-    start_tls: false
-    skip_tls_verify: false
-  radius:
-    server: ""
-    secret: ""
-    nas_identifier: "tiyi"
-
-license:
-  # Empty keeps Community single-node behavior.
-  key_path: ""
-
-update:
-  repo: "zzmzm/tiyi"
-  channel: "stable" # stable | prerelease
-  mirror: "auto"    # auto | github | gitee
-  api_base_url: "https://api.github.com"
-
-geo:
-  # Disable for air-gapped operation, then upload MMDB files in Settings.
-  auto_update: true
-  # Go duration, minimum 1h.
-  update_interval: "24h"
-```
-
-The annotated copy lives at [`docs/en/templates/tiyi.yaml`](docs/en/templates/tiyi.yaml).
-Sites, upstreams, policies, and IP lists use a different file:
-[`docs/en/templates/apply.yaml`](docs/en/templates/apply.yaml).
-
-Use environment variables only when your service manager, container runtime, or
-secret manager injects config at runtime. Env names mirror config keys: prefix
-`TIYI_`, uppercase the key, and replace dots with underscores. For example,
+Prefer `tiyi.yaml` for persistent service configuration. Use environment
+variables only when your service manager, container runtime, or secret manager
+injects config at runtime. Env names mirror config keys: prefix `TIYI_`,
+uppercase the key, and replace dots with underscores. For example,
 `auth.jwt_secret` becomes `TIYI_AUTH_JWT_SECRET`.
 
 Common config env overrides:
