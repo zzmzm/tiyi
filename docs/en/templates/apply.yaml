@@ -12,7 +12,7 @@ kind: Policy
 metadata:
   name: app-baseline
 spec:
-  engineState: on          # on | detection_only | off
+  engineState: "on"          # on | detection_only | off
   blockingMode: anomaly    # anomaly | self_contained
   crsRulesetRef: "4.25.1" # existing CRS ID or version
   status: active           # draft | active | archived
@@ -60,15 +60,14 @@ spec:
     policyRef: app-baseline
     mode: blocking
   botProtection:
-    mode: off               # off | browser_check | human_verification
+    mode: "off"               # off | browser_check | human_verification
     challengeTtlSeconds: 120
     clearanceTtlSeconds: 3600
     proofDifficulty: 16
     bindNetwork: true
     exemptPaths:
       - /healthz
-    trustedIpListRefs:
-      - office-addresses
+    trustedIpListRefs: []
   status: active           # active | disabled
 ---
 apiVersion: tiyi.io/v1
@@ -86,3 +85,5 @@ spec:
 
 # IpList apply manages addresses only. Create a separate IP-list binding to
 # enforce allow/deny/monitor behavior. geo:* is rejected; use Country Access.
+
+# Current apply cannot resolve Bot trusted lists by name. Create the list, then bind it in the site Bot settings.

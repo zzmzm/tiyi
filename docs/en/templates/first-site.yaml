@@ -1,0 +1,24 @@
+apiVersion: tiyi.io/v1
+kind: Upstream
+metadata:
+  name: example-origin
+spec:
+  backends:
+    - url: http://127.0.0.1:9000
+      weight: 100
+  loadBalance: round_robin
+  status: active
+---
+apiVersion: tiyi.io/v1
+kind: Site
+metadata:
+  name: example-site
+spec:
+  primaryHost: app.example.com
+  upstreamRef: example-origin
+  tls:
+    mode: none
+  waf:
+    enabled: true
+    mode: blocking
+  status: active

@@ -1,0 +1,38 @@
+{
+  "apiVersion": "tiyi.io/v1",
+  "kind": "SiteConfiguration",
+  "site": {
+    "name": "imported-app",
+    "primaryHost": "imported.example.com",
+    "upstreams": [
+      {
+        "upstreamId": "00000000-0000-4000-8000-000000000010"
+      }
+    ],
+    "tls": {
+      "mode": "TLS_MODE_NONE"
+    },
+    "waf": {
+      "enabled": true,
+      "mode": "WAF_MODE_BLOCKING"
+    },
+    "status": "RESOURCE_STATUS_DISABLED"
+  },
+  "upstreams": [
+    {
+      "id": "00000000-0000-4000-8000-000000000010",
+      "name": "imported-origin",
+      "endpoints": [
+        {
+          "url": "http://127.0.0.1:9000",
+          "weight": 100
+        }
+      ],
+      "status": "RESOURCE_STATUS_ACTIVE"
+    }
+  ],
+  "routing": {
+    "unmatchedAction": "UNMATCHED_PATH_ACTION_DEFAULT_UPSTREAM"
+  },
+  "containsSecrets": false
+}

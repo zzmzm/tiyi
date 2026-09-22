@@ -1,0 +1,125 @@
+# Customize protection responses
+
+For **v3.8.0**. Give visitors a useful explanation and request ID, and API clients a parseable JSON error.
+Open **System Administration → Settings → Interception responses**, choose format, scenario status/title/message, preview, and select **Save protection responses**.
+
+## 1. Choose format and scenario
+
+One HTML/JSON/plain/custom template set serves six scenarios selected by the actual protection stage:
+
+| Scenario | Default status |
+|---|---|
+| WAF block `waf_block` | 403 |
+| IP access denial `ip_deny` | 403 |
+| Country access denial `country_deny` | 403 |
+| Rate limit / CC `rate_limit` | 429 |
+| Bot terminal denial `bot_block` | 403 |
+| Service protection `service_unavailable` | 503 |
+
+`auto` returns HTML when Accept includes `text/html`, JSON otherwise. You can also select `html`, `json`, `plain`, or `custom`.
+Scenario statuses range from 400–599; edits affect the status clients actually receive and the resulting statistics.
+Ordinary origin 403 responses are unchanged. Interactive challenges, machine verification, and protocol/body resource errors retain their own behavior.
+
+## 2. Copy a complete configuration
+
+This keeps default statuses while changing public wording and shared templates. It needs jq.
+Save current settings, inspect the backup, then apply during your chosen change window. Download: [security-responses.json](templates/security-responses.json).
+
+```sh
+umask 077
+cat > security-responses.json <<'JSON'
+{
+  "security.responses.config": {
+    "templates": {
+      "active": "auto",
+      "html": {
+        "body": "<h1>{response.title}</h1><p>{response.message}</p><p>{request.id}</p>",
+        "contentType": "text/html; charset=utf-8"
+      },
+      "json": {
+        "body": "{\"status\":{response.status_code},\"title\":\"{response.title}\",\"message\":\"{response.message}\",\"request_id\":\"{request.id}\"}",
+        "contentType": "application/problem+json"
+      },
+      "plain": {
+        "body": "{response.title}. {response.message} Request ID: {request.id}",
+        "contentType": "text/plain; charset=utf-8"
+      },
+      "custom": {
+        "body": "{response.title}. {response.message}",
+        "contentType": "text/plain; charset=utf-8"
+      }
+    },
+    "scenarios": {
+      "waf_block": {
+        "statusCode": 403,
+        "title": "Request blocked",
+        "message": "Contact the site owner with the request ID."
+      },
+      "ip_deny": {
+        "statusCode": 403,
+        "title": "Access denied",
+        "message": "Access is not allowed."
+      },
+      "country_deny": {
+        "statusCode": 403,
+        "title": "Access denied",
+        "message": "Access is not allowed."
+      },
+      "rate_limit": {
+        "statusCode": 429,
+        "title": "Too many requests",
+        "message": "Please try again later."
+      },
+      "bot_block": {
+        "statusCode": 403,
+        "title": "Browser verification required",
+        "message": "Use a browser over HTTPS or contact the site owner for API access."
+      },
+      "service_unavailable": {
+        "statusCode": 503,
+        "title": "Service unavailable",
+        "message": "Please try again later."
+      }
+    }
+  }
+}
+JSON
+sudo tiyi system settings get > settings-before.json
+jq '{"security.responses.config": .settings.values["security.responses.config"]}' \
+  settings-before.json > responses-before.json
+sudo tiyi system settings update --values-json "$(cat security-responses.json)"
+```
+
+Only `security.responses.config` is updated. The object must contain every format and all six scenarios, including inactive formats.
+Do not use the old separate WAF/rate-response keys. IP/country bindings no longer have their own status-code setting.
+
+## 3. Verify and restore
+
+Request HTML and JSON from your own demo site:
+
+```sh
+curl -i --get -H 'Host: quickstart.test' -H 'Accept: text/html' \
+  --data-urlencode 'q=1 UNION SELECT password FROM users' http://127.0.0.1/
+curl -i --get -H 'Host: quickstart.test' -H 'Accept: application/json' \
+  --data-urlencode 'q=1 UNION SELECT password FROM users' http://127.0.0.1/
+```
+
+Both should return the configured WAF status with matching body/Content-Type and a Tiyi-generated request ID.
+Normal traffic should still reach the origin. For multiple nodes, check each serving node's publication result.
+To restore, first confirm the saved value in `responses-before.json` is a complete object rather than null, then run:
+
+```sh
+sudo tiyi system settings update --values-json "$(cat responses-before.json)"
+```
+
+If no configuration had been explicitly saved and the backup contains null, reset defaults in the console and Save.
+Resetting the editor alone does not apply the change.
+
+## 4. Variables and boundaries
+
+Templates support only `{response.status_code}`, `{response.kind}`, `{response.source}`, `{response.title}`,
+`{response.message}`, `{request.id}`, and `{request.time}`. Source is a fixed broad class; ID/time are generated by Tiyi.
+Cookies, request bodies, client IPs, paths, rule IDs, thresholds, internal errors, and remaining ban time are unavailable.
+Unknown variables and invalid JSON reject save/apply, preserving the last valid runtime configuration.
+Templates cannot run JavaScript: terminal responses have a script-blocking CSP. Avoid pages that depend on scripts.
+Tiyi does not automatically emit `Retry-After`; clients should use their own bounded retry strategy.

@@ -11,7 +11,35 @@
 更新器只验证发行元数据、校验和与签名，没有硬编码最低版本，也不替代数据兼容性判断。
 更新前应阅读目标版本说明，并先保存可回滚副本。
 
+<a id="backup"></a>
+## 先准备一份能恢复的备份
+
+日常备份也可直接使用本节，不需要执行后面的升级或 purge。下面针对默认 systemd 安装；
+自定义数据库、外部 KEK、证书、license 或其他持久目录时，把实际路径一起纳入。
+备份会短暂停止本节点业务，先安排维护窗口或切流，确认磁盘空间足够。
+
+```sh
+tiyi --version
+sudo systemctl cat tiyi
+TIYI_BACKUP_ID=$(date -u +%Y%m%dT%H%M%SZ)
+sudo install -d -m 0700 /var/backups/tiyi
+sudo systemctl stop tiyi
+sudo tar --xattrs --acls -C / \
+  -czf "/var/backups/tiyi/tiyi-${TIYI_BACKUP_ID}.tar.gz" \
+  var/lib/tiyi etc/tiyi etc/systemd/system/tiyi.service usr/local/bin/tiyi
+sudo tar -tzf "/var/backups/tiyi/tiyi-${TIYI_BACKUP_ID}.tar.gz" >/dev/null
+sudo systemctl start tiyi
+sudo tiyi system health
+```
+
+归档和目录读取都应成功，服务恢复健康后，将备份复制到独立且受限的存储，记录实际二进制版本、配置路径和时间。
+备份含私钥和账号数据，不能作为普通工单附件。归档失败时恢复原服务并处理磁盘/路径问题，不继续升级。
+恢复演练按下方[迁移到另一台主机](#restore)进行：在隔离目标上使用备份里的匹配二进制和完整状态，验证登录、站点、证书与请求。
+不要在同一业务入口同时运行两个独立恢复出的 Controller。站点 JSON 导出和单独复制 `state.db` 不能代替这份完整一致备份。
+
 ## 日常签名更新
+
+先完成[备份](#backup)，核对目标版本的状态和 Agent 协议兼容性。以下只运行一次更新；强制 Gitee 时用 `sudo tiyi update --yes --mirror gitee` 替代默认更新命令。
 
 目标版本的状态与 Agent 协议兼容时：
 
@@ -19,7 +47,6 @@
 tiyi --version
 sudo tiyi update --check
 sudo tiyi update --yes                 # GitHub，失败自动回退 Gitee
-sudo tiyi update --yes --mirror gitee # 或强制 Gitee
 sudo systemctl restart tiyi
 tiyi --version
 sudo tiyi system health
@@ -30,7 +57,13 @@ sudo journalctl -u tiyi -b -n 200 --no-pager
 
 ## 状态不兼容的更新
 
-v3.7.0 无法读取 v3.6.0 或更早版本创建的状态。完成这一次过渡时，应把旧安装保存为
+先运行 `sudo tiyi update --check` 核对目标。`update` 选择当前频道的最新发行版，没有 `--version` 参数；
+只有目标确实是你已审核的版本时才执行下面的更新。如果要固定 v3.8.0 而频道已经有更新版本，
+先按[离线安装的下载与签名核验](installation.md)准备对应架构的 v3.8.0 文件，备份/purge 后用
+`sudo install -m 0755 tiyi-release/tiyi /usr/local/bin/tiyi` 替代下面的 `update --yes`，核对版本后再安装服务。
+
+
+v3.8.0 无法读取 v3.7.2 或更早版本创建的状态。完成这一次过渡时，应把旧安装保存为
 离线回滚归档，并用空状态和空配置启动。不要把旧归档导入新的在线路径；重建
 Controller 后重新注册每一个远程 Agent。
 
@@ -76,8 +109,9 @@ sudo /usr/local/bin/tiyi system health
 若保留的二进制没有 `update` 命令，先验证归档，只删除那个准确的二进制路径，再运行
 公开安装器。保存新的一次性管理员密码，重新创建审核过的站点、策略、证书、认证、
 信任、SIEM 和告警配置；重新注册每一个远程 Agent，不要把旧身份、spool 或 bundle
-缓存恢复到 v3.7.0。
+缓存恢复到 v3.8.0。
 
+<a id="restore"></a>
 ## 把 Controller 迁移到另一台主机
 
 两台主机应尽量使用**完全相同的太一版本**。只有目标版本说明明确声明状态兼容时，

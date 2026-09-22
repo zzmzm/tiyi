@@ -1,40 +1,41 @@
 # 太一文档
 
-太一是单二进制应用网关：Caddy 终止并代理请求，Coraza 与 OWASP CRS 完成检测，
-内嵌控制平面记录结果。请按当前任务选择文档，而不是从头通读。
+太一把反向代理、HTTPS、Web/API 防护和管理控制台放进一个可执行文件。这些文档从第一次启动写起，带你接入网站、查看防护结果，再逐步完成生产部署和日常运维。
 
-## 选择一条路径
+## 从这里开始
 
-| 目标 | 从这里开始 |
-|---|---|
-| 安装单节点并验证一次真实拦截 | [快速开始](getting-started.md) |
-| 复制完整启动配置或声明式清单 | [配置模板](configuration.md) |
-| 发布站点、调优 WAF、调查流量与运维 Agent | [日常运维](operations.md) |
-| 排查启动、路由、TLS、WAF、登录、Agent 或遥测问题 | [排障](troubleshooting.md) |
-| 更新、恢复或迁移现有安装 | [升级与迁移](upgrade-migration.md) |
-| 查看当前版本与升级路径 | [v3.7.2 发行说明](release-3.7.2.md) |
-| 浏览完整 CLI、API、部署和概念参考 | [tiyisec.com/docs](https://www.tiyisec.com/zh/docs/) |
+第一次使用，从[快速开始](getting-started.md)开始就好。安装、登录、创建第一个站点，再看 WAF 拦截真实攻击；完成后，可以继续[实战与进阶](practice.md)中的练习，或在[日常运维](operations.md)中接入自己的应用。
 
-## 一次请求如何流过太一
+新 Linux 主机使用默认端口，一行安装并启动系统服务：
 
-```text
-客户端 -> 监听/TLS -> 站点 + 路径路由 -> WAF 策略 -> 上游
-                          |                   |
-                          +-> 精确计数         +-> 有界 SecurityFact 样本
-                                                 -> 可选证据/告警
-                                                 -> 生产节点直达 SIEM
+```sh
+curl -fsSL https://www.tiyisec.com/install.sh | bash && sudo tiyi install --now
 ```
 
-调查时先固定站点、时间范围和 `X-Request-Id`。太一把数据面的精确计数、客户端公平的有界事实样本、
-可选保留证据与外部投递拆开，因此 SIEM 不可用或存储 worker 变慢都不会阻塞代理流量。
+网站默认使用 80/443，管理控制台使用 8080。首次密码会显示在终端；HTTPS 需要配置站点和证书。
+需要[手动分步](getting-started.md#manual)、[自定义端口](getting-started.md#custom-ports)或[离线安装](getting-started.md#offline)时，快速开始也有对应步骤。
+已有安装请先阅读[升级与迁移](upgrade-migration.md)。
 
-## 支持的运维入口
+## 使用指南
 
-- **Web UI**：适合有引导的配置与可视化调查。
-- **本地 CLI**：通过 root 管理的 Unix socket；同机且具备 socket 权限时无需 JWT。
-- **远程 CLI/API**：通过 ConnectRPC，使用 `--api` 与 `--token`。
-- **声明式配置**：先 `tiyi diff -f FILE`，再 `tiyi apply -f FILE`；可从
-  [四类资源模板](templates/apply.yaml)起步。
+- [安装](installation.md)：安装与校验发行包，管理系统服务，选择适合自己的运行方式。
+- [配置与模板](configuration.md)：完整的启动配置与建站 YAML，附写入、应用和验证步骤。
+- [站点导入与导出](site-import.md)：用文件接入或迁移站点，处理冲突与证书。
+- [API 与上传防护](api-protection.md)：导入 OpenAPI、学习 JSON 结构，用真实请求验证校验结果。
+- [防护响应](responses.md)：调整拦截页面、状态码和 API 错误格式。
+- [工作方式](concepts.md)：了解站点、上游、证书、策略与节点如何配合。
+- [CLI](cli.md) 与 [API](api.md)：从认证和调用示例开始编写自动化；也可[安装 AI 运维技能](../../README.zh-CN.md#ai-agent-skill)。
+- [生产部署](deployment.md)与[备份恢复](upgrade-migration.md#backup)：准备上线、接入监控、扩展节点，并演练恢复。
+- [排障](troubleshooting.md)：按启动、登录、路由、TLS 或防护现象找到下一步检查。
 
-运行 `tiyi <命令> --help` 查看已安装二进制支持的准确参数。若参考文档与二进制
-不一致，以二进制为准。
+## 模板与完整参考
+
+[启动 tiyi.yaml](templates/tiyi.yaml) · [最小建站 YAML](templates/first-site.yaml) · [四类资源 YAML](templates/apply.yaml) ·
+[站点导入 JSON](templates/site-import.json) · [OpenAPI YAML](templates/orders-openapi.yaml) · [本机测试 API](templates/demo-origin.py) ·
+[拦截响应 JSON](templates/security-responses.json)。
+
+[全部 RPC](../reference/rpc-index.md) · [权限](../reference/permissions.md) · [全部 CLI 参数](../reference/cli-options.md)。
+
+**已有安装升级到 v3.8.0 必须先备份并重建状态，重新注册所有远端 Agent。**
+请先阅读[v3.8.0 版本说明](release-3.8.0.md)与[迁移步骤](upgrade-migration.md)，不要直接替换二进制后重启。
+历史说明：[v3.7.2](release-3.7.2.md) · [v3.7.1](release-3.7.1.md) · [v3.7.0](release-3.7.0.md)。

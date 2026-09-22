@@ -3,14 +3,28 @@
 Diagnose from the outside in: process, listener, site match, route, WAF, then
 upstream. Change one layer at a time and keep the failing request ID.
 
+## Start with the symptom
+
+| Symptom | First check | Next action |
+|---|---|---|
+| `sudo: tiyi: command not found` | `/usr/local/bin/tiyi --version` | Use `sudo /usr/local/bin/tiyi …` and check sudo PATH |
+| `address already in use` | `sudo ss -ltnp` and `sudo tiyi doctor` | Identify the owner and follow [port configuration](configuration.md#ports); do not stop an unknown application |
+| No 443 listener after installation | Enabled TLS site and certificate | Complete [HTTPS setup](operations.md#https); the console alone does not create an HTTPS website |
+| The console does not open | Server IP, management listener, firewall/security group | Open `http://SERVER_IP:8080`; use `sudo ss -ltnp` to check the default `0.0.0.0:8080` listener and verify port 8080 is reachable |
+| Local CLI says `permission denied` | Admin socket permissions | Use sudo for the system service or the actual socket path for a foreground instance |
+| Website returns 421 | Host matching an active site | Use the real domain or `curl -H 'Host: …'`; a bare-IP request is different |
+| Website returns 502 | Origin reachability from the serving node | Check the origin process, address, port, protocol, and probes |
+| Website returns 403 / 413 / 503 | Request ID, enforcement reason, and origin response | Identify the actual rule, limit, overload, or application response; status alone does not identify the source |
+| Saved configuration has no effect | Node application results and actual request path | Check site, policy, node, and publication failures, then retry |
+
 ## First five minutes
 
 ```sh
-tiyi doctor
-systemctl status tiyi --no-pager
-journalctl -u tiyi -n 200 --no-pager
-ss -ltnp
-tiyi system health
+sudo tiyi doctor
+sudo systemctl status tiyi --no-pager
+sudo journalctl -u tiyi -n 200 --no-pager
+sudo ss -ltnp
+sudo tiyi system health
 ```
 
 For an agent, use `tiyi-agent` as the unit name. For a manual foreground run,
@@ -24,6 +38,7 @@ inspect the terminal and the paths supplied on the command line.
 - If a systemd service cannot write its state tree, use
   `sudo tiyi doctor --fix-state-ownership` after reviewing the reported path.
 
+<a id="reset-password"></a>
 ## The bootstrap password was lost
 
 Do **not** delete `state.db`. The first password is printed once by design. Use
@@ -41,8 +56,8 @@ permissions are the local authentication boundary.
 
 ```sh
 curl -v -H 'Host: app.example.com' http://127.0.0.1/
-tiyi site list
-tiyi upstream list
+sudo tiyi site list
+sudo tiyi upstream list
 ```
 
 Check the Host header (including port normalization), listener, site enabled
@@ -103,7 +118,7 @@ migration ledger is incompatible with the running binary.
 Do not edit migration metadata. Follow the
 [upgrade and migration guide](upgrade-migration.md) to select a compatible
 binary/state pair, move a complete installation, or use the documented purge
-flow. v3.7.0 cannot open state created by v3.6.0 or earlier releases and
+flow. v3.8.0 cannot open state created by v3.7.2 or earlier releases and
 requires the documented purge and remote-Agent re-enrollment flow.
 
 ## Counters exist but evidence or SIEM is late
@@ -115,9 +130,33 @@ bounded SecurityFact samples, retained evidence, and SIEM delivery are independe
 Test the destination from the producing node and fix the consumer without
 restarting a healthy data plane unless diagnostics require it.
 
+## Console recovery and slow diagnostic output
+
+If session recovery is temporarily unavailable, use the retry page after checking connectivity and component health. A temporary read failure does not prove the session has expired. Preserve settings drafts until the save/application result is known.
+
+On the Controller host, inspect bounded diagnostic output and management latency through the protected local socket:
+
+```sh
+sudo curl -fsS --unix-socket /run/tiyi/admin.sock http://tiyi.local/debug/runtime/stats
+sudo tiyi system health
+```
+
+Use the actual socket path for a custom instance. Check the journal/output consumer and storage pressure; diagnostics can drop whole records when full, with counters, while durable audit and security records use separate paths. Do not expose the admin socket over the network to collect diagnostics.
+
 ## Collect a safe support bundle
 
 Include version, mode, sanitized config, unit definition, health output,
 `tiyi doctor`, recent relevant journals, site/upstream IDs, timestamp/timezone,
 and request ID. Remove JWTs, passwords, enrollment tokens, private keys, DNS
 credentials, cookies, and sensitive request bodies.
+
+## API / configuration file problems
+
+| Symptom | Check |
+|---|---|
+| Site import says invalid JSON | Use [site-import.json](templates/site-import.json), not apply YAML or OpenAPI. |
+| Apply says unknown field or unsupported reference | Use [apply templates](configuration.md); Bot trusted IP-list name references are not currently resolved by apply. Bind the list in the site UI after creation. |
+| API document reports `invalid_oas` | Use the [OpenAPI starter](api-protection.md). Root mapping is `basePath: ""`, not `/`; avoid duplicate base-path prefixes. |
+| Document saved but traffic unchanged | Check publication and serving-node results; uploading or saving a draft does not apply it. |
+| No violation samples | Counters and retained samples are separate. Enable Schema violation sampling deliberately in log policy when needed; it is off by default. |
+| CLI cannot reach a custom instance | Supply the actual `--admin-socket` path, or `TIYI_API` and `TIYI_TOKEN`. `auth login` does not save a CLI session. |

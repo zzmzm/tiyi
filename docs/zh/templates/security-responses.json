@@ -1,0 +1,55 @@
+{
+  "security.responses.config": {
+    "templates": {
+      "active": "auto",
+      "html": {
+        "body": "<h1>{response.title}</h1><p>{response.message}</p><p>{request.id}</p>",
+        "contentType": "text/html; charset=utf-8"
+      },
+      "json": {
+        "body": "{\"status\":{response.status_code},\"title\":\"{response.title}\",\"message\":\"{response.message}\",\"request_id\":\"{request.id}\"}",
+        "contentType": "application/problem+json"
+      },
+      "plain": {
+        "body": "{response.title}. {response.message} Request ID: {request.id}",
+        "contentType": "text/plain; charset=utf-8"
+      },
+      "custom": {
+        "body": "{response.title}. {response.message}",
+        "contentType": "text/plain; charset=utf-8"
+      }
+    },
+    "scenarios": {
+      "waf_block": {
+        "statusCode": 403,
+        "title": "请求被拦截",
+        "message": "如需协助，请向网站管理员提供请求 ID。"
+      },
+      "ip_deny": {
+        "statusCode": 403,
+        "title": "访问被拒绝",
+        "message": "当前访问不被允许。"
+      },
+      "country_deny": {
+        "statusCode": 403,
+        "title": "访问被拒绝",
+        "message": "当前访问不被允许。"
+      },
+      "rate_limit": {
+        "statusCode": 429,
+        "title": "请求过于频繁",
+        "message": "请稍后重试。"
+      },
+      "bot_block": {
+        "statusCode": 403,
+        "title": "需要浏览器验证",
+        "message": "请使用 HTTPS 浏览器访问；API 接入请联系网站管理员。"
+      },
+      "service_unavailable": {
+        "statusCode": 503,
+        "title": "服务暂时不可用",
+        "message": "请稍后重试。"
+      }
+    }
+  }
+}

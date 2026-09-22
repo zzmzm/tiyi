@@ -1,4 +1,4 @@
 interface:
   display_name: "Tiyi WAF Operations"
-  short_description: "Safely operate and maintain Tiyi WAF"
-  default_prompt: "Use $tiyi-operator to inspect my Tiyi WAF, propose the safest operational change, and verify it after I confirm."
+  short_description: "Set up, protect, automate, and troubleshoot Tiyi"
+  default_prompt: "Use $tiyi-operator to complete my Tiyi task with copyable configuration, a clear change preview, and verification within my authorized scope."

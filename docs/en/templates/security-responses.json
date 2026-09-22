@@ -1,0 +1,55 @@
+{
+  "security.responses.config": {
+    "templates": {
+      "active": "auto",
+      "html": {
+        "body": "<h1>{response.title}</h1><p>{response.message}</p><p>{request.id}</p>",
+        "contentType": "text/html; charset=utf-8"
+      },
+      "json": {
+        "body": "{\"status\":{response.status_code},\"title\":\"{response.title}\",\"message\":\"{response.message}\",\"request_id\":\"{request.id}\"}",
+        "contentType": "application/problem+json"
+      },
+      "plain": {
+        "body": "{response.title}. {response.message} Request ID: {request.id}",
+        "contentType": "text/plain; charset=utf-8"
+      },
+      "custom": {
+        "body": "{response.title}. {response.message}",
+        "contentType": "text/plain; charset=utf-8"
+      }
+    },
+    "scenarios": {
+      "waf_block": {
+        "statusCode": 403,
+        "title": "Request blocked",
+        "message": "Contact the site owner with the request ID."
+      },
+      "ip_deny": {
+        "statusCode": 403,
+        "title": "Access denied",
+        "message": "Access is not allowed."
+      },
+      "country_deny": {
+        "statusCode": 403,
+        "title": "Access denied",
+        "message": "Access is not allowed."
+      },
+      "rate_limit": {
+        "statusCode": 429,
+        "title": "Too many requests",
+        "message": "Please try again later."
+      },
+      "bot_block": {
+        "statusCode": 403,
+        "title": "Browser verification required",
+        "message": "Use a browser over HTTPS or contact the site owner for API access."
+      },
+      "service_unavailable": {
+        "statusCode": 503,
+        "title": "Service unavailable",
+        "message": "Please try again later."
+      }
+    }
+  }
+}

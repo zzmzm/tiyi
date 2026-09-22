@@ -11,7 +11,7 @@ kind: Policy
 metadata:
   name: app-baseline
 spec:
-  engineState: on          # on | detection_only | off
+  engineState: "on"          # on | detection_only | off
   blockingMode: anomaly    # anomaly | self_contained
   crsRulesetRef: "4.25.1" # 已存在的 CRS ID 或版本
   status: active           # draft | active | archived
@@ -58,15 +58,14 @@ spec:
     policyRef: app-baseline
     mode: blocking
   botProtection:
-    mode: off               # off | browser_check | human_verification
+    mode: "off"               # off | browser_check | human_verification
     challengeTtlSeconds: 120
     clearanceTtlSeconds: 3600
     proofDifficulty: 16
     bindNetwork: true
     exemptPaths:
       - /healthz
-    trustedIpListRefs:
-      - office-addresses
+    trustedIpListRefs: []
   status: active           # active | disabled
 ---
 apiVersion: tiyi.io/v1
@@ -84,3 +83,5 @@ spec:
 
 # IpList apply 只管理地址数据。需要另外创建 IP 列表绑定才会产生允许、拒绝或观察
 # 行为。geo:* 会被拒绝；国家/地区防护请使用 Country Access。
+
+# 当前 apply 无法按名称解析 Bot 可信列表；先创建地址列表，再在站点 Bot 设置中绑定。

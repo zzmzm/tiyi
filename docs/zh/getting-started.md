@@ -1,199 +1,198 @@
-# 太一快速开始
+# 快速开始
 
-太一是一个单可执行文件、可自托管、内置 WAF 的反向代理，并集成了管理平面。
+用几分钟，从一台干净的 Linux 主机走到太一拦截真实攻击。我们会安装太一、打开控制台、创建一个站点，再用几个请求看看 WAF 如何保护它。
 
-## 1. 安装
+<a id="prerequisites"></a>
+
+## 前置条件
+
+- 一台 **Linux amd64 或 arm64** 主机。默认安装使用 sudo 和 systemd。
+- 在线安装需要 **curl、tar、sha256sum**，以及可访问发行包的网络。
+- 一个太一能访问的 HTTP 后端。没有现成应用也没关系，下面用 Python 3 启动一个演示后端。
+
+本页默认使用网站端口 **80 / 443** 和管理端口 **8080**。需要[手动分步骤](#manual)、[自定义端口](#custom-ports)或[离线安装](#offline)，可以直接跳到相应段落。
+
+> **已有太一安装？** 请先阅读[升级与迁移](upgrade-migration.md)。下面的安装命令用于新主机。
+
+<a id="install"></a>
+<a id="one-line"></a>
+
+## 1. 安装并启动太一
+
+在太一主机执行：
+
+```sh
+curl -fsSL https://www.tiyisec.com/install.sh | bash && sudo tiyi install --now
+```
+
+前半段下载并校验最新稳定版二进制，安装到 `/usr/local/bin`；后半段安装 systemd 服务，立即启动并设置开机自启。
+网站默认使用 **80 / 443**，控制台使用 **8080**。HTTPS 会在配置 TLS 站点和证书后提供服务；此时还没有 443 监听是正常的。
+
+首次安装会在当前终端打印登录信息，密码以实际输出为准：
+
+```text
+Tiyi administrator created
+  username:  admin
+  password:  <your-generated-one-time-password>
+```
+
+用下面两条命令确认版本与运行状态：
+
+```sh
+tiyi --version
+sudo tiyi system health
+```
+
+启动失败时，运行 `sudo journalctl -u tiyi -n 100 --no-pager`，对照[排障指南](troubleshooting.md)。没有 systemd 的主机见[前台运行](installation.md#foreground)。
+
+<a id="run"></a>
+<a id="login"></a>
+
+## 2. 打开控制台
+
+在浏览器打开 `http://服务器IP:8080`，将“服务器IP”换成安装太一的主机 IP。
+太一默认监听 `0.0.0.0:8080`。使用 **admin** 和安装时终端显示的密码登录，即可进入总览，查看流量与防护结果。
+
+如果页面打不开，检查服务是否已启动，以及服务器防火墙或云安全组是否允许访问 8080 端口。
+
+> **首次密码只显示一次。** 登录后修改密码；若丢失，可在太一主机[通过本机 CLI 重置](troubleshooting.md#reset-password)，不需要删除数据库。
+
+<a id="upstream"></a>
+
+## 3. 准备一个后端
+
+在太一主机另开一个终端，启动一个简单的 HTTP 服务：
+
+```sh
+mkdir -p "$HOME/tiyi-demo"
+printf 'Hello from the origin\n' > "$HOME/tiyi-demo/index.html"
+python3 -m http.server 9000 --bind 127.0.0.1 --directory "$HOME/tiyi-demo"
+```
+
+保持这个终端运行。已有应用时，直接使用它的源站地址即可；下一步把 `http://127.0.0.1:9000` 换成太一主机能访问的 URL。
+演示后端只监听本机，不需要对外放行 9000。
+
+<a id="site"></a>
+
+## 4. 创建第一个站点
+
+回到太一主机的另一个终端。CLI 通过本地管理通道连接系统服务，不需要先登录或获取 token：
+
+```sh
+sudo tiyi site create --name quickstart --host quickstart.test \
+  --upstream-url http://127.0.0.1:9000 --tls none
+```
+
+站点创建后立即启用，默认使用内置 **Light** WAF 策略。也可以在控制台 **应用交付 → 站点 → 新建** 中填入相同的名称、域名与上游地址，关闭 TLS，保留 WAF 和 Light 策略后保存；两种方式选一种即可。
+
+`quickstart.test` 只是这个演示的域名，下面的请求会直接指定它，不需要修改 DNS。用真实域名上线时，再配置证书和 HTTPS。
+
+主机名和别名都支持 `*.example.com`，只匹配 `api.example.com` 这样的一级子域名，不包含 `example.com` 或 `a.b.example.com`；需要根域名时单独添加。具体填写、证书和 API 绑定限制见[通配域名建站](operations.md#wildcard-hosts)。
+
+<a id="verify"></a>
+
+## 5. 验证 WAF 拦截攻击
+
+在太一主机先发一个正常请求，再向刚创建的演示站点发三个常见攻击。每条命令只打印 HTTP 状态码，注释中标出了预期结果：
+
+```sh
+# 正常请求 → 200
+curl -sS -o /dev/null -w '%{http_code}\n' \
+  -H 'Host: quickstart.test' http://127.0.0.1/
+
+# SQL 注入 → 403
+curl -sS -o /dev/null -w '%{http_code}\n' --get \
+  -H 'Host: quickstart.test' \
+  --data-urlencode 'q=1 UNION SELECT password FROM users' http://127.0.0.1/
+
+# XSS → 403
+curl -sS -o /dev/null -w '%{http_code}\n' --get \
+  -H 'Host: quickstart.test' \
+  --data-urlencode 'q=<script>alert(1)</script>' http://127.0.0.1/
+
+# 路径穿越 → 403；--path-as-is 保留原始路径，避免 curl 提前归一化
+curl -sS -o /dev/null -w '%{http_code}\n' --path-as-is \
+  -H 'Host: quickstart.test' http://127.0.0.1/../../../../etc/passwd
+```
+
+再发一次正常请求，仍应返回 **200**。想看正文和响应头时，将 `-sS -o /dev/null -w '%{http_code}\n'` 换成 `-i`：正常请求会显示 `Hello from the origin`；攻击响应中的 `X-Request-Id` 可以用来查找对应日志。
+
+回到控制台，在总览查看流量与处理结果，在 **日志 → 攻击日志** 查看命中规则。明细是否保留、何时可见取决于日志和采样设置，先以实际 HTTP 响应确认拦截。
+若返回 502，先检查后端是否仍在运行；若攻击未被拦截，检查站点 WAF 开关、策略模式和例外设置，见[排障指南](troubleshooting.md)。
+
+<a id="alternatives"></a>
+
+## 其他安装方式
+
+以下方式与第一步的一行安装任选其一。完成安装并启动服务后，从[打开控制台](#login)继续。
+
+<a id="manual"></a>
+
+### 手动分步骤安装
+
+想先检查脚本，再分别安装二进制和启动服务，可以这样做：
+
+```sh
+curl -fsSL https://www.tiyisec.com/install.sh -o /tmp/tiyi-install.sh
+less /tmp/tiyi-install.sh
+bash /tmp/tiyi-install.sh
+tiyi --version
+sudo tiyi doctor
+sudo tiyi install --now
+```
+
+`less` 中按 `q` 退出；没有 less 时可用 `cat`。运行脚本只安装二进制，最后一行才启动服务并打印首次密码。
+固定版本时，将运行脚本的一行换成 `TIYI_VERSION=vX.Y.Z bash /tmp/tiyi-install.sh`，使用已发布的版本标签。
+安装目录、Gitee 镜像和校验方式见[安装参考](installation.md#prebuilt)。
+
+<a id="custom-ports"></a>
+
+### DIY：自定义端口
+
+如果 80、443 或 8080 已被其他服务占用，可以先写配置再启动。下面以新安装为例，将管理端口改成 **8081**，网站端口改成 **8180 / 18443**：
 
 ```sh
 curl -fsSL https://www.tiyisec.com/install.sh | bash
+sudo tiyi install
+sudo install -d -m 0750 -o root -g tiyi /etc/tiyi
+sudo tee /etc/tiyi/tiyi.yaml >/dev/null <<'YAML'
+server:
+  addr: "0.0.0.0:8081"
+proxy:
+  http_addr: ":8180"
+  https_addr: ":18443"
+YAML
+sudo chown root:tiyi /etc/tiyi/tiyi.yaml
+sudo chmod 0640 /etc/tiyi/tiyi.yaml
+sudo tiyi install --now
 ```
 
-安装脚本会自动识别平台（Linux amd64/arm64），解析最新的已签名发行版，完成校验后
-将 `tiyi` 安装到 `/usr/local/bin`。同一脚本也镜像在
-`https://raw.githubusercontent.com/zzmzm/tiyi/main/install.sh`，中国大陆镜像在
-`https://gitee.com/tiyisec/tiyi/raw/main/install.sh`。
-安装二进制后,脚本会用彩色提示检查 sudo PATH 以及 80/443/8080 端口监听者。
-安装后的二进制也通过 `tiyi doctor` 提供同样检查。
+不带 `--now` 的 `install` 只准备系统服务，暂不启动。启动后，在浏览器打开 `http://服务器IP:8081`，使用太一主机的实际 IP。
+后面的测试 URL 改为 `http://127.0.0.1:8180/`，演示后端仍使用 9000。
+已有配置时保留其他字段，只修改需要的监听地址，见[端口与启动配置](configuration.md#ports)。
 
-默认安装器先尝试 GitHub，失败或过慢时回退到 Gitee Release 镜像。必要时可强制
-使用 Gitee：
+<a id="offline"></a>
+
+### 离线安装
+
+在联网电脑下载与目标主机架构匹配的发行包、同版本的 `SHA256SUMS`、`SHA256SUMS.sig` 和官方 `release-key.pub`，一起复制到离线主机。
+按[离线安装完整步骤](installation.md#offline)核验签名和校验和，再解包安装。离线主机无需运行在线 `install.sh`。
+
+安装好二进制和离线配置后，仍用同一条命令启动系统服务：
 
 ```sh
-curl -fsSL https://gitee.com/tiyisec/tiyi/raw/main/install.sh | TIYI_MIRROR=gitee bash
+sudo tiyi install --now
 ```
 
-指定版本或更改安装目录：
+需要自定义端口时，在启动前写入上面的 YAML。内置 WAF 规则可直接使用；HTTPS 使用上传的证书，公网证书申请和外部订阅需要另外准备网络连接。
 
-```sh
-TIYI_VERSION=v3.7.2 TIYI_PREFIX="$HOME/.local/bin" \
-  bash -c "$(curl -fsSL https://www.tiyisec.com/install.sh)"
-```
+<a id="next"></a>
 
-安装器环境变量：
+## 下一步阅读
 
-| 变量 | 默认值 | 含义 |
-|---|---|---|
-| `TIYI_MIRROR` | `auto` | 下载来源：`auto`（GitHub 优先，Gitee 回退）、`github` 或 `gitee`。 |
-| `TIYI_REPO` | `zzmzm/tiyi` | 安装器使用的 GitHub `owner/name`。 |
-| `TIYI_GITEE_REPO` | `tiyisec/tiyi` | 安装器使用的 Gitee `owner/name`。 |
-| `TIYI_VERSION` | 最新稳定版 | 固定发行标签，例如 `v3.7.2`。 |
-| `TIYI_PREFIX` | `/usr/local/bin` | `tiyi` 二进制安装目录。 |
+- [实战与进阶](practice.md)：沿着这个演示站点，继续练观察与阻断、规则调优、API 校验和自动化。
+- [日常运维](operations.md)：接入真实域名与 HTTPS，配置源站、路由和告警。
+- [配置与模板](configuration.md)：复制启动配置和建站 YAML；已有站点也可[导入与导出](site-import.md)。
+- [工作方式](concepts.md)与 [CLI 参考](cli.md)：理解站点、策略等概念，查找更多操作。
 
-## 2. 手动校验下载（可选）
-
-每个发行版都附带 `SHA256SUMS`、`SHA256SUMS.sig` 以及对应平台的压缩包。先校验
-SHA-256：
-
-```sh
-sha256sum --check --ignore-missing SHA256SUMS
-```
-
-如需校验校验和文件的 Ed25519 签名，请使用支持 `pkeyutl -rawin` 的 OpenSSL，
-并先用已发布的原始公钥（`release-key.pub`）构建 PEM：
-
-```sh
-{ printf '302a300506032b6570032100'; base64 -d release-key.pub | xxd -p -c 256; } \
-  | xxd -r -p | base64 > /tmp/k.b64
-{ echo "-----BEGIN PUBLIC KEY-----"; cat /tmp/k.b64; echo "-----END PUBLIC KEY-----"; } \
-  > release-key.pem
-
-openssl pkeyutl -verify -pubin -inkey release-key.pem -rawin \
-  -in SHA256SUMS -sigfile <(base64 -d SHA256SUMS.sig)
-```
-
-其中 `302a300506032b6570032100` 是固定的 Ed25519 SubjectPublicKeyInfo 头部；
-已发布的公钥即 32 字节原始公钥的 base64 形式。
-
-## 3. 运行
-
-> 已有安装时，请先阅读[升级与迁移](upgrade-migration.md)，不要直接执行下面的新主机
-> 步骤。v3.7.0 无法读取 v3.6.0 或更早版本创建的状态，需要执行文档中的备份和 purge 流程。
-
-单机安装会在一个进程中运行完整太一、本机内置数据平面和管理界面。默认情况下太一
-把状态存放在 `/var/lib/tiyi` 并监听 80/443 端口，因此默认方式需要 root：
-
-```sh
-sudo tiyi run
-```
-
-首次启动时，太一会自动创建 `admin` 账户，并向控制台打印一次性随机密码 —— 请在
-它滚走之前复制下来（它仅以哈希形式存储）。打开 `http://127.0.0.1:8080`，用
-`admin` 登录后会进入**总览**。稳定工作域为总览、应用交付、防护策略、节点、
-日志、告警与通知、系统监控、系统管理；权限过滤会隐藏空分组，
-但不会改变深链地址。前往**应用交付 → 站点**添加第一个站点。完整的运维流程
-（配置文件、管理套接字、站点、上游、证书、WAF 策略）请继续阅读
-[日常运维](operations.md)。需要直接写文件而不猜字段名时，使用完整的
-[`tiyi.yaml` 与声明式 apply 模板](configuration.md)；遇到错误请查看
-[排障](troubleshooting.md)。
-
-若要以普通用户身份（不用 `sudo`）运行，把太一指向可写路径并使用高端口 ——
-下面的进阶命令正是这么做的。
-
-### 进阶：以普通用户运行 / 自定义管理员密码
-
-用于自动化、容器镜像、CI，或只是想不用 `sudo` 运行时，把太一指向可写路径并
-使用高端口（并可选地设定管理员密码）—— 一条命令搞定。这里不涉及
-`/var/lib/tiyi`，也不绑定 80/443 端口，因此无需 root：
-
-```sh
-mkdir -p /tmp/waf
-TIYI_AUTH_BOOTSTRAP_ADMIN_PASSWORD='admin123@xxxxxxm' \
-  tiyi run \
-  --addr 0.0.0.0:8080 \
-  --state-db /tmp/waf/state.db \
-  --caddy-admin-socket /tmp/waf/caddy.sock \
-  --proxy-http-addr 0.0.0.0:8180 \
-  --proxy-https-addr 0.0.0.0:18443 \
-  --admin-socket /tmp/waf/admin.sock
-```
-
-太一会原样采用所给凭据且不打印任何 banner。用户名默认 `admin`。仅当尚不存在
-任何用户时才会自动生成密码，因此重启都是空操作。忘了密码？在同一台主机上通过
-本地管理套接字重置 —— 无需登录：
-
-```sh
-tiyi user list
-tiyi user reset-password <user-id> --password <new-password>
-```
-
-### 添加远端节点
-
-在 **节点 → 安装远端节点** 中选择 URL、标签和 Token 有效期，再签发 Token。
-然后按页面分别显示的二进制下载与 systemd 步骤操作：
-
-```sh
-sudo curl -fsSL -o /usr/local/bin/tiyi 'https://tiyi.example.com/download/tiyi'
-sudo chmod 0755 /usr/local/bin/tiyi
-sudo mkdir -p /etc/tiyi
-printf 'TIYI_CONTROLLER_URL=https://tiyi.example.com\nTIYI_AGENT_ENROLLMENT_TOKEN=<一次性Token>\n' | sudo tee /etc/tiyi/tiyi-agent.env >/dev/null
-sudo chmod 0600 /etc/tiyi/tiyi-agent.env
-sudo tiyi install --mode agent --unit-name tiyi-agent --now
-```
-
-页面还会显示原始 Token、前台命令和完整下载启动脚本。
-
-## 4. 通过环境变量配置运行时（可选）
-
-持久化服务配置优先写入 `tiyi.yaml`。只有当 service manager、容器运行时或
-密钥管理器需要在运行时注入配置时，才使用环境变量。环境变量名与配置键一一对应：
-加 `TIYI_` 前缀，转为大写，并把点替换为下划线。例如 `auth.jwt_secret`
-对应 `TIYI_AUTH_JWT_SECRET`。
-
-文件配置请从[完整注释版 `tiyi.yaml` 模板](templates/tiyi.yaml)开始；其中包含
-当前全部进程配置键、安全文件说明，以及配套的[安装/校验步骤](configuration.md)。
-
-常用配置覆盖：
-
-| 变量 | 配置键 | 适用场景 |
-|---|---|---|
-| `TIYI_SERVER_ADDR` | `server.addr` | 把 API / 控制台绑定到不同地址。 |
-| `TIYI_STORE_STATE_DB` | `store.state_db` | 移动 SQLite 状态数据库。 |
-| `TIYI_LOG_LEVEL` | `log.level` | 临时调整进程日志级别。 |
-| `TIYI_PROXY_HTTP_ADDR` | `proxy.http_addr` | 修改 HTTP 数据面监听地址。 |
-| `TIYI_PROXY_HTTPS_ADDR` | `proxy.https_addr` | 修改 HTTPS 数据面监听地址。 |
-| `TIYI_PROXY_CADDY_ADMIN_SOCKET` | `proxy.caddy_admin_socket` | 移动内嵌 Caddy admin socket。 |
-| `TIYI_CRYPTO_KEK_FILE` | `crypto.kek_file` | 为生产环境固定静态加密 KEK 路径。 |
-| `TIYI_AUTH_JWT_SECRET` | `auth.jwt_secret` | 为生产环境设置稳定 JWT 签名密钥。 |
-| `TIYI_AUTH_BOOTSTRAP_ADMIN_USERNAME` | `auth.bootstrap_admin_username` | 指定首个管理员用户名。 |
-| `TIYI_AUTH_BOOTSTRAP_ADMIN_PASSWORD` | `auth.bootstrap_admin_password` | 为自动化指定首个管理员密码。 |
-| `TIYI_LICENSE_KEY_PATH` | `license.key_path` | 启动时加载签名 license 文件。 |
-| `TIYI_UPDATE_REPO` | `update.repo` | 覆盖更新检查使用的 GitHub release 仓库。 |
-| `TIYI_UPDATE_CHANNEL` | `update.channel` | 为 `tiyi update` 使用 `stable` 或 `prerelease`。 |
-| `TIYI_UPDATE_MIRROR` | `update.mirror` | 更新检查/下载使用 `auto`、`github` 或 `gitee`。 |
-
-较少使用的配置键也遵循同一规则。LDAP/RADIUS、token 生命周期、cookie 设置与
-认证后端细项优先写 YAML，除非部署平台必须通过环境变量注入。
-
-## 5. 保持更新
-
-> 这些命令只替换签名二进制，不代表状态或协议一定兼容。应阅读目标版本说明，必要时
-> 按[升级与迁移](upgrade-migration.md)操作。
-
-```sh
-tiyi update --check          # 是否有更新的已签名发行版？
-sudo tiyi update --yes       # 下载、校验并安装
-sudo tiyi update --yes --mirror gitee
-```
-
-`update` 会在替换磁盘上的二进制之前，针对内嵌发布公钥校验 SHA-256 与 Ed25519
-发行签名，但不会重启服务；成功后运行 `sudo systemctl restart tiyi`。使用
-`--channel prerelease` 可跟踪预发布版本。只有二进制安装在当前用户可写目录时才
-省略 `sudo`。
-
-更新环境变量：
-
-| 变量 | 默认值 | 含义 |
-|---|---|---|
-| `TIYI_UPDATE_MIRROR` | `auto` | 更新检查/下载来源：`auto`、`github` 或 `gitee`。 |
-| `TIYI_UPDATE_REPO` | `zzmzm/tiyi` | `github` 与 `auto` 使用的 GitHub `owner/name`。 |
-| `TIYI_UPDATE_CHANNEL` | `stable` | `stable` 或 `prerelease`。 |
-
-## 6. 授权
-
-太一在单节点上免费且功能完整。扩展到多节点（远程 agent）时使用签名授权许可 ——
-单节点体验保持不变。详见 [EULA.md](../../EULA.md)。
-
-## 支持
-
-安全问题请按照 [SECURITY.md](../../SECURITY.md) 私下报告；其他问题请在分发仓库
-提交 issue。
+体验结束后，在站点页删除 `quickstart`，并在演示后端终端按 Ctrl+C。太一服务可以保留，继续接入自己的应用。

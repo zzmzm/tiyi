@@ -12,15 +12,42 @@ The updater validates release metadata, checksums, and signatures. It has no
 hard-coded minimum version and does not decide whether stored data is
 compatible. Read the target release notes and preserve a rollback copy first.
 
+<a id="backup"></a>
+## Prepare a backup you can restore
+
+Use this section for routine backups without proceeding to upgrade or purge. These commands assume the default systemd installation.
+Include actual custom database paths, external KEK, certificates, license, and other persistent directories when configured.
+The backup briefly stops this node's traffic: schedule maintenance or move traffic first and check free disk space.
+
+```sh
+tiyi --version
+sudo systemctl cat tiyi
+TIYI_BACKUP_ID=$(date -u +%Y%m%dT%H%M%SZ)
+sudo install -d -m 0700 /var/backups/tiyi
+sudo systemctl stop tiyi
+sudo tar --xattrs --acls -C / \
+  -czf "/var/backups/tiyi/tiyi-${TIYI_BACKUP_ID}.tar.gz" \
+  var/lib/tiyi etc/tiyi etc/systemd/system/tiyi.service usr/local/bin/tiyi
+sudo tar -tzf "/var/backups/tiyi/tiyi-${TIYI_BACKUP_ID}.tar.gz" >/dev/null
+sudo systemctl start tiyi
+sudo tiyi system health
+```
+
+Both archive commands should succeed. After the service is healthy, copy the archive to separate restricted storage and record the actual binary version, configuration paths, and time.
+It contains private keys and account data; keep it out of ordinary support attachments. If archiving fails, resume the original service, fix disk/path problems, and stop the upgrade.
+Rehearse [restoration on another host](#restore) with the matching binary and complete state; verify login, sites, certificates, and requests.
+Do not run two independently restored Controllers on the same application ingress. A site JSON export or a live copy of `state.db` alone is not this backup.
+
 ## Routine signed update
+
+Complete the [backup](#backup) first and review target state/Agent compatibility. Run one update command; replace the default with `sudo tiyi update --yes --mirror gitee` to force Gitee.
 
 For a release whose state and Agent protocol are compatible:
 
 ```sh
 tiyi --version
 sudo tiyi update --check
-sudo tiyi update --yes                 # GitHub, with Gitee fallback
-sudo tiyi update --yes --mirror gitee # force Gitee instead
+sudo tiyi update --yes  # GitHub, with Gitee fallback
 sudo systemctl restart tiyi
 tiyi --version
 sudo tiyi system health
@@ -32,7 +59,16 @@ not restart the running process.
 
 ## Incompatible-state update
 
-v3.7.0 cannot open state created by v3.6.0 or earlier releases. For this
+Run `sudo tiyi update --check` first to inspect the target. `update` selects
+the latest release in the current channel; it has no `--version` option.
+Use the update below only when that target is the version you reviewed. To pin
+v3.8.0 after a newer release exists, first follow the [offline download and
+signature verification steps](installation.md) for the correct architecture.
+After backup/purge, replace `update --yes` below with
+`sudo install -m 0755 tiyi-release/tiyi /usr/local/bin/tiyi`, verify the version,
+then install the service.
+
+v3.8.0 cannot open state created by v3.7.2 or earlier releases. For this
 transition, keep the old installation as an offline rollback archive and start
 with empty state and configuration. Do not import the old archive into the new
 live paths, and re-enroll every remote Agent after rebuilding the Controller.
@@ -82,8 +118,9 @@ If the retained binary has no `update` command, verify the archive, remove only
 that exact binary path, then run the public installer. Save the new one-time
 administrator password and recreate reviewed sites, policies, certificates,
 authentication, trust, SIEM, and alert settings. Re-enroll every remote Agent;
-do not restore its previous identity, spool, or bundle cache into v3.7.0.
+do not restore its previous identity, spool, or bundle cache into v3.8.0.
 
+<a id="restore"></a>
 ## Move a Controller to another host
 
 Use the exact same Tiyi version on both hosts where possible. A newer version

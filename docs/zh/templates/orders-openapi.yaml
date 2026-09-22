@@ -1,0 +1,29 @@
+openapi: 3.0.3
+info:
+  title: Orders API
+  version: 1.0.0
+servers:
+  - url: http://quickstart.test
+paths:
+  /api/orders:
+    post:
+      operationId: createOrder
+      summary: Create an order
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [sku, quantity]
+              properties:
+                sku:
+                  type: string
+                quantity:
+                  type: integer
+            example:
+              sku: BOOK-1
+              quantity: 2
+      responses:
+        '200':
+          description: Order received

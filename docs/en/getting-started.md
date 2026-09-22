@@ -1,218 +1,198 @@
-# Getting started with Tiyi
+# Quickstart
 
-Tiyi is a single-binary, self-hostable WAF-enabled reverse proxy with an
-integrated management plane.
+Go from a clean Linux host to Tiyi blocking real attacks in a few minutes. We'll install Tiyi, open the console, create one site, and send a few requests to see the WAF at work.
 
-## 1. Install
+<a id="prerequisites"></a>
+
+## Before you start
+
+- A **Linux amd64 or arm64** host. The default installation uses sudo and systemd.
+- **curl, tar, sha256sum**, and access to the release downloads for online installation.
+- An HTTP application Tiyi can reach. If you don't have one ready, the example below starts a demo origin with Python 3.
+
+This guide uses **80 / 443** for websites and **8080** for management. For [manual steps](#manual), [custom ports](#custom-ports), or [offline installation](#offline), jump to the relevant section.
+
+> **Already running Tiyi?** Read [upgrade and migration](upgrade-migration.md) first. The installation commands below are for a fresh host.
+
+<a id="install"></a>
+<a id="one-line"></a>
+
+## 1. Install and start Tiyi
+
+Run on the Tiyi host:
+
+```sh
+curl -fsSL https://www.tiyisec.com/install.sh | bash && sudo tiyi install --now
+```
+
+The first part downloads and verifies the latest stable binary and installs it in `/usr/local/bin`. The second installs the systemd service, starts it, and enables it at boot.
+Websites use **80 / 443** and the console uses **8080** by default. HTTPS becomes available after you configure a TLS site and certificate; no listener on 443 yet is normal.
+
+On first installation, this terminal shows the login details. Use the password from your actual output:
+
+```text
+Tiyi administrator created
+  username:  admin
+  password:  <your-generated-one-time-password>
+```
+
+Check the installed version and running instance:
+
+```sh
+tiyi --version
+sudo tiyi system health
+```
+
+If startup fails, run `sudo journalctl -u tiyi -n 100 --no-pager` and follow [troubleshooting](troubleshooting.md). For hosts without systemd, see [foreground mode](installation.md#foreground).
+
+<a id="run"></a>
+<a id="login"></a>
+
+## 2. Open the console
+
+Open `http://SERVER_IP:8080` in your browser, replacing `SERVER_IP` with the IP address of the host running Tiyi.
+Tiyi listens on `0.0.0.0:8080` by default. Sign in with **admin** and the password printed during installation; you'll reach Overview, where you can watch traffic and protection results.
+
+If the page does not open, check that the service is running and that port 8080 is reachable through the server firewall or cloud security group.
+
+> **The first password is shown once.** Change it after signing in. If you lose it, [reset it through the local CLI](troubleshooting.md#reset-password) on the Tiyi host; you don't need to delete the database.
+
+<a id="upstream"></a>
+
+## 3. Start an origin
+
+Open another terminal on the Tiyi host and start a small HTTP server:
+
+```sh
+mkdir -p "$HOME/tiyi-demo"
+printf 'Hello from the origin\n' > "$HOME/tiyi-demo/index.html"
+python3 -m http.server 9000 --bind 127.0.0.1 --directory "$HOME/tiyi-demo"
+```
+
+Leave it running. If you already have an application, use its origin address instead: replace `http://127.0.0.1:9000` in the next step with a URL the Tiyi host can reach.
+The demo origin listens only on loopback, so you don't need to open port 9000 to visitors.
+
+<a id="site"></a>
+
+## 4. Create your first site
+
+Return to another terminal on the Tiyi host. The CLI connects to the system service through the local admin channel, without a separate login or token:
+
+```sh
+sudo tiyi site create --name quickstart --host quickstart.test \
+  --upstream-url http://127.0.0.1:9000 --tls none
+```
+
+The site becomes active immediately and uses the built-in **Light** WAF policy by default. You can also use **Application Delivery → Sites → Create** in the console: enter the same name, domain, and origin, disable TLS, keep WAF and the Light policy enabled, then save. Choose either the CLI or the UI to create the site.
+
+`quickstart.test` is just the demo domain. The requests below supply it directly, so no DNS change is needed. Configure a certificate and HTTPS when you move to a real domain.
+
+Both the primary host and aliases accept `*.example.com` for one subdomain level, such as `api.example.com`. It does not match `example.com` or `a.b.example.com`; add the root domain separately if needed. See [wildcard setup, certificates, and API bindings](operations.md#wildcard-hosts).
+
+<a id="verify"></a>
+
+## 5. Watch the WAF block attacks
+
+On the Tiyi host, send a normal request followed by three common attacks against your new demo site. Each command prints only the HTTP status code; comments show the expected result:
+
+```sh
+# Normal request → 200
+curl -sS -o /dev/null -w '%{http_code}\n' \
+  -H 'Host: quickstart.test' http://127.0.0.1/
+
+# SQL injection → 403
+curl -sS -o /dev/null -w '%{http_code}\n' --get \
+  -H 'Host: quickstart.test' \
+  --data-urlencode 'q=1 UNION SELECT password FROM users' http://127.0.0.1/
+
+# XSS → 403
+curl -sS -o /dev/null -w '%{http_code}\n' --get \
+  -H 'Host: quickstart.test' \
+  --data-urlencode 'q=<script>alert(1)</script>' http://127.0.0.1/
+
+# Path traversal → 403; --path-as-is stops curl normalizing the path first
+curl -sS -o /dev/null -w '%{http_code}\n' --path-as-is \
+  -H 'Host: quickstart.test' http://127.0.0.1/../../../../etc/passwd
+```
+
+Send the normal request once more; it should still return **200**. To see the body and headers, replace `-sS -o /dev/null -w '%{http_code}\n'` with `-i`. A normal response shows `Hello from the origin`; an attack response includes an `X-Request-Id` you can use to find the matching log.
+
+Back in the console, check traffic and outcomes in Overview and matched rules in **Logs → Attack Logs**. Detail retention and visibility depend on your logging and sampling settings; confirm blocking from the actual HTTP response first.
+If you get 502, check that the origin is still running. If an attack passes, check the site's WAF switch, policy mode, and exceptions; see [troubleshooting](troubleshooting.md).
+
+<a id="alternatives"></a>
+
+## Other installation methods
+
+Choose one of these instead of the one-line installation in step 1. Once the service is running, continue with [Open the console](#login).
+
+<a id="manual"></a>
+
+### Install in separate steps
+
+To inspect the script, install the binary, and start the service separately:
+
+```sh
+curl -fsSL https://www.tiyisec.com/install.sh -o /tmp/tiyi-install.sh
+less /tmp/tiyi-install.sh
+bash /tmp/tiyi-install.sh
+tiyi --version
+sudo tiyi doctor
+sudo tiyi install --now
+```
+
+Press `q` to leave less, or use `cat` if less is unavailable. Running the script only installs the binary; the final line starts the service and prints the first password.
+To pin a version, replace the script execution with `TIYI_VERSION=vX.Y.Z bash /tmp/tiyi-install.sh`, using a published release tag.
+See [installation](installation.md#prebuilt) for install directories, the Gitee mirror, and verification details.
+
+<a id="custom-ports"></a>
+
+### Choose your own ports
+
+If another service already uses 80, 443, or 8080, write the configuration before starting Tiyi. For a fresh installation, this example selects **8081** for management and **8180 / 18443** for websites:
 
 ```sh
 curl -fsSL https://www.tiyisec.com/install.sh | bash
+sudo tiyi install
+sudo install -d -m 0750 -o root -g tiyi /etc/tiyi
+sudo tee /etc/tiyi/tiyi.yaml >/dev/null <<'YAML'
+server:
+  addr: "0.0.0.0:8081"
+proxy:
+  http_addr: ":8180"
+  https_addr: ":18443"
+YAML
+sudo chown root:tiyi /etc/tiyi/tiyi.yaml
+sudo chmod 0640 /etc/tiyi/tiyi.yaml
+sudo tiyi install --now
 ```
 
-The installer detects your platform (Linux amd64/arm64), resolves the latest
-signed release, verifies it, and installs `tiyi` to `/usr/local/bin`. The same
-script is mirrored at
-`https://raw.githubusercontent.com/zzmzm/tiyi/main/install.sh`, with a China
-mirror at `https://gitee.com/tiyisec/tiyi/raw/main/install.sh`.
-After installing the binary, the script runs a colored environment check for
-sudo PATH and listeners on ports 80/443/8080. The installed binary also exposes
-the same checks as `tiyi doctor`.
+Without `--now`, `install` prepares the system service without starting it. Once started, open `http://SERVER_IP:8081` in your browser, using the Tiyi host's IP address.
+Change the later test URLs to `http://127.0.0.1:8180/`; the demo origin stays on 9000.
+If you already have a configuration, preserve its other fields and edit only the listeners you need; see [ports and configuration](configuration.md#ports).
 
-By default the installer tries GitHub first and falls back to the Gitee release
-mirror. Force Gitee when needed:
+<a id="offline"></a>
+
+### Install offline
+
+On a connected computer, download the release archive matching the target host's architecture, its `SHA256SUMS` and `SHA256SUMS.sig`, and the official `release-key.pub`. Transfer all four files to the offline host.
+Follow the [complete offline procedure](installation.md#offline) to verify the signature and checksum before extraction and installation. The offline host doesn't need to run the online `install.sh`.
+
+After installing the binary and offline configuration, start the system service with the same command:
 
 ```sh
-curl -fsSL https://gitee.com/tiyisec/tiyi/raw/main/install.sh | TIYI_MIRROR=gitee bash
+sudo tiyi install --now
 ```
 
-Pin a version or change the install prefix:
+For custom ports, write the YAML above before starting. The embedded WAF rules work offline. Use uploaded certificates for HTTPS; public certificate issuance and external subscriptions need their own network access.
 
-```sh
-TIYI_VERSION=v3.7.2 TIYI_PREFIX="$HOME/.local/bin" \
-  bash -c "$(curl -fsSL https://www.tiyisec.com/install.sh)"
-```
+<a id="next"></a>
 
-Installer environment variables:
+## What to read next
 
-| Variable | Default | Meaning |
-|---|---|---|
-| `TIYI_MIRROR` | `auto` | Download source: `auto` (GitHub primary, Gitee fallback), `github`, or `gitee`. |
-| `TIYI_REPO` | `zzmzm/tiyi` | GitHub `owner/name` used by the installer. |
-| `TIYI_GITEE_REPO` | `tiyisec/tiyi` | Gitee `owner/name` used by the installer. |
-| `TIYI_VERSION` | latest stable | Pin a release tag, for example `v3.7.2`. |
-| `TIYI_PREFIX` | `/usr/local/bin` | Install directory for the `tiyi` binary. |
+- [Practice and advanced use](practice.md): keep using this demo site to explore observe/block modes, rule tuning, API validation, and automation.
+- [Operations](operations.md): connect a real domain and HTTPS, then configure origins, routes, and alerts.
+- [Configuration and templates](configuration.md): copy startup and site YAML; you can also [import and export existing sites](site-import.md).
+- [How it works](concepts.md) and the [CLI reference](cli.md): understand sites and policies, then find more commands.
 
-## 2. Verify a download manually (optional)
-
-Every release attaches `SHA256SUMS`, `SHA256SUMS.sig`, and a per-platform
-tarball. First check the checksum:
-
-```sh
-sha256sum --check --ignore-missing SHA256SUMS
-```
-
-To verify the Ed25519 signature of the checksums with an OpenSSL build that
-supports `pkeyutl -rawin`, build a PEM from the published raw public key
-(`release-key.pub`):
-
-```sh
-{ printf '302a300506032b6570032100'; base64 -d release-key.pub | xxd -p -c 256; } \
-  | xxd -r -p | base64 > /tmp/k.b64
-{ echo "-----BEGIN PUBLIC KEY-----"; cat /tmp/k.b64; echo "-----END PUBLIC KEY-----"; } \
-  > release-key.pem
-
-openssl pkeyutl -verify -pubin -inkey release-key.pem -rawin \
-  -in SHA256SUMS -sigfile <(base64 -d SHA256SUMS.sig)
-```
-
-The `302a300506032b6570032100` prefix is the fixed Ed25519
-SubjectPublicKeyInfo header; the published key is the 32 raw key bytes in
-base64.
-
-## 3. Run
-
-> Existing installation? Use [Upgrade and migration](upgrade-migration.md)
-> before the new-host steps below. v3.7.0 cannot open state created by v3.6.0
-> or earlier releases and requires the documented backup and purge flow.
-
-A single-host install runs the complete Tiyi instance with its built-in local
-data plane and dashboard in one process. By default Tiyi stores its state under
-`/var/lib/tiyi` and binds ports 80/443, so the default invocation needs root:
-
-```sh
-sudo tiyi run
-```
-
-On first boot Tiyi auto-creates an `admin` account and prints a one-time random
-password to the console — copy it before it scrolls away (it is stored only as a
-hash). Open `http://127.0.0.1:8080` and sign in as `admin`; the console lands
-at **Overview**. Its stable work areas are Overview, Application Delivery,
-Protection, Agent Fleet, Logs, Alerts & Notifications, System
-Monitoring, and System Administration. Permission filtering hides empty groups
-without changing deep links. Add your first site under **Application Delivery → Sites**. For the
-full operator flow (config file, admin socket, sites, upstreams, certificates,
-WAF policies), continue with the [operations guide](operations.md). To write a
-file without guessing field names, use the complete
-[`tiyi.yaml` and declarative apply templates](configuration.md). For errors, use
-[troubleshooting](troubleshooting.md).
-
-To run as a normal user without `sudo`, point Tiyi at writable paths and high
-ports — the advanced command below does exactly that.
-
-### Advanced: run as a normal user / pick your own admin password
-
-For automation, container images, CI, or simply running without `sudo`, point
-Tiyi at writable paths and high ports (and, optionally, set the admin password)
-— all in one command. Nothing here touches `/var/lib/tiyi` or ports 80/443, so
-no root is needed:
-
-```sh
-mkdir -p /tmp/waf
-TIYI_AUTH_BOOTSTRAP_ADMIN_PASSWORD='admin123@xxxxxxm' \
-  tiyi run \
-  --addr 0.0.0.0:8080 \
-  --state-db /tmp/waf/state.db \
-  --caddy-admin-socket /tmp/waf/caddy.sock \
-  --proxy-http-addr 0.0.0.0:8180 \
-  --proxy-https-addr 0.0.0.0:18443 \
-  --admin-socket /tmp/waf/admin.sock
-```
-
-Tiyi uses the supplied credentials verbatim and prints no banner. The username
-defaults to `admin`. Auto-generation only fires when no users exist yet, so
-restarts are no-ops. Lost the password? Reset it on the same host over the local
-admin socket — no login required:
-
-```sh
-tiyi user list
-tiyi user reset-password <user-id> --password <new-password>
-```
-
-### Add a remote node
-
-In **Nodes → Install**, choose the URL, tags, and token TTL, then issue the
-token. Follow the separate binary download and systemd instructions:
-
-```sh
-sudo curl -fsSL -o /usr/local/bin/tiyi 'https://tiyi.example.com/download/tiyi'
-sudo chmod 0755 /usr/local/bin/tiyi
-sudo mkdir -p /etc/tiyi
-printf 'TIYI_CONTROLLER_URL=https://tiyi.example.com\nTIYI_AGENT_ENROLLMENT_TOKEN=<one-use-token>\n' | sudo tee /etc/tiyi/tiyi-agent.env >/dev/null
-sudo chmod 0600 /etc/tiyi/tiyi-agent.env
-sudo tiyi install --mode agent --unit-name tiyi-agent --now
-```
-
-The page also shows the raw token, foreground command, and complete
-download-and-start script.
-
-## 4. Runtime config via environment (optional)
-
-Prefer `tiyi.yaml` for persistent service configuration. Use environment
-variables only when your service manager, container runtime, or secret manager
-injects config at runtime. Env names mirror config keys: prefix `TIYI_`,
-uppercase the key, and replace dots with underscores. For example,
-`auth.jwt_secret` becomes `TIYI_AUTH_JWT_SECRET`.
-
-Use the [complete annotated `tiyi.yaml` template](templates/tiyi.yaml) for
-file-based configuration. It includes every supported process key, secure-file
-notes, and a matching [install/validate procedure](configuration.md).
-
-Common config env overrides:
-
-| Variable | Config key | When to use |
-|---|---|---|
-| `TIYI_SERVER_ADDR` | `server.addr` | Bind the API/dashboard to a different address. |
-| `TIYI_STORE_STATE_DB` | `store.state_db` | Move the SQLite state database. |
-| `TIYI_LOG_LEVEL` | `log.level` | Temporarily raise or lower process logging. |
-| `TIYI_PROXY_HTTP_ADDR` | `proxy.http_addr` | Change the HTTP data-plane listen address. |
-| `TIYI_PROXY_HTTPS_ADDR` | `proxy.https_addr` | Change the HTTPS data-plane listen address. |
-| `TIYI_PROXY_CADDY_ADMIN_SOCKET` | `proxy.caddy_admin_socket` | Move the embedded Caddy admin socket. |
-| `TIYI_CRYPTO_KEK_FILE` | `crypto.kek_file` | Pin the at-rest encryption KEK path for production. |
-| `TIYI_AUTH_JWT_SECRET` | `auth.jwt_secret` | Set a stable JWT signing secret for production. |
-| `TIYI_AUTH_BOOTSTRAP_ADMIN_USERNAME` | `auth.bootstrap_admin_username` | Choose the first admin username. |
-| `TIYI_AUTH_BOOTSTRAP_ADMIN_PASSWORD` | `auth.bootstrap_admin_password` | Choose the first admin password for automation. |
-| `TIYI_LICENSE_KEY_PATH` | `license.key_path` | Load a signed license file on boot. |
-| `TIYI_UPDATE_REPO` | `update.repo` | Override the GitHub release repo used by update checks. |
-| `TIYI_UPDATE_CHANNEL` | `update.channel` | Use `stable` or `prerelease` for `tiyi update`. |
-| `TIYI_UPDATE_MIRROR` | `update.mirror` | Use `auto`, `github`, or `gitee` for update checks/downloads. |
-
-Less common config keys follow the same rule. Prefer YAML for LDAP/RADIUS,
-token TTLs, cookie settings, and provider-specific auth settings unless your
-deployment platform requires env injection.
-
-## 5. Keep it updated
-
-> These commands replace a signed binary; they do not prove state or protocol
-> compatibility. Read the target release notes and use
-> [Upgrade and migration](upgrade-migration.md) when required.
-
-```sh
-tiyi update --check          # is a newer signed release available?
-sudo tiyi update --yes       # download, verify, and install it
-sudo tiyi update --yes --mirror gitee
-```
-
-`update` verifies the SHA-256 and Ed25519 release signature against the key
-embedded in the binary before replacing it on disk and does not restart the
-service. Restart with `sudo systemctl restart tiyi` after a successful update.
-Track pre-release builds with `--channel prerelease`. Omit `sudo` only when the
-installed binary is in a user-writable prefix.
-
-Update environment variables:
-
-| Variable | Default | Meaning |
-|---|---|---|
-| `TIYI_UPDATE_MIRROR` | `auto` | Update-check/download source: `auto`, `github`, or `gitee`. |
-| `TIYI_UPDATE_REPO` | `zzmzm/tiyi` | GitHub `owner/name` for `github` and `auto`. |
-| `TIYI_UPDATE_CHANNEL` | `stable` | `stable` or `prerelease`. |
-
-## 6. Licensing
-
-Tiyi is free and full-featured on a single node. Growing to multiple nodes
-(remote agents) uses a signed license — the single-node experience is
-unchanged. See [EULA.md](../../EULA.md).
-
-## Support
-
-Report security issues privately per [SECURITY.md](../../SECURITY.md). For other
-questions, open an issue on the distribution repository.
+When you're done, delete `quickstart` from the Sites page and press Ctrl+C in the demo origin terminal. Keep Tiyi running to connect your own application next.
