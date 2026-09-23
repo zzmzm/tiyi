@@ -7,6 +7,25 @@
 **One executable to protect your websites and APIs.** Tiyi includes a reverse proxy, automatic TLS, web application firewall, API request validation, and a management console.
 Runs on Linux amd64/arm64. The built-in local node is free and fully featured, with no Docker, external database, or source build required.
 
+## Tiyi in 76 seconds
+
+Install one binary, route an upstream, publish a site, block SQL injection,
+and inspect the evidence — one complete operator path.
+
+https://github.com/user-attachments/assets/9d5b2eed-3956-41e6-bc39-b8c7048b7f44
+
+<p align="center">
+  <sub>Native GitHub player · 1 min 16 sec · no audio</sub>
+  <br />
+  <a href="https://www.tiyisec.com/">Guided web demo</a>
+  ·
+  <a href="https://www.tiyisec.com/assets/video/tiyi-demo.mp4">1080p MP4</a>
+  ·
+  <a href="https://www.tiyisec.com/assets/video/tiyi-demo-1440p.mp4">1440p MP4</a>
+</p>
+
+The original recording shows the getting-started workflow; see the [quickstart](docs/en/getting-started.md) for the current UI.
+
 ## Get running
 
 On a fresh host, install and start the signed release. Save the one-time administrator password printed in the terminal.

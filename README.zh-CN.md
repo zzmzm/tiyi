@@ -7,6 +7,25 @@
 **一个可执行文件，保护你的网站与 API。** 太一提供反向代理、自动 TLS、Web 应用防火墙、API 请求校验和管理控制台。
 支持 Linux amd64/arm64；本机单节点免费且功能完整，无需 Docker、外部数据库或源码构建。
 
+## 76 秒看懂太一
+
+安装一个二进制、配置上游、发布站点、拦截 SQL 注入并检查证据——一条完整的
+运维路径。
+
+https://github.com/user-attachments/assets/9d5b2eed-3956-41e6-bc39-b8c7048b7f44
+
+<p align="center">
+  <sub>GitHub 原生播放器 · 1 分 16 秒 · 无音频</sub>
+  <br />
+  <a href="https://www.tiyisec.com/zh/">网页引导演示</a>
+  ·
+  <a href="https://www.tiyisec.com/assets/video/tiyi-demo.mp4">1080p MP4</a>
+  ·
+  <a href="https://www.tiyisec.com/assets/video/tiyi-demo-1440p.mp4">1440p MP4</a>
+</p>
+
+原版录屏展示完整上手流程；当前界面操作请参阅[快速开始](docs/zh/getting-started.md)。
+
 ## 先跑起来
 
 新主机：安装并启动签名发行版，记下终端打印的一次性管理员密码。
