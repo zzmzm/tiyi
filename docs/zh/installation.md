@@ -3,6 +3,8 @@
 本页解决如何安装、校验下载、离线部署和管理服务。第一次使用可跟随[快速开始](getting-started.md)继续登录、建站与验证。
 适用 Linux amd64/arm64。安装脚本用于新主机；已有安装请走[升级与迁移](upgrade-migration.md)。
 
+默认安装让 Controller 与内置 Agent 在同一进程运行。需要最短上线步骤时阅读[单机部署](single-deployment.md)；需要在负载均衡后运行冗余流量节点时阅读[集群部署](cluster-deployment.md)。
+
 <a id="prebuilt"></a>
 ## 1. 默认安装：系统服务与 80/443/8080
 

@@ -53,6 +53,8 @@ then follow [practice and advanced use](docs/en/practice.md). The default downlo
 | Import OpenAPI, learn traffic, validate requests | [Complete API protection example](docs/en/api-protection.md) |
 | Configure HTTPS, routes, WAF, alerts | [Operations](docs/en/operations.md) |
 | Automate and integrate | [CLI](docs/en/cli.md) · [API](docs/en/api.md) · [Complete fields](docs/reference/README.md) |
+| Start with one Controller and its built-in Agent | [Single-server deployment](docs/en/single-deployment.md) |
+| Run multiple Agents behind an HA load balancer | [Cluster deployment](docs/en/cluster-deployment.md) |
 | Deploy, manage users/nodes, back up and restore | [Deployment](docs/en/deployment.md) · [Migration](docs/en/upgrade-migration.md) |
 | Resolve errors | [Troubleshooting](docs/en/troubleshooting.md) |
 

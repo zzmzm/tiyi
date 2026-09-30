@@ -3,6 +3,8 @@
 Choose how to install, verify downloads, deploy offline, and manage the service. New users can continue through the [quickstart](getting-started.md) for login, site creation, and request checks.
 Supported platforms are Linux amd64/arm64. The installer is for a fresh host; existing installations should use [upgrade and migration](upgrade-migration.md).
 
+This default installation runs the Controller and built-in Agent together in one process. Use [single-server deployment](single-deployment.md) for the shortest path to production, or [cluster deployment](cluster-deployment.md) when you need redundant traffic nodes behind a load balancer.
+
 <a id="prebuilt"></a>
 ## 1. Default installation: system service and ports 80/443/8080
 

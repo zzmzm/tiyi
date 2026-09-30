@@ -42,6 +42,8 @@ otherwise choose the matching locale and installed version.
 | Protection response templates | https://www.tiyisec.com/docs/responses.html | https://www.tiyisec.com/zh/docs/responses.html |
 | CLI tasks and complete flags | https://www.tiyisec.com/docs/cli.html | https://www.tiyisec.com/zh/docs/cli.html |
 | API integration and fields | https://www.tiyisec.com/docs/api.html | https://www.tiyisec.com/zh/docs/api.html |
+| One server with built-in Agent | https://www.tiyisec.com/docs/single-deployment.html | https://www.tiyisec.com/zh/docs/single-deployment.html |
+| Multiple Agents behind an HA LB | https://www.tiyisec.com/docs/cluster-deployment.html | https://www.tiyisec.com/zh/docs/cluster-deployment.html |
 | Production, identity, nodes | https://www.tiyisec.com/docs/deployment.html | https://www.tiyisec.com/zh/docs/deployment.html |
 | Backup and compatibility | https://www.tiyisec.com/docs/upgrade-migration.html | https://www.tiyisec.com/zh/docs/upgrade-migration.html |
 | Troubleshooting | https://www.tiyisec.com/docs/troubleshooting.html | https://www.tiyisec.com/zh/docs/troubleshooting.html |
@@ -181,6 +183,8 @@ Counters, sampled security events, retained evidence, and external delivery
 answer different questions. Gaps do not prove absence. Load only needed evidence
 and redact reports. Test notification receipt and SIEM from producing nodes.
 Do not restart healthy traffic handling just to diagnose a slow log consumer.
+
+Prefer one Controller with its built-in Agent for first use and workloads with maintenance windows. For traffic-node redundancy or horizontal capacity, use one Controller, at least two remote Agents, and an external HA LB; keep the Controller out of the business pool and preserve a separate stable management URL.
 
 One Controller includes the full-featured local node. Remote nodes require
 licensed capacity; use the generated Nodes → Install command. Check platform,

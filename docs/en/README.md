@@ -25,6 +25,8 @@ For an existing installation, read [upgrade and migration](upgrade-migration.md)
 - [Protection responses](responses.md): customize block pages, status codes, and API error formats.
 - [How it works](concepts.md): understand how sites, origins, certificates, policies, and nodes fit together.
 - [CLI](cli.md) and [API](api.md): start automating with authentication and request examples; you can also [install the AI operator skill](../../README.md#ai-agent-skill).
+- [Single-server deployment](single-deployment.md): one Controller and built-in Agent, with a short install-to-verification path.
+- [Cluster deployment](cluster-deployment.md): one Controller, multiple Agents and an HA load balancer, with health checks and recovery boundaries.
 - [Deployment](deployment.md) and [backup and recovery](upgrade-migration.md#backup): prepare for production, connect monitoring, expand to remote nodes, and practice restoration.
 - [Troubleshooting](troubleshooting.md): find your next check for startup, login, routing, TLS, or protection problems.
 

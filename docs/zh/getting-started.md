@@ -190,6 +190,7 @@ sudo tiyi install --now
 
 ## 下一步阅读
 
+- [单机部署](single-deployment.md)或[集群部署](cluster-deployment.md)：按生产可用性与容量需求选择拓扑。
 - [实战与进阶](practice.md)：沿着这个演示站点，继续练观察与阻断、规则调优、API 校验和自动化。
 - [日常运维](operations.md)：接入真实域名与 HTTPS，配置源站、路由和告警。
 - [配置与模板](configuration.md)：复制启动配置和建站 YAML；已有站点也可[导入与导出](site-import.md)。

@@ -25,6 +25,8 @@ curl -fsSL https://www.tiyisec.com/install.sh | bash && sudo tiyi install --now
 - [防护响应](responses.md)：调整拦截页面、状态码和 API 错误格式。
 - [工作方式](concepts.md)：了解站点、上游、证书、策略与节点如何配合。
 - [CLI](cli.md) 与 [API](api.md)：从认证和调用示例开始编写自动化；也可[安装 AI 运维技能](../../README.zh-CN.md#ai-agent-skill)。
+- [单机部署](single-deployment.md)：一台 Controller + 内置 Agent，从安装到验证的短路径。
+- [集群部署](cluster-deployment.md)：一个 Controller、多台 Agents 与高可用 LB，附健康检查和恢复边界。
 - [生产部署](deployment.md)与[备份恢复](upgrade-migration.md#backup)：准备上线、接入监控、扩展节点，并演练恢复。
 - [排障](troubleshooting.md)：按启动、登录、路由、TLS 或防护现象找到下一步检查。
 

@@ -53,6 +53,8 @@ curl -fsSL https://www.tiyisec.com/install.sh | bash && sudo tiyi install --now
 | OpenAPI 导入、流量学习、接口校验 | [完整 API 防护示例](docs/zh/api-protection.md) |
 | HTTPS、路径路由、WAF、告警 | [日常运维](docs/zh/operations.md) |
 | 脚本自动化与系统集成 | [CLI](docs/zh/cli.md) · [API](docs/zh/api.md) · [完整字段](docs/reference/README.md) |
+| 一台 Controller 与内置 Agent 快速上线 | [单机部署](docs/zh/single-deployment.md) |
+| 多台 Agents 放在高可用 LB 后 | [集群部署](docs/zh/cluster-deployment.md) |
 | 部署、账号、节点、备份、恢复 | [生产部署](docs/zh/deployment.md) · [升级与迁移](docs/zh/upgrade-migration.md) |
 | 解决错误 | [排障](docs/zh/troubleshooting.md) |
 

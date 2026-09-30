@@ -3,6 +3,8 @@
 For **v3.8.0**. Before replacing a demo with a real application, decide how traffic and administrators reach Tiyi, how much data to retain, and how to recover.
 Tiyi sits between clients and origins: point the domain at Tiyi, which proxies accepted requests to your application.
 
+**Choose your deployment:** [Single server](single-deployment.md) is the default quickstart: one Controller with its built-in Agent. [Cluster](cluster-deployment.md) adds remote Agents and an external HA load balancer for traffic-node redundancy and capacity.
+
 ## 1. Choose topology and access boundaries
 
 | Scenario | Deployment | Prepare |
@@ -16,6 +18,7 @@ There is one writable Controller, with no built-in leader election or automatic 
 Remote Agents continue using their last accepted configuration while the Controller is unavailable, but receive no new configuration; administration, enrollment, and central views are unavailable.
 Account for this in recovery planning. CPU, memory, and disk needs depend on traffic, rules, body/upload limits, and retained evidence; measure your workload instead of treating a demo as a capacity claim.
 
+<a id="management"></a>
 ## 2. Protect management access and state
 
 Start from the [copyable configuration](configuration.md#startup): management listens on `0.0.0.0:8080`, and websites use 80/443.

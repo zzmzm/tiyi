@@ -190,6 +190,7 @@ For custom ports, write the YAML above before starting. The embedded WAF rules w
 
 ## What to read next
 
+- [Single-server deployment](single-deployment.md) or [cluster deployment](cluster-deployment.md): choose the topology for your production availability and capacity needs.
 - [Practice and advanced use](practice.md): keep using this demo site to explore observe/block modes, rule tuning, API validation, and automation.
 - [Operations](operations.md): connect a real domain and HTTPS, then configure origins, routes, and alerts.
 - [Configuration and templates](configuration.md): copy startup and site YAML; you can also [import and export existing sites](site-import.md).
