@@ -1,4 +1,4 @@
-<!-- v3.8.0 public API reference, derived from the verified protobuf contract. -->
+<!-- v3.8.1 public API reference, derived from the protobuf contract. -->
 
 # menu.proto — Navigation menus for the admin UI
 
@@ -53,3 +53,9 @@ _No fields — send `{}`._
 | `redirect` | `redirect` | `string` | singular | — |
 | `meta` | `meta` | [`MenuMeta`](#menumeta) | singular | — |
 | `children` | `children` | [`MenuRecord`](#menurecord) | repeated | — |
+
+<a id="menumeta"></a>
+
+<a id="menurecord"></a>
+
+<a id="menuservicelistmenus"></a>

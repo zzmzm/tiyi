@@ -1,8 +1,8 @@
-<!-- v3.8.0 public API reference, derived from the verified protobuf contract. -->
+<!-- v3.8.1 public API reference, derived from the protobuf contract. -->
 
 # RPC index
 
-Every RPC Tiyi serves: **310 RPCs across 26 services**. Generated from the protobuf schema, so this list is complete by construction.
+Every RPC Tiyi serves: **354 RPCs across 26 services**. Generated from the protobuf schema, so this list is complete by construction.
 
 `Auth` is the permission the server requires. `authenticated` means any valid session may call it; `public` means no token at all. A role holding `tiyi:superadmin` satisfies every check. See [the API guide](../en/api.md#authentication) for how tokens are obtained.
 
@@ -152,6 +152,8 @@ Every RPC Tiyi serves: **310 RPCs across 26 services**. Generated from the proto
 
 | RPC | Procedure | Kind | Auth |
 |---|---|---|---|
+| [`PreviewRuleOverrideBatch`](services/rule.md#ruleoverrideservicepreviewruleoverridebatch) | `/tiyi.v1.RuleOverrideService/PreviewRuleOverrideBatch` | unary | (`policy:read`) |
+| [`PreviewRuleOverride`](services/rule.md#ruleoverrideservicepreviewruleoverride) | `/tiyi.v1.RuleOverrideService/PreviewRuleOverride` | unary | (`policy:read`) |
 | [`ListRuleOverrides`](services/rule.md#ruleoverrideservicelistruleoverrides) | `/tiyi.v1.RuleOverrideService/ListRuleOverrides` | unary | (`policy:read`) |
 | [`GetRuleOverride`](services/rule.md#ruleoverrideservicegetruleoverride) | `/tiyi.v1.RuleOverrideService/GetRuleOverride` | unary | (`policy:read`) |
 | [`UpsertRuleOverride`](services/rule.md#ruleoverrideserviceupsertruleoverride) | `/tiyi.v1.RuleOverrideService/UpsertRuleOverride` | unary | (`policy:rule:override`) |
@@ -167,11 +169,14 @@ Every RPC Tiyi serves: **310 RPCs across 26 services**. Generated from the proto
 |---|---|---|---|
 | [`ListCustomRules`](services/rule.md#customruleservicelistcustomrules) | `/tiyi.v1.CustomRuleService/ListCustomRules` | unary | (`policy:read`) |
 | [`GetCustomRule`](services/rule.md#customruleservicegetcustomrule) | `/tiyi.v1.CustomRuleService/GetCustomRule` | unary | (`policy:read`) |
+| [`GetCustomRuleHistory`](services/rule.md#customruleservicegetcustomrulehistory) | `/tiyi.v1.CustomRuleService/GetCustomRuleHistory` | unary | `policy:read` and `log:read` |
 | [`CreateCustomRule`](services/rule.md#customruleservicecreatecustomrule) | `/tiyi.v1.CustomRuleService/CreateCustomRule` | unary | (`policy:custom:write`) |
 | [`UpdateCustomRule`](services/rule.md#customruleserviceupdatecustomrule) | `/tiyi.v1.CustomRuleService/UpdateCustomRule` | unary | (`policy:custom:write`) |
 | [`DeleteCustomRule`](services/rule.md#customruleservicedeletecustomrule) | `/tiyi.v1.CustomRuleService/DeleteCustomRule` | unary | (`policy:custom:write`) |
 | [`ReorderCustomRules`](services/rule.md#customruleservicereordercustomrules) | `/tiyi.v1.CustomRuleService/ReorderCustomRules` | unary | (`policy:custom:write`) |
 | [`PreviewCustomRule`](services/rule.md#customruleservicepreviewcustomrule) | `/tiyi.v1.CustomRuleService/PreviewCustomRule` | unary | (`policy:preview`) |
+| [`AnalyzeCustomRuleExpression`](services/rule.md#customruleserviceanalyzecustomruleexpression) | `/tiyi.v1.CustomRuleService/AnalyzeCustomRuleExpression` | unary | (`policy:read`) |
+| [`TestCustomRuleCandidate`](services/rule.md#customruleservicetestcustomrulecandidate) | `/tiyi.v1.CustomRuleService/TestCustomRuleCandidate` | unary | `policy:read` and `policy:preview` |
 | [`ListCustomRuleTemplates`](services/rule.md#customruleservicelistcustomruletemplates) | `/tiyi.v1.CustomRuleService/ListCustomRuleTemplates` | unary | (`policy:read`) |
 | [`CreateFromTemplate`](services/rule.md#customruleservicecreatefromtemplate) | `/tiyi.v1.CustomRuleService/CreateFromTemplate` | unary | (`policy:custom:write`) |
 
@@ -437,14 +442,53 @@ Every RPC Tiyi serves: **310 RPCs across 26 services**. Generated from the proto
 
 | RPC | Procedure | Kind | Auth |
 |---|---|---|---|
+| [`GetAIScheduleCapabilities`](services/ai.md#aiservicegetaischedulecapabilities) | `/tiyi.v1.AIService/GetAIScheduleCapabilities` | unary | `ai:read` and `ai:schedule:read` |
+| [`PrepareAISchedule`](services/ai.md#aiserviceprepareaischedule) | `/tiyi.v1.AIService/PrepareAISchedule` | unary | `ai:read` and `ai:schedule:read` and `ai:schedule:write` |
+| [`CreateAISchedule`](services/ai.md#aiservicecreateaischedule) | `/tiyi.v1.AIService/CreateAISchedule` | unary | `ai:read` and `ai:schedule:read` and `ai:schedule:write` |
+| [`UpdateAISchedule`](services/ai.md#aiserviceupdateaischedule) | `/tiyi.v1.AIService/UpdateAISchedule` | unary | `ai:read` and `ai:schedule:read` and `ai:schedule:write` |
+| [`ListAISchedules`](services/ai.md#aiservicelistaischedules) | `/tiyi.v1.AIService/ListAISchedules` | unary | `ai:read` and `ai:schedule:read` |
+| [`GetAISchedule`](services/ai.md#aiservicegetaischedule) | `/tiyi.v1.AIService/GetAISchedule` | unary | `ai:read` and `ai:schedule:read` |
+| [`SetAIScheduleState`](services/ai.md#aiservicesetaischedulestate) | `/tiyi.v1.AIService/SetAIScheduleState` | unary | `ai:read` and `ai:schedule:read` |
+| [`RunAIScheduleNow`](services/ai.md#aiservicerunaischedulenow) | `/tiyi.v1.AIService/RunAIScheduleNow` | unary | `ai:read` and `ai:schedule:read` and `ai:schedule:write` |
+| [`PreviewAIScheduleRun`](services/ai.md#aiservicepreviewaischedulerun) | `/tiyi.v1.AIService/PreviewAIScheduleRun` | unary | `ai:read` and `ai:schedule:read` and `ai:schedule:write` |
+| [`RetryAIScheduleRun`](services/ai.md#aiserviceretryaischedulerun) | `/tiyi.v1.AIService/RetryAIScheduleRun` | unary | `ai:read` and `ai:schedule:read` and `ai:schedule:write` |
+| [`CancelAIScheduleRun`](services/ai.md#aiservicecancelaischedulerun) | `/tiyi.v1.AIService/CancelAIScheduleRun` | unary | `ai:read` and `ai:schedule:read` |
+| [`ListAIScheduleRuns`](services/ai.md#aiservicelistaischeduleruns) | `/tiyi.v1.AIService/ListAIScheduleRuns` | unary | `ai:read` and `ai:schedule:read` |
+| [`GetAIScheduleRun`](services/ai.md#aiservicegetaischedulerun) | `/tiyi.v1.AIService/GetAIScheduleRun` | unary | `ai:read` and `ai:schedule:read` |
+| [`SetAIScheduleRunRead`](services/ai.md#aiservicesetaischedulerunread) | `/tiyi.v1.AIService/SetAIScheduleRunRead` | unary | `ai:read` and `ai:schedule:read` |
+| [`ContinueAIScheduleRun`](services/ai.md#aiservicecontinueaischedulerun) | `/tiyi.v1.AIService/ContinueAIScheduleRun` | unary | `ai:read` and `ai:schedule:read` |
+| [`ManageAISchedule`](services/ai.md#aiservicemanageaischedule) | `/tiyi.v1.AIService/ManageAISchedule` | unary | `ai:read` and `ai:schedule:manage` |
+| [`RetryAIScheduleEffect`](services/ai.md#aiserviceretryaischeduleeffect) | `/tiyi.v1.AIService/RetryAIScheduleEffect` | unary | `ai:read` and `ai:schedule:read` and `ai:schedule:write` |
 | [`ListAIProposals`](services/ai.md#aiservicelistaiproposals) | `/tiyi.v1.AIService/ListAIProposals` | unary | (`ai:read`) |
 | [`GetAIProposal`](services/ai.md#aiservicegetaiproposal) | `/tiyi.v1.AIService/GetAIProposal` | unary | (`ai:read`) |
 | [`GetAIStatus`](services/ai.md#aiservicegetaistatus) | `/tiyi.v1.AIService/GetAIStatus` | unary | (`ai:read`) |
-| [`DraftCustomRule`](services/ai.md#aiservicedraftcustomrule) | `/tiyi.v1.AIService/DraftCustomRule` | unary | (`ai:propose`) |
+| [`GetAIConversationContext`](services/ai.md#aiservicegetaiconversationcontext) | `/tiyi.v1.AIService/GetAIConversationContext` | unary | (`ai:read`) |
+| [`SubmitAIAnalysisFeedback`](services/ai.md#aiservicesubmitaianalysisfeedback) | `/tiyi.v1.AIService/SubmitAIAnalysisFeedback` | unary | (`ai:read`) |
+| [`ListAIAnalysisFeedback`](services/ai.md#aiservicelistaianalysisfeedback) | `/tiyi.v1.AIService/ListAIAnalysisFeedback` | unary | `ai:read` and `system:write` |
+| [`GetAIAnalysisFeedback`](services/ai.md#aiservicegetaianalysisfeedback) | `/tiyi.v1.AIService/GetAIAnalysisFeedback` | unary | `ai:read` and `system:write` |
+| [`ReviewAIAnalysisFeedback`](services/ai.md#aiservicereviewaianalysisfeedback) | `/tiyi.v1.AIService/ReviewAIAnalysisFeedback` | unary | `ai:read` and `system:write` |
+| [`DraftCustomRule`](services/ai.md#aiservicedraftcustomrule) | `/tiyi.v1.AIService/DraftCustomRule` | unary | `ai:read` and `ai:propose` and `policy:read` |
+| [`PrepareAIIPDisposition`](services/ai.md#aiserviceprepareaiipdisposition) | `/tiyi.v1.AIService/PrepareAIIPDisposition` | unary | `ai:read` and `ai:propose` and `policy:read` and `site:read` and `log:read` and `telemetry:read` |
+| [`TestAIProposal`](services/ai.md#aiservicetestaiproposal) | `/tiyi.v1.AIService/TestAIProposal` | unary | `ai:read` and `policy:preview` and `policy:read` |
+| [`PrepareAITuning`](services/ai.md#aiserviceprepareaituning) | `/tiyi.v1.AIService/PrepareAITuning` | unary | `ai:propose` and `policy:read` and `site:read` and `log:read` |
+| [`GetAITuningReview`](services/ai.md#aiservicegetaituningreview) | `/tiyi.v1.AIService/GetAITuningReview` | unary | `ai:read` and `policy:read` and `site:read` and `log:read` |
+| [`ReplayAITuning`](services/ai.md#aiservicereplayaituning) | `/tiyi.v1.AIService/ReplayAITuning` | unary | `ai:read` and `policy:preview` and `policy:read` and `site:read` and `log:read` |
+| [`StreamAITuningAnalysis`](services/ai.md#aiservicestreamaituninganalysis) | `/tiyi.v1.AIService/StreamAITuningAnalysis` | server stream | `ai:read` and `policy:read` and `site:read` and `log:read` |
 | [`TranslateLogQuery`](services/ai.md#aiservicetranslatelogquery) | `/tiyi.v1.AIService/TranslateLogQuery` | unary | (`ai:read`) |
 | [`StreamAnalysis`](services/ai.md#aiservicestreamanalysis) | `/tiyi.v1.AIService/StreamAnalysis` | server stream | `ai:read` and `log:read` |
-| [`StreamChat`](services/ai.md#aiservicestreamchat) | `/tiyi.v1.AIService/StreamChat` | server stream | `ai:read` and `log:read` |
+| [`StreamAPIContractAnalysis`](services/ai.md#aiservicestreamapicontractanalysis) | `/tiyi.v1.AIService/StreamAPIContractAnalysis` | server stream | `ai:read` and `site:read` and `telemetry:read` |
+| [`StreamRuleImpactAnalysis`](services/ai.md#aiservicestreamruleimpactanalysis) | `/tiyi.v1.AIService/StreamRuleImpactAnalysis` | server stream | `ai:read` and `policy:read` and `log:read` and `telemetry:read` |
+| [`StreamOperationsAnalysis`](services/ai.md#aiservicestreamoperationsanalysis) | `/tiyi.v1.AIService/StreamOperationsAnalysis` | server stream | `ai:read` and `system:read` |
+| [`StreamAlertAnalysis`](services/ai.md#aiservicestreamalertanalysis) | `/tiyi.v1.AIService/StreamAlertAnalysis` | server stream | `ai:read` and `alert:read` |
+| [`CompareAIAlertRule`](services/ai.md#aiservicecompareaialertrule) | `/tiyi.v1.AIService/CompareAIAlertRule` | unary | `ai:read` and `alert:write` and `alert:read` |
+| [`StreamAlertTuningAnalysis`](services/ai.md#aiservicestreamalerttuninganalysis) | `/tiyi.v1.AIService/StreamAlertTuningAnalysis` | server stream | `ai:read` and `alert:write` and `alert:read` |
+| [`PrepareAISecurityReport`](services/ai.md#aiserviceprepareaisecurityreport) | `/tiyi.v1.AIService/PrepareAISecurityReport` | unary | `ai:read` and `log:read` and `telemetry:read` and `site:read` |
+| [`StreamSecurityReportAnalysis`](services/ai.md#aiservicestreamsecurityreportanalysis) | `/tiyi.v1.AIService/StreamSecurityReportAnalysis` | server stream | `ai:read` and `log:read` and `telemetry:read` and `site:read` |
+| [`StreamConfigurationReview`](services/ai.md#aiservicestreamconfigurationreview) | `/tiyi.v1.AIService/StreamConfigurationReview` | server stream | `ai:read` and `system:apply` and `site:read` and `policy:read` |
+| [`StreamCrsUpgradeReview`](services/ai.md#aiservicestreamcrsupgradereview) | `/tiyi.v1.AIService/StreamCrsUpgradeReview` | server stream | `ai:read` and `policy:preview` and `policy:read` and `site:read` |
+| [`StreamChat`](services/ai.md#aiservicestreamchat) | `/tiyi.v1.AIService/StreamChat` | server stream | `ai:read` |
 | [`ApplyAIProposal`](services/ai.md#aiserviceapplyaiproposal) | `/tiyi.v1.AIService/ApplyAIProposal` | unary | (`ai:apply`) |
+| [`ReviseAIProposal`](services/ai.md#aiservicereviseaiproposal) | `/tiyi.v1.AIService/ReviseAIProposal` | unary | `ai:read` and `ai:propose` and `policy:read` |
 | [`RejectAIProposal`](services/ai.md#aiservicerejectaiproposal) | `/tiyi.v1.AIService/RejectAIProposal` | unary | (`ai:propose`) |
 | [`SetAIProviderSecret`](services/ai.md#aiservicesetaiprovidersecret) | `/tiyi.v1.AIService/SetAIProviderSecret` | unary | (`system:write`) |
 

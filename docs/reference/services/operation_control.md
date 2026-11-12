@@ -1,4 +1,4 @@
-<!-- v3.8.0 public API reference, derived from the verified protobuf contract. -->
+<!-- v3.8.1 public API reference, derived from the protobuf contract. -->
 
 # operation_control.proto — operation_control
 
@@ -116,7 +116,6 @@ Enforcing changes additionally require api_inventory:block and policy:write.
 - **Kind** unary
 - **Auth** `api_inventory:write` and `site:write`
 
-<a id="previewbodychangerequest"></a>
 **Request** — `tiyi.v1.PreviewBodyChangeRequest`
 
 | Field | JSON key | Type | Cardinality | Description |
@@ -410,3 +409,43 @@ Immutable reviewed target identity; unrelated tenant and bootstrap nodes do not 
 | `status` | `status` | `string` | singular | — |
 | `superseded_by_revision_id` | `supersededByRevisionId` | `string` | singular | — |
 | `applied_at` | `appliedAt` | `string` | singular | — |
+
+<a id="bodychangeapproval"></a>
+
+<a id="bodycontrolapproval"></a>
+
+<a id="bodycontroldraft"></a>
+
+<a id="operationcontrolattempt"></a>
+
+<a id="operationcontrolhistoryitem"></a>
+
+<a id="operationcontrolintent"></a>
+
+<a id="operationcontrolmanifestentry"></a>
+
+<a id="operationcontrolrequiredtarget"></a>
+
+<a id="operationcontrolreview"></a>
+
+<a id="operationcontrolserviceapplybodycontrol"></a>
+
+<a id="operationcontrolservicechangebodycontrol"></a>
+
+<a id="operationcontrolservicegetoperationcontrolstate"></a>
+
+<a id="operationcontrolservicegetrequestinspection"></a>
+
+<a id="operationcontrolservicelistoperationcontrolhistory"></a>
+
+<a id="operationcontrolservicepreviewbodychange"></a>
+
+<a id="operationcontrolservicepreviewbodycontrol"></a>
+
+<a id="operationcontrolservicereplaceoperationcontrols"></a>
+
+<a id="operationcontrolservicerollbackoperationcontrols"></a>
+
+<a id="operationcontroltarget"></a>
+
+<a id="previewbodychangerequest"></a>

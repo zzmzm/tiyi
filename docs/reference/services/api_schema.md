@@ -1,4 +1,4 @@
-<!-- v3.8.0 public API reference, derived from the verified protobuf contract. -->
+<!-- v3.8.1 public API reference, derived from the protobuf contract. -->
 
 # api_schema.proto — api_schema
 
@@ -520,7 +520,6 @@ Saves an immutable document draft; never activates detection or routing.
 - **Kind** unary
 - **Auth** `telemetry:read` and `site:read`
 
-<a id="previewschemacontrolrequest"></a>
 **Request** — `tiyi.v1.PreviewSchemaControlRequest`
 
 | Field | JSON key | Type | Cardinality | Description |
@@ -797,3 +796,77 @@ Immutable upload provenance. This resource is staged, never evidence that a prof
 | `learned_revision_id` | `learnedRevisionId` | `string` | singular | — |
 | `learned_sha256` | `learnedSha256` | `string` | singular | — |
 | `learned_mappings_json` | `learnedMappingsJson` | `bytes` | singular | _base64-encoded JSON string._ |
+
+<a id="apidocumentreportmetadata"></a>
+
+<a id="apischemaservicechangeschemacontrol"></a>
+
+<a id="apischemaservicechangeschemalearning"></a>
+
+<a id="apischemaserviceexportlearneddocument"></a>
+
+<a id="apischemaservicegetapidocumentreport"></a>
+
+<a id="apischemaservicegetapirequestdocument"></a>
+
+<a id="apischemaservicegetschemabindings"></a>
+
+<a id="apischemaservicegetschemacontract"></a>
+
+<a id="apischemaservicegetschemadetection"></a>
+
+<a id="apischemaservicegetschemalearning"></a>
+
+<a id="apischemaservicegetschemaprofile"></a>
+
+<a id="apischemaservicegetschemasource"></a>
+
+<a id="apischemaservicegetschemavalidation"></a>
+
+<a id="apischemaservicelistapidocumentreports"></a>
+
+<a id="apischemaservicelistschemabindings"></a>
+
+<a id="apischemaservicelistschemacontracts"></a>
+
+<a id="apischemaservicelistschemaprofiles"></a>
+
+<a id="apischemaservicelistschemasources"></a>
+
+<a id="apischemaservicepreviewapideclaration"></a>
+
+<a id="apischemaservicepreviewschemacontrol"></a>
+
+<a id="apischemaservicesnapshotschemalearning"></a>
+
+<a id="apischemaservicestageapicatalogchange"></a>
+
+<a id="apischemaservicestageapideclaration"></a>
+
+<a id="apischemaservicestageapirequestdocument"></a>
+
+<a id="apischemaservicestagelearneddocument"></a>
+
+<a id="apischemaservicestageschemabindings"></a>
+
+<a id="apischemaservicestageschemaprofile"></a>
+
+<a id="apischemaservicestageschemasource"></a>
+
+<a id="previewschemacontrolrequest"></a>
+
+<a id="schemabindings"></a>
+
+<a id="schemacontract"></a>
+
+<a id="schemacontrolapproval"></a>
+
+<a id="schemacoveragedecision"></a>
+
+<a id="schemamapping"></a>
+
+<a id="schemaprofile"></a>
+
+<a id="schemareconciliationdecision"></a>
+
+<a id="schemasource"></a>

@@ -1,5 +1,7 @@
 # Upgrade and migrate Tiyi
 
+v3.8.0 → v3.8.1: back up, perform the routine signed update, restart and verify. Startup migrates v3.8.0 state; do not purge it. Upgrade remote Agents before publishing new custom-rule formats. See [v3.8.1 release notes](release-3.8.1.md).
+
 Use the workflow that matches the change:
 
 | Goal | Workflow |

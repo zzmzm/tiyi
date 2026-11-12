@@ -1,4 +1,4 @@
-<!-- v3.8.0 public API reference, derived from the verified protobuf contract. -->
+<!-- v3.8.1 public API reference, derived from the protobuf contract. -->
 
 # alert.proto — Alerting: rules, channels, alerts, silences
 
@@ -584,3 +584,69 @@ Business content belongs to the rule; the destination selects the locale.
 | `ALERT_STATUS_OPEN` | 1 | — |
 | `ALERT_STATUS_ACKED` | 2 | — |
 | `ALERT_STATUS_RESOLVED` | 3 | — |
+
+<a id="alert"></a>
+
+<a id="alertchannel"></a>
+
+<a id="alertchannelkind"></a>
+
+<a id="alertnote"></a>
+
+<a id="alertnotificationlocale"></a>
+
+<a id="alertnotificationtemplate"></a>
+
+<a id="alertrule"></a>
+
+<a id="alertrulenotification"></a>
+
+<a id="alertserviceackalert"></a>
+
+<a id="alertserviceapplyalertchanneltorules"></a>
+
+<a id="alertservicecreatealertsilence"></a>
+
+<a id="alertservicedeletealertchannel"></a>
+
+<a id="alertservicedeletealertrule"></a>
+
+<a id="alertservicedeletealertsilence"></a>
+
+<a id="alertservicegetalert"></a>
+
+<a id="alertservicegetalertchannel"></a>
+
+<a id="alertservicegetalertrule"></a>
+
+<a id="alertservicelistalertchannels"></a>
+
+<a id="alertservicelistalertnotes"></a>
+
+<a id="alertservicelistalertrules"></a>
+
+<a id="alertservicelistalerts"></a>
+
+<a id="alertservicelistalertsilences"></a>
+
+<a id="alertservicepreviewalertrulenotification"></a>
+
+<a id="alertservicepreviewalertsilence"></a>
+
+<a id="alertservicereplayalertrule"></a>
+
+<a id="alertserviceresolvealert"></a>
+
+<a id="alertservicetestalertchannel"></a>
+
+<a id="alertserviceupsertalertchannel"></a>
+
+<a id="alertserviceupsertalertrule"></a>
+
+<a id="alertseverity"></a>
+
+<a id="alertsilence"></a>
+
+<a id="alertstatus"></a>
+
+<a id="replayalertruleresponse"></a>

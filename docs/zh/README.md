@@ -16,6 +16,8 @@ curl -fsSL https://www.tiyisec.com/install.sh | bash && sudo tiyi install --now
 需要[手动分步](getting-started.md#manual)、[自定义端口](getting-started.md#custom-ports)或[离线安装](getting-started.md#offline)时，快速开始也有对应步骤。
 已有安装请先阅读[升级与迁移](upgrade-migration.md)。
 
+当前版本：[v3.8.1 发行说明](release-3.8.1.md)。v3.8.0 安装先备份再执行签名更新；新工作流见[日常运维](operations.md)。
+
 ## 使用指南
 
 - [安装](installation.md)：安装与校验发行包，管理系统服务，选择适合自己的运行方式。

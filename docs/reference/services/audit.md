@@ -1,4 +1,4 @@
-<!-- v3.8.0 public API reference, derived from the verified protobuf contract. -->
+<!-- v3.8.1 public API reference, derived from the protobuf contract. -->
 
 # audit.proto — Tamper-evident audit chain
 
@@ -136,3 +136,15 @@ _No fields — send `{}`._
 | `actual_prev_hash` | `actualPrevHash` | `string` | singular | — |
 | `expected_row_hash` | `expectedRowHash` | `string` | singular | — |
 | `actual_row_hash` | `actualRowHash` | `string` | singular | — |
+
+<a id="auditentry"></a>
+
+<a id="auditservicegetauditentry"></a>
+
+<a id="auditservicegetchainstatus"></a>
+
+<a id="auditservicequeryaudit"></a>
+
+<a id="auditserviceverifychain"></a>
+
+<a id="chainbreak"></a>

@@ -1,4 +1,4 @@
-<!-- v3.8.0 public API reference, derived from the verified protobuf contract. -->
+<!-- v3.8.1 public API reference, derived from the protobuf contract. -->
 
 # cert.proto — Certificates and ACME/DNS providers
 
@@ -330,3 +330,33 @@ ACMEDNSProvider describes a tenant-scoped DNS-01 provider registration. Secret c
 | `deleted_at` | `deletedAt` | `google.protobuf.Timestamp` | singular | _RFC 3339 string, e.g. `2026-07-26T09:00:00Z`._ |
 | `acme_issuer` | `acmeIssuer` | `string` | singular | ACMEIssuer identifies the CA used to obtain a managed certificate: "letsencrypt", "letsencrypt-staging", "custom", or empty for uploads. |
 | `auto_renew` | `autoRenew` | `bool` | singular | auto_renew indicates whether the renewal worker will attempt to re-issue this certificate when it nears expiry. |
+
+<a id="acmednsprovider"></a>
+
+<a id="certificate"></a>
+
+<a id="certservicecreatednsprovider"></a>
+
+<a id="certservicedeletecert"></a>
+
+<a id="certservicedeletednsprovider"></a>
+
+<a id="certservicedownloadcert"></a>
+
+<a id="certservicegetcert"></a>
+
+<a id="certservicegetdnsprovider"></a>
+
+<a id="certserviceissueacmecert"></a>
+
+<a id="certservicelistcerts"></a>
+
+<a id="certservicelistdnsproviderdrivers"></a>
+
+<a id="certservicelistdnsproviders"></a>
+
+<a id="certservicerenewcert"></a>
+
+<a id="certserviceupdatednsprovider"></a>
+
+<a id="certserviceuploadcert"></a>

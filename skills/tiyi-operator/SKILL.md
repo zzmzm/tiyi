@@ -6,7 +6,7 @@ description: Operate an installed Tiyi WAF through its supported CLI, Web UI, an
 # Tiyi operator
 
 Help the user complete their task on an installed Tiyi environment. Respond in
-their language. This skill targets v3.8.0; first read `tiyi --version` and the
+their language. This skill targets v3.8.1; first read `tiyi --version` and the
 relevant command's `--help` when constructing commands for another release.
 
 ## Work from the user's task
@@ -159,6 +159,19 @@ supported structural/file requirements. File validation is not antivirus,
 Schema is not business authorization, and browser challenges are unsuitable
 for noninteractive API clients without deliberate exemptions.
 
+## v3.8.1 assistant and rule workflows
+
+Use the current page's assistant context, retained evidence and existing permissions.
+Review and edit suggestions before applying; saved suggestions do not prove node
+application. Scheduled automatic IP actions require explicit targets, count conditions
+and expiry; model prose cannot authorize wider action. AI is off by default.
+Grouped custom rules can inspect supported request/response fields and structured
+bodies, subject to inspection settings and node capabilities. Preview, test, save,
+check node application and verify real requests. Draft narrow CRS exceptions from
+security events; CRS-only skips retain Tiyi custom-rule and IP enforcement.
+Log exports use the applied query. Expired history is unavailable, not zero events.
+See the operations guide and v3.8.1 release notes for complete workflows.
+
 ## Tune, investigate, and operate
 
 Diagnose process → listener/TLS → Host/site → route → protection → origin.
@@ -194,7 +207,7 @@ no central administration or new configuration. There is no built-in control-pla
 
 ## Back up, upgrade, and recover
 
-Read current-to-target release notes. **v3.8.0 needs fresh state when upgrading
+Read current-to-target release notes. v3.8.0 → v3.8.1 uses a backed-up signed update and startup migrations; do not purge v3.8.0 state. Upgrade remote Agents before publishing the new rule formats. Restore the matching pre-upgrade backup and binary for rollback. **v3.8.0 needs fresh state when upgrading
 from v3.7.2 or earlier**, and every remote Agent must re-enroll. Do not reuse old
 database, identity, spool, metrics, or cached bundles.
 

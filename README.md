@@ -1,6 +1,6 @@
 # Tiyi
 
-> **v3.8.0 · 2026-09-22:** review the [release notes](docs/en/release-3.8.0.md) before upgrading. This release requires fresh state.
+> **v3.8.1 · 2026-11-12:** AI investigation and scheduled tasks, custom rules and clearer log queries. Read the [release notes](docs/en/release-3.8.1.md) for the v3.8.0 update path.
 
 [English](README.md) · [中文](README.zh-CN.md) · [Website](https://www.tiyisec.com/)
 
@@ -58,14 +58,14 @@ then follow [practice and advanced use](docs/en/practice.md). The default downlo
 | Deploy, manage users/nodes, back up and restore | [Deployment](docs/en/deployment.md) · [Migration](docs/en/upgrade-migration.md) |
 | Resolve errors | [Troubleshooting](docs/en/troubleshooting.md) |
 
-[English documentation hub](docs/en/README.md) · [中文文档](docs/zh/README.md) · [v3.8.0 notes](docs/en/release-3.8.0.md).
+[English documentation hub](docs/en/README.md) · [中文文档](docs/zh/README.md) · [v3.8.1 notes](docs/en/release-3.8.1.md).
 
 ## Capabilities
 
 Protect against common SQL injection/XSS; tune CRS, precise exceptions, and virtual patches per site; manage request/upload limits,
 rate controls, IP/country access, and Bot verification. Discover APIs, import OpenAPI/Swagger, learn JSON structure, and validate individual endpoints.
 Operate multiple origins, path routes, certificates, and renewal. Investigate traffic/evidence and integrate alerts, SIEM, and Prometheus.
-Manage access with RBAC, LDAP/AD, RADIUS, OIDC, SAML, and TOTP. Optional AI Copilot is off by default and remains advisory.
+Manage access with RBAC, LDAP/AD, RADIUS, OIDC, SAML, and TOTP. Optional AI assistance is off by default; review suggestions before applying. Scheduled automatic IP actions require explicit targets, count conditions and expiry.
 
 Remote Agents require signed licensed capacity; local features remain complete. There is one writable Controller; remote Agents keep serving their last accepted configuration during its outage.
 This repository distributes the installer, public key, user docs, and skill. Signed binaries are attached to [GitHub Releases](https://github.com/zzmzm/tiyi/releases)

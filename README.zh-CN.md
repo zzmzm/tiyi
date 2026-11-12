@@ -1,6 +1,6 @@
 # 太一 Tiyi
 
-> **v3.8.0 · 2026-09-22：**本版本要求全新状态，升级前请先阅读[发行说明](docs/zh/release-3.8.0.md)。
+> **v3.8.1 · 2026-11-12：** AI 调查与定时任务、自定义规则和日志查询改进。[发行说明](docs/zh/release-3.8.1.md)包含从 v3.8.0 更新步骤。
 
 [English](README.md) · [中文](README.zh-CN.md) · [官网](https://www.tiyisec.com/zh/)
 
@@ -58,14 +58,14 @@ curl -fsSL https://www.tiyisec.com/install.sh | bash && sudo tiyi install --now
 | 部署、账号、节点、备份、恢复 | [生产部署](docs/zh/deployment.md) · [升级与迁移](docs/zh/upgrade-migration.md) |
 | 解决错误 | [排障](docs/zh/troubleshooting.md) |
 
-[中文文档中心](docs/zh/README.md) · [English docs](docs/en/README.md) · [v3.8.0 版本说明](docs/zh/release-3.8.0.md)。
+[中文文档中心](docs/zh/README.md) · [English docs](docs/en/README.md) · [v3.8.1 版本说明](docs/zh/release-3.8.1.md)。
 
 ## 能做什么
 
 保护常见 SQL 注入/XSS；按站点配置 CRS、规则例外与虚拟补丁；管理请求/上传限制、限速、IP/国家访问和 Bot 验证；
 发现并管理 API、导入 OpenAPI/Swagger、学习 JSON 结构、逐接口校验；管理多源站、路径路由、证书与续期；
 查看流量/请求证据，通过告警、SIEM、Prometheus 运维；使用 RBAC、LDAP/AD、RADIUS、OIDC、SAML 和 TOTP 管理访问。
-可选 AI Copilot 默认关闭，始终只提供建议。
+可选 AI 助手默认关闭，建议经审核后应用；定时自动 IP 动作需要明确目标、数量条件与有效期。
 
 远端 Agent 需要签名许可配额；本机功能不受影响。只有一个可写 Controller；远端 Agent 在其离线时继续使用最后接受的配置。
 本仓库分发安装器、公钥、用户文档和 skill；签名二进制位于 [GitHub Release](https://github.com/zzmzm/tiyi/releases) 和

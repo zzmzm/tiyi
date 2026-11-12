@@ -1,4 +1,4 @@
-<!-- v3.8.0 public API reference, derived from the verified protobuf contract. -->
+<!-- v3.8.1 public API reference, derived from the protobuf contract. -->
 
 # policy.proto — WAF policies, rule overrides, custom rules, IP lists, rate limits, CRS
 
@@ -251,6 +251,8 @@ Schema: `tiyi.v1` · `policy.proto` · [English guide](../../en/api.md) · [中�
 | `removed_rule_ids` | `removedRuleIds` | `int32` | repeated | Rule ids present in the currently bound ruleset but not in the candidate. Sorted ascending. |
 | `orphaned_overrides` | `orphanedOverrides` | [`PreviewCrsImpactOrphanedOverride`](#previewcrsimpactorphanedoverride) | repeated | Overrides whose CRS rule id no longer exists in the candidate ruleset. Sorted by crs_rule_id. |
 | `changed_rules` | `changedRules` | [`PreviewCrsChangedRule`](#previewcrschangedrule) | repeated | — |
+| `review_token` | `reviewToken` | `string` | singular | — |
+| `compilation_succeeded` | `compilationSucceeded` | `bool` | singular | False means counts are unavailable, not zero enabled/disabled rules. |
 
 ### PolicyService.TestPolicy
 
@@ -271,17 +273,22 @@ Schema: `tiyi.v1` · `policy.proto` · [English guide](../../en/api.md) · [中�
 | `site_id` | `siteId` | `string` | singular | Optional site overlay. Must reference this policy and have WAF enabled. |
 | `client_ip` | `clientIp` | `string` | singular | Explicit simulation inputs; no trusted-proxy resolution is performed. |
 | `peer_ip` | `peerIp` | `string` | singular | — |
+| `response` | `response` | [`TestPolicyResponseSample`](#testpolicyresponsesample) | singular | — |
 
 **Response** — `tiyi.v1.TestPolicyResponse`
 
 | Field | JSON key | Type | Cardinality | Description |
 |---|---|---|---|---|
+| `response_evaluation` | `responseEvaluation` | `string` | singular | not_provided, not_reached, headers_inspected, or body_inspected. |
+| `response_body_inspection` | `responseBodyInspection` | [`ResponseBodyInspection`](#responsebodyinspection) | singular | — |
+| `request_inspection` | `requestInspection` | [`RequestInspection`](#requestinspection) | singular | — |
 | `blocked` | `blocked` | `bool` | singular | — |
 | `status` | `status` | `int32` | singular | — |
 | `matched_rule_ids` | `matchedRuleIds` | `string` | repeated | — |
 | `transaction` | `transaction` | `google.protobuf.Struct` | singular | _free-form JSON object._ |
 | `matched_rules` | `matchedRules` | [`TestPolicyMatchedRule`](#testpolicymatchedrule) | repeated | Detailed per-rule breakdown including score contributions. Sorted by phase, then rule_id ascending for stable output. |
 | `total_inbound_score` | `totalInboundScore` | `int32` | singular | Actual CRS blocking_inbound_anomaly_score from this transaction. Zero if evaluation did not reach the CRS blocking-score aggregation. |
+| `rule_traces` | `ruleTraces` | [`RuleEvaluationTrace`](#ruleevaluationtrace) | repeated | Actual generated-edge evidence. No input values or physical helper IDs. |
 
 ### PolicyService.ListPolicyTemplates
 
@@ -511,6 +518,56 @@ PreviewCrsImpactOrphanedOverride describes a policy override that references a C
 | `before` | `before` | `string` | singular | — |
 | `after` | `after` | `string` | singular | — |
 
+### RequestInspection
+
+Value-free outcome of the saved site's native request-control simulation.
+
+| Field | JSON key | Type | Cardinality | Description |
+|---|---|---|---|---|
+| `scope` | `scope` | `string` | singular | site \| policy_only |
+| `waf_reached` | `wafReached` | `bool` | singular | — |
+| `downstream_reached` | `downstreamReached` | `bool` | singular | — |
+| `body_processor` | `bodyProcessor` | `string` | singular | — |
+| `body_outcome` | `bodyOutcome` | `string` | singular | — |
+| `body_complete` | `bodyComplete` | `bool` | singular | — |
+| `schema_state` | `schemaState` | `string` | singular | — |
+| `schema_reason` | `schemaReason` | `string` | singular | — |
+| `decisions` | `decisions` | [`TestProtectionDecision`](#testprotectiondecision) | repeated | — |
+| `context_sha256` | `contextSha256` | `string` | singular | — |
+| `site_name` | `siteName` | `string` | singular | — |
+| `native_ip_reached` | `nativeIpReached` | `bool` | singular | — |
+
+### ResponseBodyInspection
+
+| Field | JSON key | Type | Cardinality | Description |
+|---|---|---|---|---|
+| `state` | `state` | `string` | singular | inspected, incomplete, or not_inspected. Independent of rule matches. |
+| `reason` | `reason` | `string` | singular | Complete-input qualification or the reason the body was unavailable. |
+| `buffered_bytes` | `bufferedBytes` | `int64` | singular | _JSON string (64-bit ints are quoted)._ |
+
+### RuleConditionEvaluation
+
+| Field | JSON key | Type | Cardinality | Description |
+|---|---|---|---|---|
+| `path` | `path` | `string` | singular | — |
+| `state` | `state` | `string` | singular | matched, not_matched, short_circuited, not_observed, or incomplete. |
+| `target` | `target` | `string` | singular | — |
+| `operator` | `operator` | `string` | singular | — |
+| `kind` | `kind` | `string` | singular | — |
+| `selector` | `selector` | `string` | singular | Configured literal selector, never a value extracted from traffic. |
+| `operand` | `operand` | `string` | singular | Configured predicate operand, never an observed request value. |
+| `negated` | `negated` | `bool` | singular | — |
+
+### RuleEvaluationTrace
+
+| Field | JSON key | Type | Cardinality | Description |
+|---|---|---|---|---|
+| `rule_id` | `ruleId` | `int64` | singular | _JSON string (64-bit ints are quoted)._ |
+| `coverage` | `coverage` | `string` | singular | observed, logical_only, incomplete, or not_observed. |
+| `matched` | `matched` | `bool` | singular | — |
+| `reason` | `reason` | `string` | singular | — |
+| `nodes` | `nodes` | [`RuleConditionEvaluation`](#ruleconditionevaluation) | repeated | — |
+
 ### TestPolicyMatchedRule
 
 TestPolicyMatchedRule breaks down one rule that matched during a policy test. Closes WAF_POLICY_DESIGN § 7.14 / deep-review item #12 — operators can now see WHICH rules contributed to a block, their score contribution, and their tags (so they know whether the match was CRS critical/error/warning).
@@ -526,6 +583,27 @@ TestPolicyMatchedRule breaks down one rule that matched during a policy test. Cl
 | `disruptive` | `disruptive` | `bool` | singular | Whether this rule produced the transaction's final interruption. |
 | `file` | `file` | `string` | singular | Source file + line for debugging. |
 | `line` | `line` | `int32` | singular | — |
+
+### TestPolicyResponseSample
+
+Explicit response fixture. No upstream request is made.
+
+| Field | JSON key | Type | Cardinality | Description |
+|---|---|---|---|---|
+| `status` | `status` | `int32` | singular | Final status: 200..599. Zero is invalid; upgrades are not simulated. |
+| `headers` | `headers` | map&lt;`string`, `string`&gt; | map | — |
+| `body` | `body` | `bytes` | optional (explicit) | Presence distinguishes an omitted body from an explicitly empty entity. _base64-encoded JSON string._ |
+| `body_truncated` | `bodyTruncated` | `bool` | singular | Mark a captured prefix as incomplete; it cannot qualify Boolean NOT. |
+
+### TestProtectionDecision
+
+| Field | JSON key | Type | Cardinality | Description |
+|---|---|---|---|---|
+| `source` | `source` | `string` | singular | — |
+| `action` | `action` | `string` | singular | — |
+| `reason` | `reason` | `string` | singular | — |
+| `status` | `status` | `int32` | singular | — |
+| `terminal` | `terminal` | `bool` | singular | — |
 
 ## Enums
 
@@ -573,3 +651,85 @@ TestPolicyMatchedRule breaks down one rule that matched during a policy test. Cl
 | `REQUEST_BODY_LIMIT_ACTION_UNSPECIFIED` | 0 | — |
 | `REQUEST_BODY_LIMIT_ACTION_BLOCK` | 1 | — |
 | `REQUEST_BODY_LIMIT_ACTION_OBSERVE` | 2 | — |
+
+<a id="arglimits"></a>
+
+<a id="argumentlimitaction"></a>
+
+<a id="bodyprocessor"></a>
+
+<a id="bodyprocessoroverride"></a>
+
+<a id="crscoresettings"></a>
+
+<a id="httppolicy"></a>
+
+<a id="httppolicyviolationaction"></a>
+
+<a id="policy"></a>
+
+<a id="policylayerkind"></a>
+
+<a id="policyplugin"></a>
+
+<a id="policyservicecreatepolicy"></a>
+
+<a id="policyservicecreatepolicyfromtemplate"></a>
+
+<a id="policyservicedeletepolicy"></a>
+
+<a id="policyservicediffpolicyversions"></a>
+
+<a id="policyservicegetpolicy"></a>
+
+<a id="policyservicegetpolicyversion"></a>
+
+<a id="policyservicelistpolicies"></a>
+
+<a id="policyservicelistpolicytemplates"></a>
+
+<a id="policyservicelistpolicyversions"></a>
+
+<a id="policyservicepreviewcrsimpact"></a>
+
+<a id="policyservicepreviewseclang"></a>
+
+<a id="policyservicerollbackpolicy"></a>
+
+<a id="policyservicesetactivecrsruleset"></a>
+
+<a id="policyservicesetenginestate"></a>
+
+<a id="policyservicetestpolicy"></a>
+
+<a id="policyserviceupdatepolicy"></a>
+
+<a id="policyserviceupdatepolicylayer"></a>
+
+<a id="policyversion"></a>
+
+<a id="previewcrschangedrule"></a>
+
+<a id="previewcrsimpactorphanedoverride"></a>
+
+<a id="previewcrsrulechange"></a>
+
+<a id="requestbodylimitaction"></a>
+
+<a id="requestinspection"></a>
+
+<a id="responsebodyinspection"></a>
+
+<a id="ruleconditionevaluation"></a>
+
+<a id="ruleevaluationtrace"></a>
+
+<a id="testpolicymatchedrule"></a>
+
+<a id="testpolicyresponsesample"></a>
+
+<a id="testprotectiondecision"></a>
+
+<a id="testpolicyrequest"></a>
+
+<a id="testpolicyresponse"></a>

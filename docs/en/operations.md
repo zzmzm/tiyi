@@ -388,3 +388,23 @@ Missing node counters or logs represent incomplete coverage, not proof that no a
 ## Customize block pages and API errors
 
 Six protection scenarios share templates and have individual statuses. Use the [complete response template and restore steps](responses.md), then verify actual HTML and JSON responses.
+
+## v3.8.1 investigation and rule workflows
+
+### Ask the assistant and review a change
+
+An administrator configures the optional AI provider in System Settings; AI is off by default. Open the assistant from the current page and ask about the selected site, time range or retained evidence. 小太 can explain the current form and prepare a suggestion. Review the actual fields, scope, compiler result and evidence; edit or reject the draft before applying. Existing permissions still govern reads and changes. Saving a suggestion is not proof that nodes received it.
+
+Use Chat, Suggestion history and Scheduled tasks in the assistant workspace. Scheduled reports, follow-ups and alert handover summaries retain results and can send summaries through existing alert channels. Review the schedule, timezone, channel, target scope and expiry. Automatic IP blocking requires explicit targets and event-count conditions; model text cannot broaden them. Disable or withdraw the task to stop future runs, then separately review any active IP disposition.
+
+### Author a rule or narrow an exception
+
+In Security Policies, open the policy's custom rules and create a rule from its intended request or response condition. Group AND/OR conditions, choose the supported input, and supply the operator and value. Request-body, response-body and structured-body conditions need the corresponding inspection/capacity settings. Review the dependency message and serving-node capability result rather than enabling unrelated inspection.
+
+Preview the executable rule, test representative allowed and denied requests, then save the reviewed change. Check node application and send real requests through the protected site. History and restore provide policy/rule recovery; shared-policy changes affect every bound site. From a Security Log event, use its rule action to draft a scoped exception. Verify the site, method, path and rule targets; a CRS-only skip retains custom-rule and IP enforcement. IP blocking remains a separate action.
+
+### Query retained history
+
+Access, Security and Error Logs keep common filters visible; use Filters for one additional condition at a time. Edit a chip to change it or remove it explicitly. Relative presets apply immediately; custom dates and times apply only after confirmation. Calendar day ranges include the whole final day using the next local midnight as the exclusive end. Exports use the applied query, not unsaved edits.
+
+Read the displayed timezone and retention cutoff. An entirely expired range means history is unavailable, not that no events occurred. Widen or move the query into retained dates; an expired partition is skipped while genuine storage and validation errors remain visible. Missing samples do not establish complete traffic coverage.

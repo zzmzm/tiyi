@@ -1,4 +1,4 @@
-<!-- v3.8.0 public API reference, derived from the verified protobuf contract. -->
+<!-- v3.8.1 public API reference, derived from the protobuf contract. -->
 
 # user.proto — Users, roles, and permissions
 
@@ -371,3 +371,41 @@ _No fields — send `{}`._
 | `deleted_at` | `deletedAt` | `google.protobuf.Timestamp` | singular | _RFC 3339 string, e.g. `2026-07-26T09:00:00Z`._ |
 | `totp_enabled` | `totpEnabled` | `bool` | singular | — |
 | `external_providers` | `externalProviders` | `string` | repeated | — |
+
+<a id="permission"></a>
+
+<a id="role"></a>
+
+<a id="roleservicecreaterole"></a>
+
+<a id="roleservicedeleterole"></a>
+
+<a id="roleservicegetrole"></a>
+
+<a id="roleservicelistpermissions"></a>
+
+<a id="roleservicelistroles"></a>
+
+<a id="roleserviceupdaterole"></a>
+
+<a id="user"></a>
+
+<a id="userserviceassignroles"></a>
+
+<a id="userservicecreateuser"></a>
+
+<a id="userservicedeleteuser"></a>
+
+<a id="userservicegetuser"></a>
+
+<a id="userservicelistusers"></a>
+
+<a id="userservicelockuser"></a>
+
+<a id="userserviceresetpassword"></a>
+
+<a id="userserviceresetusermfa"></a>
+
+<a id="userserviceunlockuser"></a>
+
+<a id="userserviceupdateuser"></a>

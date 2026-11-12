@@ -1,4 +1,4 @@
-<!-- v3.8.0 public API reference, derived from the verified protobuf contract. -->
+<!-- v3.8.1 public API reference, derived from the protobuf contract. -->
 
 # upstream.proto — Upstream pools
 
@@ -193,3 +193,23 @@ UpstreamResiliencePolicy protects real traffic independently of active probes. W
 | `retry_enabled` | `retryEnabled` | `bool` | singular | — |
 | `retry_duration_seconds` | `retryDurationSeconds` | `int32` | singular | — |
 | `retry_interval_milliseconds` | `retryIntervalMilliseconds` | `int32` | singular | — |
+
+<a id="upstream"></a>
+
+<a id="upstreamhealthcheck"></a>
+
+<a id="upstreamhealthstate"></a>
+
+<a id="upstreamresiliencepolicy"></a>
+
+<a id="upstreamservicecreateupstream"></a>
+
+<a id="upstreamservicedeleteupstream"></a>
+
+<a id="upstreamservicegetupstream"></a>
+
+<a id="upstreamservicelistupstreamhealth"></a>
+
+<a id="upstreamservicelistupstreams"></a>
+
+<a id="upstreamserviceupdateupstream"></a>

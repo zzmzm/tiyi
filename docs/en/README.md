@@ -16,6 +16,8 @@ Websites use 80/443 and the management console uses 8080. The first password app
 Quickstart also covers [manual steps](getting-started.md#manual), [custom ports](getting-started.md#custom-ports), and [offline installation](getting-started.md#offline).
 For an existing installation, read [upgrade and migration](upgrade-migration.md) first.
 
+Current release: [v3.8.1 notes](release-3.8.1.md). v3.8.0 installations use the backed-up signed update path; see [new investigation and rule workflows](operations.md#v381-investigation-and-rule-workflows).
+
 ## Guides
 
 - [Installation](installation.md): install and verify release packages, manage the service, and choose how to run Tiyi.

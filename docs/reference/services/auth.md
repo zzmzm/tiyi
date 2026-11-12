@@ -1,4 +1,4 @@
-<!-- v3.8.0 public API reference, derived from the verified protobuf contract. -->
+<!-- v3.8.1 public API reference, derived from the protobuf contract. -->
 
 # auth.proto — Authentication and session lifecycle
 
@@ -293,3 +293,33 @@ _No fields — send `{}`._
 | `id` | `id` | `string` | singular | — |
 | `label` | `label` | `string` | singular | — |
 | `login_url` | `loginUrl` | `string` | singular | — |
+
+<a id="authservicebegintotpenrollment"></a>
+
+<a id="authservicechangepassword"></a>
+
+<a id="authservicecompleteauthenticationchallenge"></a>
+
+<a id="authserviceconfirmtotpenrollment"></a>
+
+<a id="authservicedisabletotp"></a>
+
+<a id="authservicegetaccesscodes"></a>
+
+<a id="authservicegetloginoptions"></a>
+
+<a id="authservicegetmfastatus"></a>
+
+<a id="authservicegetuserinfo"></a>
+
+<a id="authservicelogin"></a>
+
+<a id="authservicelogout"></a>
+
+<a id="authservicerefresh"></a>
+
+<a id="authserviceregeneraterecoverycodes"></a>
+
+<a id="currentuser"></a>
+
+<a id="loginprovider"></a>

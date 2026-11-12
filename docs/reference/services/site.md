@@ -1,4 +1,4 @@
-<!-- v3.8.0 public API reference, derived from the verified protobuf contract. -->
+<!-- v3.8.1 public API reference, derived from the protobuf contract. -->
 
 # site.proto — Sites, routing, and per-site policy overrides
 
@@ -484,3 +484,59 @@ BotProtectionMode is a site-wide admission contract. It is deliberately independ
 | `UNMATCHED_PATH_ACTION_UNSPECIFIED` | 0 | treated as DEFAULT_UPSTREAM |
 | `UNMATCHED_PATH_ACTION_DEFAULT_UPSTREAM` | 1 | fall through to the site default pool |
 | `UNMATCHED_PATH_ACTION_RETURN_404` | 2 | strict allowlist: 404 unmatched paths |
+
+<a id="botprotectionconfig"></a>
+
+<a id="botprotectionmode"></a>
+
+<a id="pathrewritemode"></a>
+
+<a id="site"></a>
+
+<a id="sitecertificatematerial"></a>
+
+<a id="siteconfiguration"></a>
+
+<a id="siteconfigurationarchive"></a>
+
+<a id="sitepolicyoverride"></a>
+
+<a id="siteroute"></a>
+
+<a id="siterouting"></a>
+
+<a id="siteservicecreatesite"></a>
+
+<a id="siteservicedeletesite"></a>
+
+<a id="siteservicedeletesitepolicyoverride"></a>
+
+<a id="siteservicedisablesite"></a>
+
+<a id="siteserviceenablesite"></a>
+
+<a id="siteserviceexportsite"></a>
+
+<a id="siteserviceexportsites"></a>
+
+<a id="siteservicegetsite"></a>
+
+<a id="siteservicegetsitepolicyoverride"></a>
+
+<a id="siteservicegetsiterouting"></a>
+
+<a id="siteserviceimportsite"></a>
+
+<a id="siteservicelistsites"></a>
+
+<a id="siteservicepreviewcompiledconfig"></a>
+
+<a id="siteserviceupdatesite"></a>
+
+<a id="siteserviceupdatesiterouting"></a>
+
+<a id="siteserviceupsertsitepolicyoverride"></a>
+
+<a id="siteupstream"></a>
+
+<a id="unmatchedpathaction"></a>

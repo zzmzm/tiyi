@@ -1,4 +1,4 @@
-<!-- v3.8.0 public API reference, derived from the verified protobuf contract. -->
+<!-- v3.8.1 public API reference, derived from the protobuf contract. -->
 
 # common.proto — Shared types
 
@@ -202,3 +202,11 @@ SecurityEventOutcome is the canonical transaction-result filter used by Security
 | `WAF_MODE_UNSPECIFIED` | 0 | — |
 | `WAF_MODE_BLOCKING` | 1 | — |
 | `WAF_MODE_DETECTION` | 2 | — |
+
+<a id="tlshttpbehavior"></a>
+
+<a id="tlsmode"></a>
+
+<a id="tlsversion"></a>
+
+<a id="wafmode"></a>

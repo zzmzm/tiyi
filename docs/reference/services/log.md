@@ -1,4 +1,4 @@
-<!-- v3.8.0 public API reference, derived from the verified protobuf contract. -->
+<!-- v3.8.1 public API reference, derived from the protobuf contract. -->
 
 # log.proto — Observation v2: events, evidence, exports, log policy
 
@@ -137,7 +137,6 @@ _No fields — send `{}`._
 - **Kind** unary
 - **Auth** (`log:read`)
 
-<a id="querysecurityeventsrequest"></a>
 **Request** — `tiyi.v1.QuerySecurityEventsRequest`
 
 | Field | JSON key | Type | Cardinality | Description |
@@ -160,6 +159,7 @@ _No fields — send `{}`._
 |---|---|---|---|---|
 | `items` | `items` | [`SecurityEvent`](#securityevent) | repeated | — |
 | `page` | `page` | [`CursorResponse`](common.md#cursorresponse) | singular | — |
+| `retention` | `retention` | [`LogQueryRetention`](#logqueryretention) | singular | — |
 
 ### LogService.QueryAccessEvents
 
@@ -167,7 +167,6 @@ _No fields — send `{}`._
 - **Kind** unary
 - **Auth** (`log:read`)
 
-<a id="queryaccesseventsrequest"></a>
 **Request** — `tiyi.v1.QueryAccessEventsRequest`
 
 | Field | JSON key | Type | Cardinality | Description |
@@ -199,7 +198,6 @@ _No fields — send `{}`._
 - **Kind** unary
 - **Auth** (`log:read`)
 
-<a id="queryerroreventsrequest"></a>
 **Request** — `tiyi.v1.QueryErrorEventsRequest`
 
 | Field | JSON key | Type | Cardinality | Description |
@@ -313,6 +311,7 @@ _No fields — send `{}`._
 |---|---|---|---|---|
 | `ndjson` | `ndjson` | `bytes` | singular | _base64-encoded JSON string._ |
 | `filename` | `filename` | `string` | singular | — |
+| `retention` | `retention` | [`LogQueryRetention`](#logqueryretention) | singular | — |
 
 ### LogService.ExportAccessEvents
 
@@ -429,6 +428,7 @@ _No fields — send `{}`._
 | `top_attack_types` | `topAttackTypes` | [`LogTopEntry`](#logtopentry) | repeated | — |
 | `top_targets` | `topTargets` | [`LogTopEntry`](#logtopentry) | repeated | — |
 | `top_sites` | `topSites` | [`LogTopEntry`](#logtopentry) | repeated | — |
+| `retention` | `retention` | [`LogQueryRetention`](#logqueryretention) | singular | Expired dates are omitted from the trend, rather than filled with zeros. |
 
 ### LogService.GetRequestEvidenceMetadata
 
@@ -642,6 +642,15 @@ Current policy snapshot for the selected site or sites represented on this page.
 | `request_evidence_finalized_queue_max_bytes` | `requestEvidenceFinalizedQueueMaxBytes` | [`LogPolicySource`](#logpolicysource) | singular | — |
 | `schema_violation_details` | `schemaViolationDetails` | [`LogPolicySource`](#logpolicysource) | singular | — |
 
+### LogQueryRetention
+
+Present when requested security history crosses the current retention cutoff. This policy boundary does not guarantee complete capture after retained_from.
+
+| Field | JSON key | Type | Cardinality | Description |
+|---|---|---|---|---|
+| `retained_from` | `retainedFrom` | `google.protobuf.Timestamp` | singular | _RFC 3339 string, e.g. `2026-07-26T09:00:00Z`._ |
+| `fully_expired` | `fullyExpired` | `bool` | singular | The entire requested interval precedes retained_from; an empty result does not establish that no security events occurred in that interval. |
+
 ### LogStorageHealth
 
 | Field | JSON key | Type | Cardinality | Description |
@@ -744,6 +753,30 @@ Current policy snapshot for the selected site or sites represented on this page.
 | `site_revision` | `siteRevision` | `int64` | singular | _JSON string (64-bit ints are quoted)._ |
 | `safety_epoch` | `safetyEpoch` | `int64` | singular | _JSON string (64-bit ints are quoted)._ |
 
+### RuleExecution
+
+| Field | JSON key | Type | Cardinality | Description |
+|---|---|---|---|---|
+| `version` | `version` | `int32` | singular | — |
+| `policy_id` | `policyId` | `string` | singular | — |
+| `policy_revision` | `policyRevision` | `int64` | singular | _JSON string (64-bit ints are quoted)._ |
+| `coverage` | `coverage` | `string` | singular | observed or logical_only; optimized backends cannot prove individual leaves. |
+| `total_nodes` | `totalNodes` | `uint32` | singular | — |
+| `nodes_truncated` | `nodesTruncated` | `bool` | singular | — |
+| `nodes` | `nodes` | [`RuleExecutionNode`](#ruleexecutionnode) | repeated | — |
+| `definition_sha256` | `definitionSha256` | `string` | singular | Digest of the frozen executable/spec/source map, computed before serving. Groups historical observations without joining today's rule definition. |
+
+### RuleExecutionNode
+
+| Field | JSON key | Type | Cardinality | Description |
+|---|---|---|---|---|
+| `path` | `path` | `string` | singular | — |
+| `kind` | `kind` | `string` | singular | — |
+| `state` | `state` | `string` | singular | — |
+| `target` | `target` | `string` | singular | — |
+| `operator` | `operator` | `string` | singular | — |
+| `negated` | `negated` | `bool` | singular | Value-level predicate negation; distinct from a NOT group. |
+
 ### SecurityEvent
 
 | Field | JSON key | Type | Cardinality | Description |
@@ -795,6 +828,7 @@ Current policy snapshot for the selected site or sites represented on this page.
 | `disruptive` | `disruptive` | `bool` | singular | — |
 | `chain_level` | `chainLevel` | `int32` | singular | — |
 | `match_value_truncated` | `matchValueTruncated` | `bool` | singular | — |
+| `rule_execution` | `ruleExecution` | [`RuleExecution`](#ruleexecution) | singular | Optional admitted historical compiler-edge evidence. No request values, selectors or configured operands; absence never proves a condition false. |
 
 ### SiteLogPolicyOverride
 
@@ -908,3 +942,113 @@ Current policy snapshot for the selected site or sites represented on this page.
 | `SECURITY_SUMMARY_DIMENSION_PATH` | 5 | — |
 | `SECURITY_SUMMARY_DIMENSION_RULE` | 6 | — |
 | `SECURITY_SUMMARY_DIMENSION_METHOD` | 7 | — |
+
+<a id="accessevent"></a>
+
+<a id="accesslogrankingdimension"></a>
+
+<a id="detailpolicyannotation"></a>
+
+<a id="detailretentiontier"></a>
+
+<a id="detailselection"></a>
+
+<a id="errorevent"></a>
+
+<a id="globallogpolicy"></a>
+
+<a id="logdetailmode"></a>
+
+<a id="logpolicy"></a>
+
+<a id="logpolicysource"></a>
+
+<a id="logpolicysources"></a>
+
+<a id="logpressurepolicy"></a>
+
+<a id="logqueryretention"></a>
+
+<a id="logservicedeletesitelogpolicyoverride"></a>
+
+<a id="logservicedownloadrequestevidencebody"></a>
+
+<a id="logserviceexportaccessevents"></a>
+
+<a id="logserviceexporterrorevents"></a>
+
+<a id="logserviceexportsecurityevents"></a>
+
+<a id="logservicegetaccessevent"></a>
+
+<a id="logservicegetaccesslogrankings"></a>
+
+<a id="logservicegetaccesslogsummary"></a>
+
+<a id="logservicegeterrorevent"></a>
+
+<a id="logservicegetgloballogpolicy"></a>
+
+<a id="logservicegetrequestevidenceheaders"></a>
+
+<a id="logservicegetrequestevidencemetadata"></a>
+
+<a id="logservicegetsecurityevent"></a>
+
+<a id="logservicegetsecuritylogsummary"></a>
+
+<a id="logservicegetsitelogpolicy"></a>
+
+<a id="logservicequeryaccessevents"></a>
+
+<a id="logservicequeryerrorevents"></a>
+
+<a id="logservicequerysecurityevents"></a>
+
+<a id="logservicestreamrequestevidencebody"></a>
+
+<a id="logservicetailsecurityevents"></a>
+
+<a id="logserviceupdategloballogpolicy"></a>
+
+<a id="logserviceupsertsitelogpolicyoverride"></a>
+
+<a id="logstorageestimatestate"></a>
+
+<a id="logstoragehealth"></a>
+
+<a id="logstoragehealthstatus"></a>
+
+<a id="logtopentry"></a>
+
+<a id="logtrendbucket"></a>
+
+<a id="queryaccesseventsrequest"></a>
+
+<a id="queryerroreventsrequest"></a>
+
+<a id="querysecurityeventsrequest"></a>
+
+<a id="requestevidencebodymode"></a>
+
+<a id="requestevidenceheader"></a>
+
+<a id="requestevidencemetadata"></a>
+
+<a id="requestevidencemode"></a>
+
+<a id="requestevidencesummary"></a>
+
+<a id="resolvedlogpolicy"></a>
+
+<a id="ruleexecution"></a>
+
+<a id="ruleexecutionnode"></a>
+
+<a id="securityevent"></a>
+
+<a id="securitymessage"></a>
+
+<a id="securitysummarydimension"></a>
+
+<a id="sitelogpolicyoverride"></a>

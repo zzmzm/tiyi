@@ -1,4 +1,4 @@
-<!-- v3.8.0 public API reference, derived from the verified protobuf contract. -->
+<!-- v3.8.1 public API reference, derived from the protobuf contract. -->
 
 # rule.proto — Rule primitives shared by policy services
 
@@ -10,6 +10,8 @@ Schema: `tiyi.v1` · `rule.proto` · [English guide](../../en/api.md) · [中文
 
 | RPC | Kind | Required permission |
 |---|---|---|
+| [`PreviewRuleOverrideBatch`](#ruleoverrideservicepreviewruleoverridebatch) | unary | (`policy:read`) |
+| [`PreviewRuleOverride`](#ruleoverrideservicepreviewruleoverride) | unary | (`policy:read`) |
 | [`ListRuleOverrides`](#ruleoverrideservicelistruleoverrides) | unary | (`policy:read`) |
 | [`GetRuleOverride`](#ruleoverrideservicegetruleoverride) | unary | (`policy:read`) |
 | [`UpsertRuleOverride`](#ruleoverrideserviceupsertruleoverride) | unary | (`policy:rule:override`) |
@@ -23,11 +25,14 @@ Schema: `tiyi.v1` · `rule.proto` · [English guide](../../en/api.md) · [中文
 |---|---|---|
 | [`ListCustomRules`](#customruleservicelistcustomrules) | unary | (`policy:read`) |
 | [`GetCustomRule`](#customruleservicegetcustomrule) | unary | (`policy:read`) |
+| [`GetCustomRuleHistory`](#customruleservicegetcustomrulehistory) | unary | `policy:read` and `log:read` |
 | [`CreateCustomRule`](#customruleservicecreatecustomrule) | unary | (`policy:custom:write`) |
 | [`UpdateCustomRule`](#customruleserviceupdatecustomrule) | unary | (`policy:custom:write`) |
 | [`DeleteCustomRule`](#customruleservicedeletecustomrule) | unary | (`policy:custom:write`) |
 | [`ReorderCustomRules`](#customruleservicereordercustomrules) | unary | (`policy:custom:write`) |
 | [`PreviewCustomRule`](#customruleservicepreviewcustomrule) | unary | (`policy:preview`) |
+| [`AnalyzeCustomRuleExpression`](#customruleserviceanalyzecustomruleexpression) | unary | (`policy:read`) |
+| [`TestCustomRuleCandidate`](#customruleservicetestcustomrulecandidate) | unary | `policy:read` and `policy:preview` |
 | [`ListCustomRuleTemplates`](#customruleservicelistcustomruletemplates) | unary | (`policy:read`) |
 | [`CreateFromTemplate`](#customruleservicecreatefromtemplate) | unary | (`policy:custom:write`) |
 
@@ -109,6 +114,44 @@ CountryAccessService owns jurisdiction-aware access decisions. Country codes are
 
 ## RPCs
 
+### RuleOverrideService.PreviewRuleOverrideBatch
+
+Review a bounded group using the same planner as the atomic write.
+
+- **Procedure** `POST /tiyi.v1.RuleOverrideService/PreviewRuleOverrideBatch`
+- **Kind** unary
+- **Auth** (`policy:read`)
+
+**Request** — `tiyi.v1.PreviewRuleOverrideBatchRequest`
+
+| Field | JSON key | Type | Cardinality | Description |
+|---|---|---|---|---|
+| `overrides` | `overrides` | [`RuleOverride`](#ruleoverride) | repeated | — |
+
+**Response** — `tiyi.v1.PreviewRuleOverrideBatchResponse`
+
+| Field | JSON key | Type | Cardinality | Description |
+|---|---|---|---|---|
+| `plan` | `plan` | [`RuleOverrideBatchPlan`](#ruleoverridebatchplan) | singular | — |
+
+### RuleOverrideService.PreviewRuleOverride
+
+- **Procedure** `POST /tiyi.v1.RuleOverrideService/PreviewRuleOverride`
+- **Kind** unary
+- **Auth** (`policy:read`)
+
+**Request** — `tiyi.v1.PreviewRuleOverrideRequest`
+
+| Field | JSON key | Type | Cardinality | Description |
+|---|---|---|---|---|
+| `override` | `override` | [`RuleOverride`](#ruleoverride) | singular | — |
+
+**Response** — `tiyi.v1.PreviewRuleOverrideResponse`
+
+| Field | JSON key | Type | Cardinality | Description |
+|---|---|---|---|---|
+| `plan` | `plan` | [`RuleOverrideChangePlan`](#ruleoverridechangeplan) | singular | — |
+
 ### RuleOverrideService.ListRuleOverrides
 
 - **Procedure** `POST /tiyi.v1.RuleOverrideService/ListRuleOverrides`
@@ -157,13 +200,15 @@ CountryAccessService owns jurisdiction-aware access decisions. Country codes are
 
 | Field | JSON key | Type | Cardinality | Description |
 |---|---|---|---|---|
-| `override` | `override` | [`RuleOverride`](#ruleoverride) | singular | — |
+| `override` | `override` | [`RuleOverride`](#ruleoverride) | singular | Empty ID adds intent: compatible field exclusions merge, duplicates are no-ops. A persisted ID explicitly edits/moves that exception. |
+| `expected_plan_token` | `expectedPlanToken` | `string` | singular | Bind the write to a preview. A stale/different draft is rejected. |
 
 **Response** — `tiyi.v1.UpsertRuleOverrideResponse`
 
 | Field | JSON key | Type | Cardinality | Description |
 |---|---|---|---|---|
 | `override` | `override` | [`RuleOverride`](#ruleoverride) | singular | — |
+| `plan` | `plan` | [`RuleOverrideChangePlan`](#ruleoverridechangeplan) | singular | — |
 
 ### RuleOverrideService.DeleteRuleOverride
 
@@ -194,12 +239,15 @@ CountryAccessService owns jurisdiction-aware access decisions. Country codes are
 | Field | JSON key | Type | Cardinality | Description |
 |---|---|---|---|---|
 | `overrides` | `overrides` | [`RuleOverride`](#ruleoverride) | repeated | — |
+| `expected_plan_token` | `expectedPlanToken` | `string` | singular | Required for reviewed batches and request-constrained exceptions. |
 
 **Response** — `tiyi.v1.BulkUpsertRuleOverridesResponse`
 
 | Field | JSON key | Type | Cardinality | Description |
 |---|---|---|---|---|
 | `overrides` | `overrides` | [`RuleOverride`](#ruleoverride) | repeated | — |
+| `plan` | `plan` | [`RuleOverrideBatchPlan`](#ruleoverridebatchplan) | singular | — |
+| `application_error` | `applicationError` | `string` | singular | Configuration committed, but immediate delivery failed. Saving and node application are separate outcomes; do not repeat the reviewed write. |
 
 ### RuleOverrideService.ListCrsRulesForPolicy
 
@@ -214,6 +262,7 @@ CountryAccessService owns jurisdiction-aware access decisions. Country codes are
 | `policy_id` | `policyId` | `string` | singular | — |
 | `page` | `page` | [`PageRequest`](common.md#pagerequest) | singular | — |
 | `query` | `query` | `string` | singular | — |
+| `detectors_only` | `detectorsOnly` | `bool` | singular | — |
 
 **Response** — `tiyi.v1.ListCrsRulesForPolicyResponse`
 
@@ -259,6 +308,43 @@ CountryAccessService owns jurisdiction-aware access decisions. Country codes are
 | Field | JSON key | Type | Cardinality | Description |
 |---|---|---|---|---|
 | `rule` | `rule` | [`CustomRule`](#customrule) | singular | — |
+
+### CustomRuleService.GetCustomRuleHistory
+
+Bounded retained execution history; works independently of AI settings.
+
+- **Procedure** `POST /tiyi.v1.CustomRuleService/GetCustomRuleHistory`
+- **Kind** unary
+- **Auth** `policy:read` and `log:read`
+
+**Request** — `tiyi.v1.GetCustomRuleHistoryRequest`
+
+| Field | JSON key | Type | Cardinality | Description |
+|---|---|---|---|---|
+| `policy_id` | `policyId` | `string` | singular | — |
+| `custom_rule_id` | `customRuleId` | `string` | singular | — |
+| `lookback_seconds` | `lookbackSeconds` | `int64` | singular | Default one hour, at most seven days; newest 200 retained numeric-ID samples. _JSON string (64-bit ints are quoted)._ |
+| `logical_rule_id` | `logicalRuleId` | `int64` | singular | Alternative to custom_rule_id, using retained identity (also after deletion). _JSON string (64-bit ints are quoted)._ |
+| `site_id` | `siteId` | `string` | singular | — |
+| `time_range` | `timeRange` | [`TimeRange`](common.md#timerange) | singular | Optional fixed historical window, at most seven days. Mutually exclusive with a nonzero lookback_seconds. Old retained events need not be recent. |
+
+**Response** — `tiyi.v1.GetCustomRuleHistoryResponse`
+
+| Field | JSON key | Type | Cardinality | Description |
+|---|---|---|---|---|
+| `window_start` | `windowStart` | `google.protobuf.Timestamp` | singular | _RFC 3339 string, e.g. `2026-07-26T09:00:00Z`._ |
+| `window_end` | `windowEnd` | `google.protobuf.Timestamp` | singular | _RFC 3339 string, e.g. `2026-07-26T09:00:00Z`._ |
+| `sample_limit` | `sampleLimit` | `uint32` | singular | — |
+| `samples_checked` | `samplesChecked` | `uint32` | singular | — |
+| `details_available` | `detailsAvailable` | `uint32` | singular | — |
+| `missing_details` | `missingDetails` | `uint32` | singular | — |
+| `unversioned_events` | `unversionedEvents` | `uint32` | singular | — |
+| `other_policy_events` | `otherPolicyEvents` | `uint32` | singular | — |
+| `omitted_variant_events` | `omittedVariantEvents` | `uint32` | singular | — |
+| `has_more_samples` | `hasMoreSamples` | `bool` | singular | — |
+| `variants` | `variants` | [`CustomRuleHistoryVariant`](#customrulehistoryvariant) | repeated | — |
+| `site_id` | `siteId` | `string` | singular | Query site scope. Current-rule queries infer a site-bound rule's current scope; historical-identity queries use the selected event's retained site. |
+| `historical_identity` | `historicalIdentity` | `bool` | singular | — |
 
 ### CustomRuleService.CreateCustomRule
 
@@ -350,8 +436,68 @@ CountryAccessService owns jurisdiction-aware access decisions. Country codes are
 
 | Field | JSON key | Type | Cardinality | Description |
 |---|---|---|---|---|
-| `seclang` | `seclang` | `string` | singular | — |
+| `seclang` | `seclang` | `string` | singular | Historical synthetic policy context. Never use this as a raw-rule seed. |
 | `warnings` | `warnings` | `string` | repeated | — |
+| `rule_seclang` | `ruleSeclang` | `string` | singular | Only the candidate rule fragment, without policy-level directives. |
+| `syntax_validated` | `syntaxValidated` | `bool` | singular | — |
+| `resolved_phase` | `resolvedPhase` | `int32` | singular | — |
+| `resolved_placement` | `resolvedPlacement` | `string` | singular | — |
+| `diagnostics` | `diagnostics` | [`CustomRuleDiagnostic`](#customrulediagnostic) | repeated | — |
+
+### CustomRuleService.AnalyzeCustomRuleExpression
+
+Pure authoring analysis. No policy execution, persistence or Raw privilege.
+
+- **Procedure** `POST /tiyi.v1.CustomRuleService/AnalyzeCustomRuleExpression`
+- **Kind** unary
+- **Auth** (`policy:read`)
+
+**Request** — `tiyi.v1.AnalyzeCustomRuleExpressionRequest`
+
+| Field | JSON key | Type | Cardinality | Description |
+|---|---|---|---|---|
+| `visual_spec` | `visualSpec` | `google.protobuf.Struct` | singular | _free-form JSON object._ |
+| `upgrade_legacy` | `upgradeLegacy` | `bool` | singular | Explicitly adapt a version-1 draft. Unsupported fields fail without loss. |
+
+**Response** — `tiyi.v1.AnalyzeCustomRuleExpressionResponse`
+
+| Field | JSON key | Type | Cardinality | Description |
+|---|---|---|---|---|
+| `visual_spec` | `visualSpec` | `google.protobuf.Struct` | singular | Set only when the model passes the shared compiler. Authoring text is not persisted: the canonical version-2 tree is the source of execution truth. _free-form JSON object._ |
+| `expression_text` | `expressionText` | `string` | singular | — |
+| `valid` | `valid` | `bool` | singular | — |
+| `diagnostics` | `diagnostics` | [`CustomRuleDiagnostic`](#customrulediagnostic) | repeated | — |
+| `expression` | `expression` | `google.protobuf.Struct` | singular | Parsed tree may be available even when model validation fails. _free-form JSON object._ |
+| `catalog` | `catalog` | `google.protobuf.Struct` | singular | Server-owned field/operator/transform hints and resource bounds. _free-form JSON object._ |
+| `warnings` | `warnings` | `string` | repeated | — |
+
+### CustomRuleService.TestCustomRuleCandidate
+
+Execute an unsaved candidate and baseline against the same frozen inputs.
+
+- **Procedure** `POST /tiyi.v1.CustomRuleService/TestCustomRuleCandidate`
+- **Kind** unary
+- **Auth** `policy:read` and `policy:preview`
+
+**Request** — `tiyi.v1.TestCustomRuleCandidateRequest`
+
+| Field | JSON key | Type | Cardinality | Description |
+|---|---|---|---|---|
+| `rule` | `rule` | [`CustomRule`](#customrule) | singular | — |
+| `sample` | `sample` | [`TestPolicyRequest`](policy.md#testpolicyrequest) | singular | — |
+
+**Response** — `tiyi.v1.TestCustomRuleCandidateResponse`
+
+| Field | JSON key | Type | Cardinality | Description |
+|---|---|---|---|---|
+| `baseline` | `baseline` | [`TestPolicyResponse`](policy.md#testpolicyresponse) | singular | — |
+| `candidate` | `candidate` | [`TestPolicyResponse`](policy.md#testpolicyresponse) | singular | — |
+| `rule_matched` | `ruleMatched` | `bool` | singular | — |
+| `evaluation_status` | `evaluationStatus` | `string` | singular | matched, not_matched, incomplete, not_observed, disabled, not_reached, missing_response, missing_response_body, or unsupported_response. |
+| `policy_revision` | `policyRevision` | `int64` | singular | _JSON string (64-bit ints are quoted)._ |
+| `resolved_phase` | `resolvedPhase` | `int32` | singular | — |
+| `resolved_placement` | `resolvedPlacement` | `string` | singular | — |
+| `trace` | `trace` | [`RuleEvaluationTrace`](policy.md#ruleevaluationtrace) | singular | — |
 
 ### CustomRuleService.ListCustomRuleTemplates
 
@@ -1603,7 +1749,45 @@ CrsExclusionPlugin is a single curated rule-exclusion-package row in the tenant-
 | `updated_at` | `updatedAt` | `google.protobuf.Timestamp` | singular | _RFC 3339 string, e.g. `2026-07-26T09:00:00Z`._ |
 | `site_id` | `siteId` | `string` | singular | Optional site id. When empty the rule is policy-wide; when set it only runs when the matching site is being compiled. WAF_POLICY_DESIGN § 3.2. |
 | `placement` | `placement` | `string` | singular | "before_crs" \| "after_crs" \| "request_before_blocking" \| "response_before_blocking". |
-| `visual_spec` | `visualSpec` | `google.protobuf.Struct` | singular | Optional visual-builder spec. When set the server compiles this into SecLang; when absent the `seclang` field is treated as raw. See internal/waf/visualrule for the schema. _free-form JSON object._ |
+| `visual_spec` | `visualSpec` | `google.protobuf.Struct` | singular | Optional visual-builder spec. When set the server compiles this into SecLang; when absent the `seclang` field is treated as raw. V1 uses conditions/condition_logic. V2 uses all/any/not/leaf expression nodes and currently qualifies complete request metadata only. See internal/waf/visualrule for the schema. _free-form JSON object._ |
+| `authoring_warnings` | `authoringWarnings` | `string` | repeated | Output-only warnings about the saved executable and its authoring metadata. |
+
+### CustomRuleDiagnostic
+
+| Field | JSON key | Type | Cardinality | Description |
+|---|---|---|---|---|
+| `code` | `code` | `string` | singular | — |
+| `stage` | `stage` | `string` | singular | — |
+| `message` | `message` | `string` | singular | — |
+| `path` | `path` | `string` | singular | — |
+| `line` | `line` | `int32` | singular | — |
+| `column` | `column` | `int32` | singular | — |
+
+### CustomRuleHistoryNode
+
+| Field | JSON key | Type | Cardinality | Description |
+|---|---|---|---|---|
+| `path` | `path` | `string` | singular | — |
+| `kind` | `kind` | `string` | singular | — |
+| `target` | `target` | `string` | singular | — |
+| `operator` | `operator` | `string` | singular | — |
+| `negated` | `negated` | `bool` | singular | — |
+| `matched` | `matched` | `uint32` | singular | — |
+| `not_matched` | `notMatched` | `uint32` | singular | — |
+| `short_circuited` | `shortCircuited` | `uint32` | singular | — |
+| `not_observed` | `notObserved` | `uint32` | singular | — |
+
+### CustomRuleHistoryVariant
+
+| Field | JSON key | Type | Cardinality | Description |
+|---|---|---|---|---|
+| `policy_revision` | `policyRevision` | `int64` | singular | _JSON string (64-bit ints are quoted)._ |
+| `definition_sha256` | `definitionSha256` | `string` | singular | — |
+| `events` | `events` | `uint32` | singular | — |
+| `logical_only` | `logicalOnly` | `uint32` | singular | — |
+| `partial_events` | `partialEvents` | `uint32` | singular | — |
+| `omitted_node_observations` | `omittedNodeObservations` | `uint32` | singular | — |
+| `nodes` | `nodes` | [`CustomRuleHistoryNode`](#customrulehistorynode) | repeated | — |
 
 ### CustomRuleTemplate
 
@@ -1897,9 +2081,34 @@ RateLimitEndpointRecord is one canonical rolling-window rule. Policy-wide rows a
 | `created_at` | `createdAt` | `google.protobuf.Timestamp` | singular | _RFC 3339 string, e.g. `2026-07-26T09:00:00Z`._ |
 | `updated_at` | `updatedAt` | `google.protobuf.Timestamp` | singular | _RFC 3339 string, e.g. `2026-07-26T09:00:00Z`._ |
 | `site_id` | `siteId` | `string` | singular | Optional site id. When empty the override is policy-wide (applies to every site that attaches the policy); when set, it only runs when the matching site is being compiled. WAF_POLICY_DESIGN § 3.2. |
-| `scope` | `scope` | `string` | singular | Optional path prefix (`@beginsWith`). When set the override is scoped to requests whose URI starts with this string. CRS docs § 2-3 Example 5. |
+| `scope` | `scope` | `string` | singular | Optional canonical, segment-bounded path prefix. Empty means all paths in the selected site/policy; otherwise includes this path and children. Distinct scopes coexist. Methods/hosts are unrestricted when their lists are empty; path_exact opts into exact rather than path-tree matching. |
 | `score_override` | `scoreOverride` | `int32` | optional (explicit) | Optional explicit score override (PR 3). proto3 `optional` gives presence tracking so the operator can set 0 to suppress the rule's anomaly contribution entirely (defect C5). When unset and `action_enum != SCORE_OVERRIDE`, the rule's default contribution stays untouched. |
 | `action_enum` | `actionEnum` | [`RuleOverrideAction`](#ruleoverrideaction) | singular | Required canonical action verb. |
+| `name` | `name` | `string` | singular | Display metadata; never used to infer executable scope. |
+| `path_exact` | `pathExact` | `bool` | singular | False retains the historical segment-bounded path-and-children match. |
+| `methods` | `methods` | `string` | repeated | Empty lists mean every method / every host in the selected owner. |
+| `hosts` | `hosts` | `string` | repeated | — |
+
+### RuleOverrideBatchPlan
+
+| Field | JSON key | Type | Cardinality | Description |
+|---|---|---|---|---|
+| `token` | `token` | `string` | singular | — |
+| `changes` | `changes` | [`RuleOverrideChangePlan`](#ruleoverridechangeplan) | repeated | — |
+
+### RuleOverrideChangePlan
+
+| Field | JSON key | Type | Cardinality | Description |
+|---|---|---|---|---|
+| `token` | `token` | `string` | singular | — |
+| `kind` | `kind` | [`RuleOverrideChangeKind`](#ruleoverridechangekind) | singular | — |
+| `result` | `result` | [`RuleOverride`](#ruleoverride) | singular | — |
+| `related` | `related` | [`RuleOverride`](#ruleoverride) | repeated | — |
+| `added_targets` | `addedTargets` | `string` | repeated | — |
+| `covered_targets` | `coveredTargets` | `string` | repeated | — |
+| `conflict` | `conflict` | `string` | singular | — |
+| `replaced_policy_overrides` | `replacedPolicyOverrides` | [`RuleOverride`](#ruleoverride) | repeated | — |
+| `source_id` | `sourceId` | `string` | singular | Removed only when moving an existing exception into another scope row. |
 
 ### UpstreamCrsExclusionPluginRelease
 
@@ -1926,3 +2135,241 @@ RuleOverrideAction is the canonical operator-visible verb for a CRS override. UN
 | `RULE_OVERRIDE_ACTION_DISABLE` | 2 | — |
 | `RULE_OVERRIDE_ACTION_LOG_ONLY` | 3 | — |
 | `RULE_OVERRIDE_ACTION_SCORE_OVERRIDE` | 4 | — |
+
+### RuleOverrideChangeKind
+
+| Value | Number | Description |
+|---|---|---|
+| `RULE_OVERRIDE_CHANGE_KIND_UNSPECIFIED` | 0 | — |
+| `RULE_OVERRIDE_CHANGE_KIND_CREATE` | 1 | — |
+| `RULE_OVERRIDE_CHANGE_KIND_MERGE` | 2 | — |
+| `RULE_OVERRIDE_CHANGE_KIND_UPDATE` | 3 | — |
+| `RULE_OVERRIDE_CHANGE_KIND_MOVE_MERGE` | 4 | — |
+| `RULE_OVERRIDE_CHANGE_KIND_COVERED` | 5 | — |
+| `RULE_OVERRIDE_CHANGE_KIND_CONFLICT` | 6 | — |
+
+<a id="countryaccessrule"></a>
+
+<a id="countryaccessservicedeletecountryaccessrule"></a>
+
+<a id="countryaccessservicegetcountryaccessrule"></a>
+
+<a id="countryaccessservicegetcountrycatalog"></a>
+
+<a id="countryaccessservicelistcountryaccessrules"></a>
+
+<a id="countryaccessserviceupsertcountryaccessrule"></a>
+
+<a id="countryaccesstarget"></a>
+
+<a id="countrycatalog"></a>
+
+<a id="countrycatalogentry"></a>
+
+<a id="crscategory"></a>
+
+<a id="crsexclusionplugin"></a>
+
+<a id="crsplugin"></a>
+
+<a id="crsrule"></a>
+
+<a id="crsruleset"></a>
+
+<a id="crsservicedeletepolicyexclusionplugin"></a>
+
+<a id="crsservicegetcrsexclusionplugin"></a>
+
+<a id="crsservicegetcrspluginconfigschema"></a>
+
+<a id="crsservicegetcrsrule"></a>
+
+<a id="crsservicegetcrsruleset"></a>
+
+<a id="crsserviceimportcrsexclusionplugin"></a>
+
+<a id="crsservicelistcrscategories"></a>
+
+<a id="crsservicelistcrsexclusionplugins"></a>
+
+<a id="crsservicelistcrsplugins"></a>
+
+<a id="crsservicelistcrsrules"></a>
+
+<a id="crsservicelistcrsrulesets"></a>
+
+<a id="crsservicelistcrstags"></a>
+
+<a id="crsservicelistpolicyexclusionplugins"></a>
+
+<a id="crsservicelistupstreamcrsexclusionpluginreleases"></a>
+
+<a id="crsserviceupsertpolicyexclusionplugin"></a>
+
+<a id="crstag"></a>
+
+<a id="customrule"></a>
+
+<a id="customrulediagnostic"></a>
+
+<a id="customrulehistorynode"></a>
+
+<a id="customrulehistoryvariant"></a>
+
+<a id="customruleserviceanalyzecustomruleexpression"></a>
+
+<a id="customruleservicecreatecustomrule"></a>
+
+<a id="customruleservicecreatefromtemplate"></a>
+
+<a id="customruleservicedeletecustomrule"></a>
+
+<a id="customruleservicegetcustomrule"></a>
+
+<a id="customruleservicegetcustomrulehistory"></a>
+
+<a id="customruleservicelistcustomrules"></a>
+
+<a id="customruleservicelistcustomruletemplates"></a>
+
+<a id="customruleservicepreviewcustomrule"></a>
+
+<a id="customruleservicereordercustomrules"></a>
+
+<a id="customruleservicetestcustomrulecandidate"></a>
+
+<a id="customruleserviceupdatecustomrule"></a>
+
+<a id="customruletemplate"></a>
+
+<a id="iplist"></a>
+
+<a id="iplistapplytarget"></a>
+
+<a id="iplistbindingrecord"></a>
+
+<a id="iplistdeployment"></a>
+
+<a id="iplistdeploymenttarget"></a>
+
+<a id="iplistentry"></a>
+
+<a id="iplistheldupdate"></a>
+
+<a id="iplistreference"></a>
+
+<a id="iplistrollout"></a>
+
+<a id="iplistscopehit"></a>
+
+<a id="iplistserviceacceptheldiplistupdate"></a>
+
+<a id="iplistserviceaddentries"></a>
+
+<a id="iplistserviceapplyiplist"></a>
+
+<a id="iplistservicecloneiplist"></a>
+
+<a id="iplistservicecreateiplist"></a>
+
+<a id="iplistservicecreateiplistsubscription"></a>
+
+<a id="iplistservicedeleteglobaliplistbinding"></a>
+
+<a id="iplistservicedeleteiplist"></a>
+
+<a id="iplistservicedeleteiplistbinding"></a>
+
+<a id="iplistservicediscardheldiplistupdate"></a>
+
+<a id="iplistserviceexportcsv"></a>
+
+<a id="iplistservicegetiplist"></a>
+
+<a id="iplistservicegetiplisteditimpact"></a>
+
+<a id="iplistservicelistglobaliplistbindings"></a>
+
+<a id="iplistservicelistiplistbindings"></a>
+
+<a id="iplistservicelistiplistentries"></a>
+
+<a id="iplistservicelistiplistreferences"></a>
+
+<a id="iplistservicelistiplists"></a>
+
+<a id="iplistservicelistiplistsyncruns"></a>
+
+<a id="iplistservicelookupip"></a>
+
+<a id="iplistservicelookupipscopes"></a>
+
+<a id="iplistservicepauseiplistsync"></a>
+
+<a id="iplistserviceremoveentries"></a>
+
+<a id="iplistservicereplaceiplistentries"></a>
+
+<a id="iplistserviceresumeiplistsync"></a>
+
+<a id="iplistservicesynciplistnow"></a>
+
+<a id="iplistservicetestiplistsource"></a>
+
+<a id="iplistserviceupdateiplist"></a>
+
+<a id="iplistserviceupdateiplistsubscription"></a>
+
+<a id="iplistserviceupsertglobaliplistbinding"></a>
+
+<a id="iplistserviceupsertiplistbinding"></a>
+
+<a id="iplistsource"></a>
+
+<a id="iplistsourceheader"></a>
+
+<a id="iplistsourceheadermutation"></a>
+
+<a id="iplistsourceinput"></a>
+
+<a id="iplistsyncrun"></a>
+
+<a id="iplistsyncstatus"></a>
+
+<a id="policycrsexclusionplugin"></a>
+
+<a id="ratelimitendpointrecord"></a>
+
+<a id="ratelimitservicedeleteratelimitendpoint"></a>
+
+<a id="ratelimitservicelistratelimitendpoints"></a>
+
+<a id="ratelimitserviceupsertratelimitendpoint"></a>
+
+<a id="ruleoverride"></a>
+
+<a id="ruleoverrideaction"></a>
+
+<a id="ruleoverridebatchplan"></a>
+
+<a id="ruleoverridechangekind"></a>
+
+<a id="ruleoverridechangeplan"></a>
+
+<a id="ruleoverrideservicebulkupsertruleoverrides"></a>
+
+<a id="ruleoverrideservicedeleteruleoverride"></a>
+
+<a id="ruleoverrideservicegetruleoverride"></a>
+
+<a id="ruleoverrideservicelistcrsrulesforpolicy"></a>
+
+<a id="ruleoverrideservicelistruleoverrides"></a>
+
+<a id="ruleoverrideservicepreviewruleoverride"></a>
+
+<a id="ruleoverrideservicepreviewruleoverridebatch"></a>
+
+<a id="ruleoverrideserviceupsertruleoverride"></a>
+
+<a id="upstreamcrsexclusionpluginrelease"></a>

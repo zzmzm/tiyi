@@ -1,4 +1,4 @@
-<!-- v3.8.0 public API reference, derived from the verified protobuf contract. -->
+<!-- v3.8.1 public API reference, derived from the protobuf contract. -->
 
 # system.proto — System settings, health, dashboards, updates, and declarative apply
 
@@ -281,6 +281,7 @@ Returns the complete dashboard read model in one bounded request. The richer tel
 | Field | JSON key | Type | Cardinality | Description |
 |---|---|---|---|---|
 | `plan` | `plan` | [`ApplyPlan`](#applyplan) | singular | — |
+| `review_token` | `reviewToken` | `string` | singular | Binds this preview to the tenant's desired graph and exact candidate bytes. A concurrency check, never an approval or authorization credential. |
 
 ### SystemService.Apply
 
@@ -294,6 +295,7 @@ Returns the complete dashboard read model in one bounded request. The richer tel
 |---|---|---|---|---|
 | `manifest_yaml` | `manifestYaml` | `bytes` | singular | _base64-encoded JSON string._ |
 | `dry_run` | `dryRun` | `bool` | singular | — |
+| `review_token` | `reviewToken` | `string` | singular | Optional for older callers; the console sends its last preview token. |
 
 **Response** — `tiyi.v1.ApplyResponse`
 
@@ -1013,3 +1015,119 @@ Independent current component observation. status is healthy, unhealthy or unkno
 | `UPGRADE_RUN_STATUS_SUCCEEDED` | 3 | — |
 | `UPGRADE_RUN_STATUS_FAILED` | 4 | — |
 | `UPGRADE_RUN_STATUS_CANCELED` | 5 | — |
+
+<a id="applychange"></a>
+
+<a id="applyplan"></a>
+
+<a id="attackdistributionitem"></a>
+
+<a id="binaryrelease"></a>
+
+<a id="dashboardfreshness"></a>
+
+<a id="dashboardsecuritytopk"></a>
+
+<a id="dashboardsecuritytopkitem"></a>
+
+<a id="dashboardstats"></a>
+
+<a id="dashboardtopk"></a>
+
+<a id="dashboardtopkitem"></a>
+
+<a id="dashboardtopsite"></a>
+
+<a id="dashboardtrafficquality"></a>
+
+<a id="geodatabase"></a>
+
+<a id="licensestatus"></a>
+
+<a id="observationlanestats"></a>
+
+<a id="observationpipelinestats"></a>
+
+<a id="systemhealthcheck"></a>
+
+<a id="systemserviceapply"></a>
+
+<a id="systemserviceapplybinaryrelease"></a>
+
+<a id="systemservicecancelupgraderun"></a>
+
+<a id="systemservicecheckforupdates"></a>
+
+<a id="systemservicedeletebinaryrelease"></a>
+
+<a id="systemservicedeletecrsruleset"></a>
+
+<a id="systemservicedeletegeodatabase"></a>
+
+<a id="systemservicedownloadgeodatabase"></a>
+
+<a id="systemservicegetattackdistribution"></a>
+
+<a id="systemservicegetbinaryrelease"></a>
+
+<a id="systemservicegetdashboardoverview"></a>
+
+<a id="systemservicegetdashboardstats"></a>
+
+<a id="systemservicegetobservationpipelinestats"></a>
+
+<a id="systemservicegetsystemcrsruleset"></a>
+
+<a id="systemservicegetsystemsettings"></a>
+
+<a id="systemservicegettopattackers"></a>
+
+<a id="systemservicegettraffictimeseries"></a>
+
+<a id="systemservicegetupgraderun"></a>
+
+<a id="systemservicehealth"></a>
+
+<a id="systemserviceimportbinaryrelease"></a>
+
+<a id="systemserviceimportcrsruleset"></a>
+
+<a id="systemserviceimportlicense"></a>
+
+<a id="systemservicelistbinaryreleases"></a>
+
+<a id="systemservicelistgeodatabases"></a>
+
+<a id="systemservicelistsystemcrsrulesets"></a>
+
+<a id="systemservicelistupgraderuns"></a>
+
+<a id="systemservicelistupstreamcrsreleases"></a>
+
+<a id="systemservicepreviewapply"></a>
+
+<a id="systemservicerollbackbinaryrelease"></a>
+
+<a id="systemservicestreamupgraderun"></a>
+
+<a id="systemserviceupdatesystemsettings"></a>
+
+<a id="systemserviceuploadgeodatabase"></a>
+
+<a id="systemserviceversion"></a>
+
+<a id="systemsettings"></a>
+
+<a id="topattacker"></a>
+
+<a id="trafficpoint"></a>
+
+<a id="upgraderun"></a>
+
+<a id="upgraderunevent"></a>
+
+<a id="upgraderuneventkind"></a>
+
+<a id="upgraderunstatus"></a>
+
+<a id="upstreamcrsrelease"></a>

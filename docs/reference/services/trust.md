@@ -1,4 +1,4 @@
-<!-- v3.8.0 public API reference, derived from the verified protobuf contract. -->
+<!-- v3.8.1 public API reference, derived from the protobuf contract. -->
 
 # trust.proto — Client-IP trust profiles and resolved IP Lists
 
@@ -237,7 +237,7 @@ ClientIPAnalysis is a point-in-time view of one site-only, memory-only diagnosti
 | `target_sample_count` | `targetSampleCount` | `uint32` | singular | — |
 | `distinct_peer_count` | `distinctPeerCount` | `uint32` | singular | — |
 | `distinct_client_count` | `distinctClientCount` | `uint32` | singular | — |
-| `confidence` | `confidence` | `string` | singular | verified \| partial \| insufficient |
+| `confidence` | `confidence` | `string` | singular | verified means a sample/range pattern matched, not proof of upstream header sanitization. Private peers with XFF remain partial and require acknowledge_unverified on apply. Truncated samples never establish trust. |
 | `suggestion_kind` | `suggestionKind` | `string` | singular | direct \| proxy \| proxy_chain \| fixed |
 | `suggestion_header` | `suggestionHeader` | `string` | singular | — |
 | `suggested_profile` | `suggestedProfile` | [`TrustProfile`](#trustprofile) | singular | — |
@@ -420,3 +420,57 @@ Controls whether one analysed node's server-held ranges are retained, replaced b
 | `CLIENT_IP_ANALYSIS_RANGES_MODE_KEEP_SUGGESTED` | 1 | — |
 | `CLIENT_IP_ANALYSIS_RANGES_MODE_REPLACE` | 2 | — |
 | `CLIENT_IP_ANALYSIS_RANGES_MODE_DROP` | 3 | — |
+
+<a id="clientipanalysis"></a>
+
+<a id="clientipanalysisapplyscope"></a>
+
+<a id="clientipanalysisnodetrustdraft"></a>
+
+<a id="clientipanalysisnodetrustpreview"></a>
+
+<a id="clientipanalysispath"></a>
+
+<a id="clientipanalysisrangesmode"></a>
+
+<a id="clientiprule"></a>
+
+<a id="clientipruletrace"></a>
+
+<a id="resolvedtrustnode"></a>
+
+<a id="resolvedtrustprofile"></a>
+
+<a id="resolvedtrustsource"></a>
+
+<a id="trustedge"></a>
+
+<a id="trustnode"></a>
+
+<a id="trustprofile"></a>
+
+<a id="trustprofilevalidationissue"></a>
+
+<a id="trustserviceapplyclientipanalysis"></a>
+
+<a id="trustserviceexplaintrust"></a>
+
+<a id="trustservicegetclientipanalysis"></a>
+
+<a id="trustservicegettrustprofile"></a>
+
+<a id="trustservicegettruststatus"></a>
+
+<a id="trustserviceresettrustprofile"></a>
+
+<a id="trustservicesettrustprofile"></a>
+
+<a id="trustservicestartclientipanalysis"></a>
+
+<a id="trustservicestopclientipanalysis"></a>
+
+<a id="trustsiteoverride"></a>
+
+<a id="trustsource"></a>
+
+<a id="trustspoofwarning"></a>

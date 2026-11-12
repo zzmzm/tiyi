@@ -1,4 +1,4 @@
-<!-- v3.8.0 public API reference, derived from the verified protobuf contract. -->
+<!-- v3.8.1 public API reference, derived from the protobuf contract. -->
 
 # agent.proto — Agents, groups, and the agent stream
 
@@ -627,6 +627,7 @@ GetConfigBundle accepts either a remote config_bundle id or a built-in local con
 | `body_modes` | `bodyModes` | `string` | repeated | — |
 | `schema_irs` | `schemaIrs` | `string` | repeated | — |
 | `metric_payload_version` | `metricPayloadVersion` | `uint32` | singular | — |
+| `custom_rule_formats` | `customRuleFormats` | `string` | repeated | Exact qualified rule executors; absence supports legacy rules only. |
 
 ### AgentCommand
 
@@ -1123,3 +1124,149 @@ Domain-separated, canonical tiyi.serving_grant.v1 JSON. Binds an authenticated n
 | `OBSERVATION_STREAM_KIND_SECURITY_SIEM` | 8 | — |
 | `OBSERVATION_STREAM_KIND_ERROR_DETAIL` | 9 | — |
 | `OBSERVATION_STREAM_KIND_ERROR_SIEM` | 10 | — |
+
+<a id="agent"></a>
+
+<a id="agentapplyresult"></a>
+
+<a id="agentcapabilities"></a>
+
+<a id="agentcommand"></a>
+
+<a id="agentcommandkind"></a>
+
+<a id="agentcommandresult"></a>
+
+<a id="agentcommandstatus"></a>
+
+<a id="agentevent"></a>
+
+<a id="agentgroup"></a>
+
+<a id="agentgroupselector"></a>
+
+<a id="agentgroupservicecreateagentgroup"></a>
+
+<a id="agentgroupservicedeleteagentgroup"></a>
+
+<a id="agentgroupservicegetagentgroup"></a>
+
+<a id="agentgroupservicelistagentgroups"></a>
+
+<a id="agentgroupserviceresolveagentgroup"></a>
+
+<a id="agentgroupserviceupdateagentgroup"></a>
+
+<a id="agenthello"></a>
+
+<a id="agentmetrics"></a>
+
+<a id="agentmetricspush"></a>
+
+<a id="agentobservationhealth"></a>
+
+<a id="agentservicecreatenodeinstallation"></a>
+
+<a id="agentservicedeleteagent"></a>
+
+<a id="agentserviceenroll"></a>
+
+<a id="agentservicegetagent"></a>
+
+<a id="agentservicegetconfigbundle"></a>
+
+<a id="agentservicegetnodecapabilities"></a>
+
+<a id="agentservicegetnodeinstallstatus"></a>
+
+<a id="agentservicegetnodeservingstate"></a>
+
+<a id="agentserviceissueenrollmenttoken"></a>
+
+<a id="agentservicelistagents"></a>
+
+<a id="agentservicelistconfigbundles"></a>
+
+<a id="agentservicelistnodemetricsamples"></a>
+
+<a id="agentservicelistnodes"></a>
+
+<a id="agentserviceretrynodeconfig"></a>
+
+<a id="agentservicestreamagentevents"></a>
+
+<a id="agentserviceupdateagent"></a>
+
+<a id="agentservinggrantack"></a>
+
+<a id="agentstatereport"></a>
+
+<a id="agentstatus"></a>
+
+<a id="agentstreamserviceconnect"></a>
+
+<a id="agentwelcome"></a>
+
+<a id="batchack"></a>
+
+<a id="challengedispatch"></a>
+
+<a id="challengeresponse"></a>
+
+<a id="configbundle"></a>
+
+<a id="configbundlesummary"></a>
+
+<a id="configupdate"></a>
+
+<a id="evidenceackstatus"></a>
+
+<a id="evidencechunk"></a>
+
+<a id="evidencecommit"></a>
+
+<a id="evidencedurableack"></a>
+
+<a id="evidencemanifest"></a>
+
+<a id="evidencereservoirreference"></a>
+
+<a id="evidenceretentioncontext"></a>
+
+<a id="evidenceuploadhello"></a>
+
+<a id="evidenceuploadserviceupload"></a>
+
+<a id="gapnotice"></a>
+
+<a id="gapnoticeack"></a>
+
+<a id="goaway"></a>
+
+<a id="node"></a>
+
+<a id="nodemetricsample"></a>
+
+<a id="observationackdurability"></a>
+
+<a id="observationackerrorcode"></a>
+
+<a id="observationbatch"></a>
+
+<a id="observationbatchackstatus"></a>
+
+<a id="observationbatchheader"></a>
+
+<a id="observationgapackstatus"></a>
+
+<a id="observationgapreason"></a>
+
+<a id="observationretentiontier"></a>
+
+<a id="observationstreamkind"></a>
+
+<a id="ping"></a>
+
+<a id="pingack"></a>
+
+<a id="signedservinggrant"></a>
